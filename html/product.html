@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COCACOY ERP - Products Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><h1>Products Management</h1></header>
+  
+  <nav class="navbar">
+    <div class="menu">
+      <a href="index.html">Dashboard</a>
+      <a href="product.html">Products</a>
+      <a href="history.html">History</a>
+      <a href="chart.html">Chart</a>
+    </div>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <h2>Table Settings</h2>
+      <p>Add custom columns (e.g., Price, Category).</p>
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <input id="newColumnName" placeholder="New Column Name" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <button id="addColumnBtn" style="background: #ff8c00; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Add Column</button>
+      </div>
+      <div id="activeColumnsList" style="margin-top: 10px; font-size: 0.85rem; color: #666;">Active: Name, Stock</div>
+    </div>
+
+    <div class="card">
+      <h2>Add Product</h2>
+      <div id="dynamicInputs" style="margin-top: 15px;">
+        </div>
+      <button id="addBtn" style="background: #ff8c00; color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; margin-top: 15px;">Save Product</button>
+    </div>
+
+    <div class="card">
+      <h2>Product List</h2>
+      <div style="overflow-x: auto; margin-top: 15px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead id="productHead">
+            </thead>
+          <tbody id="productTable">
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script type="module" src="../js/product.js"></script>
+</body>
+</html>

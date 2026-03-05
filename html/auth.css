@@ -1,0 +1,76 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e293b, #2a5298);
+}
+
+.auth-card {
+  width: 400px;
+  padding: 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  color: white;
+  text-align: center;
+}
+
+.auth-card h2 {
+  margin-bottom: 25px;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: none;
+  background: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+}
+
+.auth-card button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(45deg, #ff7a18, #ffb347);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.input-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  display: block;
+  color: white;
+}
+
+.link {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.link a {
+  color: #ffb347;
+  text-decoration: none;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}

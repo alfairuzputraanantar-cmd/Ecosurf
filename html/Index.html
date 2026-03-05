@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COCACOY ERP - Dashboard</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header>
+    <h1>COCACOY ERP</h1>
+  </header>
+
+  <nav class="navbar">
+  <div class="menu">
+    <a href="index.html">Dashboard</a>
+    <a href="product.html">Products</a>
+    <a href="history.html">History</a>
+    <a href="chart.html">Chart</a>
+  </div>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</nav>
+
+
+  <div class="container">
+    <div class="card">
+      <h2>Dashboard</h2>
+      <p>Welcome to Cocacoy ERP Enterprise Version</p>
+      <h3 id="totalStock">Total Stock: 0</h3>
+    </div>
+  </div>
+
+  <script type="module" src="../js/guard.js"></script>
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

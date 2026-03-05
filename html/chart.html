@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>COCACOY ERP - Chart</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/guard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header><h1>Stock Chart</h1></header>
+<nav class="navbar">
+  <div class="menu">
+    <a href="index.html">Dashboard</a>
+    <a href="product.html">Products</a>
+    <a href="history.html">History</a>
+    <a href="chart.html">Chart</a>
+  </div>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <canvas id="stockChart"></canvas>
+  </div>
+</div>
+
+<script type="module" src="../js/guard.js"></script>
+<script type="module" src="../firebase.js"></script>
+<script type="module" src="../chart.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>COCACOY ERP - History</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Stock History</h1>
+</header>
+
+<nav class="navbar">
+  <div class="menu">
+    <a href="index.html">Dashboard</a>
+    <a href="product.html">Products</a>
+    <a href="history.html">History</a>
+    <a href="chart.html">Chart</a>
+  </div>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Details</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module" src="../js/guard.js"></script>
+<script type="module" src="../js/history.js"></script>
+
+</body>
+</html>
