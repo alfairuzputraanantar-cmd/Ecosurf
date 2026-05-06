@@ -658,9 +658,9 @@
   </div>
 </div>
 
-<script type="module" src="../js/guard.js"></script>
-<script type="module" src="../js/firebase.js"></script>
-<script type="module" src="../js/notifications.js"></script>
+<script type="module" src="./js/guard.js"></script>
+<script type="module" src="./js/firebase.js"></script>
+<script type="module" src="./js/notifications.js"></script>
 <script>
 /* ── Panel switching ── */
 function switchPanel(panelId) {
@@ -898,7 +898,7 @@ function applyGlobalTheme(theme) {
 /* ── Logout ── */
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   try {
-    const { signOut } = await import('../js/firebase.js');
+    const { signOut } = await import('./js/firebase.js');
     await signOut();
   } catch(e) {}
   window.location.href = 'login.html';
