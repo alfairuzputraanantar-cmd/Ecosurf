@@ -1,9 +1,9 @@
-import { db } from "./firebase.js";
-import { collection, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { userCol } from "./firebase.js";
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================================================================
-   HISTORY — realtime, separated by action, sorted by date
+   HISTORY — realtime, scoped per authenticated user.
+   Waits for 'userReady' event dispatched by guard.js.
 ================================================================ */
 
 const CAT_EMOJI = {
@@ -11,27 +11,27 @@ const CAT_EMOJI = {
   Clothing:'👕', Cosmetics:'💄', Others:'📦'
 };
 
-let allRows = [];
+let allRows   = [];
 let activeTab = 'all'; // 'all' | 'Added' | 'Edited' | 'Deleted'
 
-/* ── Listen realtime ── */
-onSnapshot(collection(db, "history"), (snapshot) => {
-  allRows = [];
-  snapshot.forEach(d => allRows.push({ id: d.id, ...d.data() }));
+/* ── Start listener only after auth is ready ── */
+document.addEventListener('userReady', ({ detail: { uid } }) => {
+  // ✅ Listen to users/{uid}/history
+  onSnapshot(userCol(uid, 'history'), (snapshot) => {
+    allRows = [];
+    snapshot.forEach(d => allRows.push({ id: d.id, ...d.data() }));
 
-  // Sort newest first — use createdAt ISO (most reliable)
-  // Fallback: parse DD/MM/YYYY HH:mm:ss timestamp string
-  function toSortable(r) {
-    if (r.createdAt) return r.createdAt; // ISO string, sorts correctly
-    // en-GB format: "DD/MM/YYYY, HH:mm:ss" → convert to sortable
-    const t = r.timestamp || '';
-    const m = t.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s*(\d{2}):(\d{2})/);
-    if (m) return `${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}`;
-    return t;
-  }
-  allRows.sort((a, b) => toSortable(b).localeCompare(toSortable(a)));
+    function toSortable(r) {
+      if (r.createdAt) return r.createdAt;
+      const t = r.timestamp || '';
+      const m = t.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s*(\d{2}):(\d{2})/);
+      if (m) return `${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}`;
+      return t;
+    }
+    allRows.sort((a, b) => toSortable(b).localeCompare(toSortable(a)));
 
-  renderHistory();
+    renderHistory();
+  });
 });
 
 /* ── Render with current tab filter ── */
@@ -88,15 +88,12 @@ function renderHistory() {
 /* ── Tab switching ── */
 window.switchHistoryTab = function(tab) {
   activeTab = tab;
-
-  // Update tab button styles
   document.querySelectorAll('.hist-tab').forEach(btn => {
     const active = btn.dataset.tab === tab;
-    btn.style.background    = active ? 'var(--brand-grd)' : 'var(--surface2)';
-    btn.style.color         = active ? '#fff' : 'var(--muted)';
-    btn.style.borderColor   = active ? 'transparent' : 'var(--border)';
+    btn.style.background  = active ? 'var(--brand-grd)' : 'var(--surface2)';
+    btn.style.color       = active ? '#fff'             : 'var(--muted)';
+    btn.style.borderColor = active ? 'transparent'      : 'var(--border)';
   });
-
   renderHistory();
 };
 

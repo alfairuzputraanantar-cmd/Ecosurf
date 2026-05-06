@@ -1,6 +1,6 @@
-import { db } from './firebase.js';
+import { db, userCol, userDoc } from './firebase.js';
 import {
-  collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc
+  addDoc, onSnapshot, deleteDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================================================================
@@ -8,27 +8,24 @@ import {
    Core 5 always shown. Extra saved to localStorage.
 ================================================================ */
 const CORE = ["Name", "Category", "Unit", "Price", "Stock"];
-let extra = [];
-let hiddenCols = []; // List of hidden column names
-let productsCache = []; // Global cache for real-time rendering
+let extra      = [];
+let hiddenCols = [];
+let productsCache = [];
+let _uid = null; // Set when userReady fires
 
-try { extra = JSON.parse(localStorage.getItem('cocacoy_extra_cols') || '[]'); }
-catch (e) { extra = []; }
-
-try { hiddenCols = JSON.parse(localStorage.getItem('cocacoy_hidden_cols') || '[]'); }
-catch (e) { hiddenCols = []; }
+try { extra      = JSON.parse(localStorage.getItem('cocacoy_extra_cols') || '[]'); } catch(e) { extra = []; }
+try { hiddenCols = JSON.parse(localStorage.getItem('cocacoy_hidden_cols') || '[]'); } catch(e) { hiddenCols = []; }
 
 const allPossibleCols = () => [...CORE, ...extra];
-const visibleCols = () => allPossibleCols().filter(c => !hiddenCols.includes(c));
-
-const saveExtra = () => localStorage.setItem('cocacoy_extra_cols', JSON.stringify(extra));
-const saveHidden = () => localStorage.setItem('cocacoy_hidden_cols', JSON.stringify(hiddenCols));
+const visibleCols     = () => allPossibleCols().filter(c => !hiddenCols.includes(c));
+const saveExtra       = () => localStorage.setItem('cocacoy_extra_cols', JSON.stringify(extra));
+const saveHidden      = () => localStorage.setItem('cocacoy_hidden_cols', JSON.stringify(hiddenCols));
 
 /* ================================================================
    DOM REFS
 ================================================================ */
-const headEl = () => document.getElementById('productHead');
-const bodyEl = () => document.getElementById('productTable');
+const headEl  = () => document.getElementById('productHead');
+const bodyEl  = () => document.getElementById('productTable');
 const chipsEl = () => document.getElementById('activeColumnsList');
 const emptyEl = () => document.getElementById('emptyProducts');
 
@@ -70,7 +67,7 @@ function addColumn() {
   saveExtra();
   renderHeader();
   renderChips();
-  renderTableBody(); // Re-render body with new column
+  renderTableBody();
   inp.value = '';
   showToast(`Column "${name}" added!`, 'success');
 }
@@ -81,7 +78,7 @@ window.removeCol = (name) => {
   saveExtra();
   renderHeader();
   renderChips();
-  renderTableBody(); // Re-render body after removing column
+  renderTableBody();
   showToast(`Column "${name}" removed.`, 'info');
 };
 
@@ -105,14 +102,12 @@ window.applyColVisibility = () => {
   const newHidden = [];
   allPossibleCols().forEach(c => {
     const chk = document.getElementById(`vis-${c}`);
-    if (chk && !chk.checked) {
-      newHidden.push(c);
-    }
+    if (chk && !chk.checked) newHidden.push(c);
   });
   hiddenCols = newHidden;
   saveHidden();
   renderHeader();
-  renderTableBody(); // Update body in real-time
+  renderTableBody();
   window.closeCustomizeModal();
   showToast('Column visibility updated!', 'success');
 };
@@ -142,24 +137,22 @@ window.openAddModal = () => {
    SAVE NEW PRODUCT
 ================================================================ */
 window.saveProduct = async () => {
-  const v = id => (document.getElementById(id)?.value || '').trim();
-  const name = v('core-name');
+  if (!_uid) { showToast('Not authenticated.', 'error'); return; }
+
+  const v     = id => (document.getElementById(id)?.value || '').trim();
+  const name  = v('core-name');
   const stock = v('core-stock');
   const price = v('core-price') || '0';
-  const cat = v('core-category');
-  const sku = v('core-sku');
-  const unit = v('core-unit') || 'pcs';
+  const cat   = v('core-category');
+  const sku   = v('core-sku');
+  const unit  = v('core-unit') || 'pcs';
   const notes = v('core-notes');
   const thresh = v('core-threshold') || '10';
 
-  if (!name) { showToast('Product name is required!', 'error'); return; }
+  if (!name)  { showToast('Product name is required!',   'error'); return; }
   if (!stock) { showToast('Stock quantity is required!', 'error'); return; }
-  if (isNaN(Number(stock)) || Number(stock) < 0) {
-    showToast('Stock must be a non-negative number!', 'error'); return;
-  }
-  if (isNaN(Number(price)) || Number(price) < 0) {
-    showToast('Price must be a non-negative number!', 'error'); return;
-  }
+  if (isNaN(Number(stock)) || Number(stock) < 0) { showToast('Stock must be a non-negative number!', 'error'); return; }
+  if (isNaN(Number(price)) || Number(price) < 0) { showToast('Price must be a non-negative number!', 'error'); return; }
 
   const btn = document.getElementById('addBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Saving...'; btn.disabled = true; }
@@ -176,22 +169,23 @@ window.saveProduct = async () => {
       product[c] = (document.getElementById(`dyn-${c}`)?.value || '').trim();
     });
 
-    await addDoc(collection(db, 'products'), product);
+    // ✅ Write to users/{uid}/products
+    await addDoc(userCol(_uid, 'products'), product);
 
-    await addDoc(collection(db, 'history'), {
+    // ✅ Write to users/{uid}/history
+    await addDoc(userCol(_uid, 'history'), {
       productName: name,
-      action: 'Added',
-      details: `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat || '-'}`,
-      timestamp: now.toLocaleString('en-GB'),
-      createdAt: now.toISOString(),
-      category: cat || 'Others'
+      action:      'Added',
+      details:     `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat||'-'}`,
+      timestamp:   now.toLocaleString('en-GB'),
+      createdAt:   now.toISOString(),
+      category:    cat || 'Others'
     });
 
     showToast(`"${name}" saved successfully!`, 'success');
     window.closeAddModal();
 
-    // clear form
-    ['core-name', 'core-stock', 'core-price', 'core-sku', 'core-notes', 'core-threshold']
+    ['core-name','core-stock','core-price','core-sku','core-notes','core-threshold']
       .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     const catEl = document.getElementById('core-category');
     if (catEl) catEl.value = '';
@@ -216,9 +210,6 @@ window.filterTable = () => {
 };
 
 /* ================================================================
-   REALTIME PRODUCT TABLE
-================================================================ */
-/* ================================================================
    RENDER TABLE BODY
 ================================================================ */
 function renderTableBody() {
@@ -231,19 +222,18 @@ function renderTableBody() {
 
   productsCache.forEach(prod => {
     const data = prod.data;
-    const id = prod.id;
+    const id   = prod.id;
     if (!data.Name) return;
     count++;
 
-    const stockNum = parseInt(data.Stock) || 0;
-    const priceNum = parseInt(data.Price) || 0;
+    const stockNum  = parseInt(data.Stock)             || 0;
+    const priceNum  = parseInt(data.Price)             || 0;
     const threshold = parseInt(data.lowStockThreshold) || 10;
-    const stockCls = stockNum <= Math.ceil(threshold * 0.3) ? 'tag-red'
-      : stockNum <= threshold ? 'tag-yellow'
-        : 'tag-green';
+    const stockCls  = stockNum <= Math.ceil(threshold * 0.3) ? 'tag-red'
+                    : stockNum <= threshold                   ? 'tag-yellow'
+                    : 'tag-green';
 
     const tr = document.createElement('tr');
-
     visibleCols().forEach(col => {
       const td = document.createElement('td');
       if (col === 'Price') {
@@ -254,7 +244,7 @@ function renderTableBody() {
         const warn = stockNum <= threshold
           ? `<i class="fas fa-triangle-exclamation" style="color:var(--yellow);margin-left:5px;font-size:11px;" title="Low stock!"></i>`
           : '';
-        td.innerHTML = `<span class="tag ${stockCls}">${stockNum} ${data.Unit || ''}</span>${warn}`;
+        td.innerHTML = `<span class="tag ${stockCls}">${stockNum} ${data.Unit||''}</span>${warn}`;
       } else if (col === 'Category') {
         td.innerHTML = data.Category
           ? `<span class="tag tag-copper">${data.Category}</span>`
@@ -265,7 +255,6 @@ function renderTableBody() {
       tr.appendChild(td);
     });
 
-    // Actions cell
     const actionTd = document.createElement('td');
     actionTd.style.whiteSpace = 'nowrap';
 
@@ -280,12 +269,11 @@ function renderTableBody() {
     delBtn.className = 'btn btn-danger btn-sm';
     delBtn.innerHTML = '<i class="fas fa-trash"></i>';
     delBtn.title = 'Delete Product';
-    delBtn.onclick = () => window.confirmDelete(id, data.Name || '', data.Category || 'Others');
+    delBtn.onclick = () => window.confirmDelete(id, data.Name||'', data.Category||'Others');
 
     actionTd.appendChild(editBtn);
     actionTd.appendChild(delBtn);
     tr.appendChild(actionTd);
-
     tbody.appendChild(tr);
   });
 
@@ -294,14 +282,13 @@ function renderTableBody() {
 }
 
 /* ================================================================
-   REALTIME PRODUCT SNAPSHOT
+   REALTIME PRODUCT SNAPSHOT — waits for userReady
 ================================================================ */
-function startTable() {
-  onSnapshot(collection(db, 'products'), snap => {
+function startTable(uid) {
+  // ✅ Listen to users/{uid}/products
+  onSnapshot(userCol(uid, 'products'), snap => {
     productsCache = [];
-    snap.forEach(d => {
-      productsCache.push({ id: d.id, data: d.data() });
-    });
+    snap.forEach(d => productsCache.push({ id: d.id, data: d.data() }));
     renderTableBody();
   });
 }
@@ -313,19 +300,15 @@ let _editDocId = null;
 
 window.openEditModal = (id, data) => {
   _editDocId = id;
-  const set = (elId, val) => {
-    const el = document.getElementById(elId);
-    if (el) el.value = val ?? '';
-  };
-  set('edit-name', data.Name);
-  set('edit-stock', data.Stock);
-  set('edit-price', data.Price);
-  set('edit-category', data.Category);
-  set('edit-unit', data.Unit);
-  set('edit-notes', data.Notes);
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val ?? ''; };
+  set('edit-name',      data.Name);
+  set('edit-stock',     data.Stock);
+  set('edit-price',     data.Price);
+  set('edit-category',  data.Category);
+  set('edit-unit',      data.Unit);
+  set('edit-notes',     data.Notes);
   set('edit-threshold', data.lowStockThreshold ?? 10);
 
-  // Inject custom fields into edit modal too
   const dyn = document.getElementById('editDynamicInputs');
   if (dyn) {
     dyn.innerHTML = extra.length === 0 ? '' : `
@@ -346,29 +329,21 @@ window.openEditModal = (id, data) => {
 };
 
 window.saveEdit = async () => {
-  if (!_editDocId) return;
+  if (!_editDocId || !_uid) return;
 
-  const v = id => (document.getElementById(id)?.value || '').trim();
-  const name = v('edit-name');
+  const v     = id => (document.getElementById(id)?.value || '').trim();
+  const name  = v('edit-name');
   const stock = v('edit-stock');
   const price = v('edit-price') || '0';
-  const cat = v('edit-category');
-  const unit = v('edit-unit') || 'pcs';
+  const cat   = v('edit-category');
+  const unit  = v('edit-unit') || 'pcs';
   const notes = v('edit-notes');
   const thresh = v('edit-threshold') || '10';
 
-  // Validation
-  if (!name) { showToast('Product name is required!', 'error'); return; }
+  if (!name)  { showToast('Product name is required!', 'error'); return; }
   if (!stock && stock !== '0') { showToast('Stock quantity is required!', 'error'); return; }
-  if (isNaN(Number(stock)) || Number(stock) < 0) {
-    showToast('Stock cannot be negative!', 'error'); return;
-  }
-  if (isNaN(Number(price)) || Number(price) < 0) {
-    showToast('Price must be a valid number!', 'error'); return;
-  }
-  if (isNaN(Number(thresh)) || Number(thresh) < 0) {
-    showToast('Threshold must be a valid number!', 'error'); return;
-  }
+  if (isNaN(Number(stock)) || Number(stock) < 0) { showToast('Stock cannot be negative!', 'error'); return; }
+  if (isNaN(Number(price)) || Number(price) < 0) { showToast('Price must be a valid number!', 'error'); return; }
 
   const btn = document.getElementById('editSaveBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Saving...'; btn.disabled = true; }
@@ -381,21 +356,22 @@ window.saveEdit = async () => {
       lowStockThreshold: thresh,
       updatedAt: now.toISOString()
     };
-    // Save custom fields too
     extra.forEach(col => {
       const el = document.getElementById(`edit-dyn-${col}`);
       if (el) updateData[col] = el.value.trim();
     });
 
-    await updateDoc(doc(db, 'products', _editDocId), updateData);
+    // ✅ Update users/{uid}/products/{id}
+    await updateDoc(userDoc(_uid, 'products', _editDocId), updateData);
 
-    await addDoc(collection(db, 'history'), {
+    // ✅ Log to users/{uid}/history
+    await addDoc(userCol(_uid, 'history'), {
       productName: name,
-      action: 'Edited',
-      details: `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat || '-'}`,
-      timestamp: now.toLocaleString('en-GB'),
-      createdAt: now.toISOString(),
-      category: cat || 'Others'
+      action:      'Edited',
+      details:     `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat||'-'}`,
+      timestamp:   now.toLocaleString('en-GB'),
+      createdAt:   now.toISOString(),
+      category:    cat || 'Others'
     });
 
     showToast(`"${name}" updated successfully!`, 'success');
@@ -427,16 +403,19 @@ window.confirmDelete = (id, name, category) => {
   confirmBtn.parentNode.replaceChild(fresh, confirmBtn);
 
   fresh.onclick = async () => {
+    if (!_uid) return;
     try {
-      await deleteDoc(doc(db, 'products', id));
+      // ✅ Delete from users/{uid}/products/{id}
+      await deleteDoc(userDoc(_uid, 'products', id));
       const now = new Date();
-      await addDoc(collection(db, 'history'), {
+      // ✅ Log to users/{uid}/history
+      await addDoc(userCol(_uid, 'history'), {
         productName: name,
-        action: 'Deleted',
-        details: 'Product removed from inventory',
-        timestamp: now.toLocaleString('en-GB'),
-        createdAt: now.toISOString(),
-        category: category || 'Others'
+        action:      'Deleted',
+        details:     'Product removed from inventory',
+        timestamp:   now.toLocaleString('en-GB'),
+        createdAt:   now.toISOString(),
+        category:    category || 'Others'
       });
       showToast(`"${name}" deleted.`, 'success');
     } catch (e) {
@@ -447,22 +426,17 @@ window.confirmDelete = (id, name, category) => {
 };
 
 /* ================================================================
-   BOOT
+   BOOT — wait for userReady event from guard.js
 ================================================================ */
-function boot() {
+document.addEventListener('userReady', ({ detail: { uid } }) => {
+  _uid = uid;
   renderHeader();
   renderChips();
-  startTable();
+  startTable(uid);
 
   const addColBtn = document.getElementById('addColumnBtn');
   if (addColBtn) addColBtn.onclick = addColumn;
 
   const inp = document.getElementById('newColumnName');
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addColumn(); });
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
+});

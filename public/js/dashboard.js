@@ -1,26 +1,29 @@
-import { db } from './firebase.js';
-import { collection, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db, userCol } from './firebase.js';
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================================================================
-   DASHBOARD — live data from Firebase
+   DASHBOARD — live data from Firebase, scoped per authenticated user.
+   Waits for 'userReady' event dispatched by guard.js before
+   starting any Firestore listeners.
 ================================================================ */
 
 let products = [];
 let history  = [];
 
-/* ── Listen products ── */
-onSnapshot(collection(db, 'products'), snap => {
-  products = [];
-  snap.forEach(d => { if (d.data().Name) products.push(d.data()); });
-  renderDashboard();
-});
+document.addEventListener('userReady', ({ detail: { uid } }) => {
+  /* ── Listen products ── */
+  onSnapshot(userCol(uid, 'products'), snap => {
+    products = [];
+    snap.forEach(d => { if (d.data().Name) products.push(d.data()); });
+    renderDashboard();
+  });
 
-/* ── Listen history ── */
-onSnapshot(collection(db, 'history'), snap => {
-  history = [];
-  snap.forEach(d => history.push(d.data()));
-  renderDashboard();
+  /* ── Listen history ── */
+  onSnapshot(userCol(uid, 'history'), snap => {
+    history = [];
+    snap.forEach(d => history.push(d.data()));
+    renderDashboard();
+  });
 });
 
 /* ================================================================
@@ -37,14 +40,14 @@ function renderDashboard() {
    STAT CARDS
 ================================================================ */
 function renderStats() {
-  const totalStock  = products.reduce((s, p) => s + (parseInt(p.Stock) || 0), 0);
-  const totalValue  = products.reduce((s, p) => s + ((parseInt(p.Stock)||0) * (parseInt(p.Price)||0)), 0);
-  const lowStock    = products.filter(p => {
-    const stock  = parseInt(p.Stock)              || 0;
-    const thresh = parseInt(p.lowStockThreshold)  || 10;
+  const totalStock = products.reduce((s, p) => s + (parseInt(p.Stock) || 0), 0);
+  const totalValue = products.reduce((s, p) => s + ((parseInt(p.Stock)||0) * (parseInt(p.Price)||0)), 0);
+  const lowStock   = products.filter(p => {
+    const stock  = parseInt(p.Stock)             || 0;
+    const thresh = parseInt(p.lowStockThreshold) || 10;
     return stock <= thresh;
   }).length;
-  const totalProds  = products.length;
+  const totalProds = products.length;
 
   setText('totalStock',    totalStock.toLocaleString('id-ID'));
   setText('totalValue',    'Rp ' + totalValue.toLocaleString('id-ID'));
@@ -61,14 +64,13 @@ function renderMiniChart() {
   const canvas = document.getElementById('barChart');
   if (!canvas) return;
 
-  // Group stock by category
   const catMap = {};
   products.forEach(p => {
     const cat = p.Category || 'Others';
     catMap[cat] = (catMap[cat] || 0) + (parseInt(p.Stock) || 0);
   });
 
-  const entries = Object.entries(catMap).sort((a,b) => b[1] - a[1]).slice(0, 7);
+  const entries = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0, 7);
 
   if (entries.length === 0) {
     canvas.style.display = 'none';
@@ -94,14 +96,11 @@ function renderMiniChart() {
         data,
         backgroundColor: colors.map((c,i) => colors[i % colors.length] + 'CC'),
         borderColor:     colors.map((c,i) => colors[i % colors.length]),
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false
+        borderWidth: 2, borderRadius: 8, borderSkipped: false
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a7265', font: { size: 11 } } },
@@ -123,7 +122,6 @@ function renderRecentProducts() {
     return;
   }
 
-  // Sort by createdAt desc, take 5
   const sorted = [...products]
     .sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''))
     .slice(0, 5);
