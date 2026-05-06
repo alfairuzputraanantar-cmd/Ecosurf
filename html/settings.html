@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CocaCoy ERP – Settings</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script>
+    (function(){
+      const t = localStorage.getItem('cocacoy_theme');
+      if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+    })();
+  </script>
+  <style>
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .settings-nav {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: sticky;
+      top: 88px;
+    }
+
+    .settings-nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 13px 18px;
+      font-size: 13px; font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: all .2s;
+    }
+    .settings-nav-item:last-child { border-bottom: none; }
+    .settings-nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .settings-nav-item:hover { background: var(--surface2); color: var(--text); }
+    .settings-nav-item.active {
+      background: linear-gradient(135deg, rgba(200,149,108,.14), rgba(160,113,79,.14));
+      color: var(--brand-1); font-weight: 600;
+      border-left: 3px solid var(--brand-1);
+    }
+    .settings-nav-item.active i { color: var(--brand-1); }
+
+    .settings-panel { display: none; flex-direction: column; gap: 20px; }
+    .settings-panel.active { display: flex; }
+
+    .settings-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .settings-section-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .settings-section-icon {
+      width: 40px; height: 40px;
+      border-radius: 11px;
+      display: grid; place-items: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .settings-section-icon.copper { background: rgba(200,149,108,.16); color: var(--brand-1); }
+    .settings-section-icon.blue   { background: rgba(91,156,246,.14);  color: var(--blue); }
+    .settings-section-icon.green  { background: rgba(34,201,151,.14);  color: var(--green); }
+    .settings-section-icon.yellow { background: rgba(245,166,35,.14);  color: var(--yellow); }
+    .settings-section-icon.red    { background: rgba(247,95,95,.14);   color: var(--red); }
+
+    .settings-section-title { font-family: var(--font-hd); font-size: 15px; font-weight: 700; }
+    .settings-section-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .settings-section-body  { padding: 22px; }
+
+    .setting-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .setting-row:first-child { padding-top: 0; }
+
+    .setting-info { flex: 1; }
+    .setting-label { font-size: 14px; font-weight: 600; }
+    .setting-desc  { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .setting-control { flex-shrink: 0; }
+
+    .avatar-upload-wrap {
+      display: flex; align-items: center; gap: 18px; margin-bottom: 22px;
+    }
+    .avatar-upload-img {
+      width: 72px; height: 72px;
+      border-radius: 18px;
+      background: var(--brand-grd);
+      display: grid; place-items: center;
+      font-size: 28px; font-weight: 700; color: #fff;
+      font-family: var(--font-hd);
+      flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .avatar-upload-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+    .avatar-upload-info { flex: 1; }
+    .avatar-upload-info p { font-size: 13px; color: var(--muted); margin-top: 5px; }
+
+    .currency-preview {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; color: var(--muted);
+      margin-top: 10px;
+    }
+    .currency-preview strong { color: var(--brand-1); font-family: var(--font-hd); }
+
+    .threshold-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .threshold-slider-row { display: flex; align-items: center; gap: 14px; }
+    .threshold-slider {
+      flex: 1;
+      -webkit-appearance: none; appearance: none;
+      height: 5px; border-radius: 5px;
+      background: var(--border);
+      outline: none; cursor: pointer;
+    }
+    .threshold-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--brand-1);
+      box-shadow: 0 0 0 3px rgba(200,149,108,.2);
+      cursor: pointer;
+    }
+    .threshold-val {
+      font-family: var(--font-hd); font-size: 18px; font-weight: 700;
+      color: var(--brand-1); min-width: 36px; text-align: right;
+    }
+    .threshold-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+
+    .danger-zone {
+      border: 1px solid rgba(247,95,95,.3);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .danger-zone .settings-section-header { border-bottom-color: rgba(247,95,95,.2); }
+
+    .saved-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34,201,151,.12); border: 1px solid rgba(34,201,151,.25);
+      color: var(--green); padding: 5px 13px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      opacity: 0; transition: opacity .3s;
+    }
+    .saved-badge.show { opacity: 1; }
+
+    @media (max-width: 900px) {
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-nav { position: static; display: flex; flex-wrap: wrap; }
+      .settings-nav-item { flex: 1; min-width: 120px; border-bottom: none; border-right: 1px solid var(--border); justify-content: center; text-align: center; }
+      .settings-nav-item.active { border-left: none; border-bottom: 3px solid var(--brand-1); }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy"/></div>
+    <div class="logo-text-wrap">
+      <div class="logo-name">CocaCoy</div>
+      <div class="logo-tag">ERP System</div>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main Menu</div>
+    <a class="nav-link" href="index.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a class="nav-link" href="product.html"><i class="fas fa-boxes-stacked"></i> Products</a>
+    <a class="nav-link" href="history.html"><i class="fas fa-clock-rotate-left"></i> History</a>
+    <a class="nav-link" href="chart.html"><i class="fas fa-chart-line"></i> Charts</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:6px;">
+    <div class="sidebar-label">Other</div>
+    <a class="nav-link active" href="settings.html"><i class="fas fa-gear"></i> Settings</a>
+    <a class="nav-link" href="help.html"><i class="fas fa-circle-question"></i> Help</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Owner</div>
+        <div class="user-role">UMKM Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Settings</div>
+      <div class="topbar-sub">Manage your preferences and system configuration</div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+      <div class="bell-wrap" id="bellWrap">
+        <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel()" title="Low stock alerts">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+        </button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-panel-header">
+            <div class="notif-panel-title"><i class="fas fa-triangle-exclamation"></i> Low Stock Alerts</div>
+            <button class="notif-panel-clear" onclick="document.getElementById('notifPanel').classList.remove('open')">✕</button>
+          </div>
+          <div class="notif-panel-body" id="notifPanelBody">
+            <div class="notif-panel-empty"><i class="fas fa-circle-check" style="color:var(--green);opacity:1;"></i>Loading...</div>
+          </div>
+          <div class="notif-panel-footer">
+            <a href="product.html"><i class="fas fa-arrow-right"></i> Manage Products</a>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" id="menuToggle" style="display:none;"
+        onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="settings-layout">
+
+      <!-- ── Left Nav ── -->
+      <nav class="settings-nav">
+        <div class="settings-nav-item active" data-panel="profile" onclick="switchPanel('profile')">
+          <i class="fas fa-store"></i> Store Profile
+        </div>
+        <div class="settings-nav-item" data-panel="appearance" onclick="switchPanel('appearance')">
+          <i class="fas fa-palette"></i> Appearance
+        </div>
+        <div class="settings-nav-item" data-panel="inventory" onclick="switchPanel('inventory')">
+          <i class="fas fa-boxes-stacked"></i> Inventory
+        </div>
+        <div class="settings-nav-item" data-panel="notifications" onclick="switchPanel('notifications')">
+          <i class="fas fa-bell"></i> Notifications
+        </div>
+        <div class="settings-nav-item" data-panel="security" onclick="switchPanel('security')">
+          <i class="fas fa-shield-halved"></i> Security
+        </div>
+      </nav>
+
+      <!-- ── Right Content ── -->
+      <div class="settings-right">
+
+        <!-- STORE PROFILE -->
+        <div class="settings-panel active" id="panel-profile">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon copper"><i class="fas fa-store"></i></div>
+              <div>
+                <div class="settings-section-title">Store Profile</div>
+                <div class="settings-section-sub">Basic information about your business</div>
+              </div>
+            </div>
+            <div class="settings-section-body">
+              <div class="avatar-upload-wrap">
+                <div class="avatar-upload-img" id="avatarPreview">C</div>
+                <div class="avatar-upload-info">
+                  <button class="btn btn-ghost btn-sm" onclick="document.getElementById('avatarInput').click()">
+                    <i class="fas fa-upload"></i> Upload Logo
+                  </button>
+                  <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(event)"/>
+                  <p>JPG, PNG, SVG · Max. 1 MB</p>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Store Name</label>
+                  <input class="form-control" id="storeName" type="text" placeholder="e.g. CocaCoy" value="CocaCoy"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Owner Name</label>
+                  <input class="form-control" id="ownerName" type="text" placeholder="Business owner's name"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Short Description</label>
+                <textarea class="form-control" id="storeDesc" rows="3" placeholder="Tell us a bit about your business..." style="resize:vertical;"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">WhatsApp Number</label>
+                  <input class="form-control" id="storePhone" type="tel" placeholder="+62 8xx-xxxx-xxxx"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Business Category</label>
+                  <select class="form-control" id="storeCategory">
+                    <option value="food">Food & Beverage</option>
+                    <option value="retail">Retail / Shop</option>
+                    <option value="fashion">Fashion & Clothing</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="beauty">Beauty & Cosmetics</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+                <button class="btn btn-primary" onclick="saveProfile()">
+                  <i class="fas fa-floppy-disk"></i> Save Profile
+                </button>
+                <span class="saved-badge" id="profileSaved"><i class="fas fa-circle-check"></i> Saved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- APPEARANCE -->
+        <div class="settings-panel" id="panel-appearance">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon blue"><i class="fas fa-palette"></i></div>
+              <div>
+                <div class="settings-section-title">Appearance</div>
+                <div class="settings-section-sub">Theme, language, and display format</div>
+              </div>
+            </div>
+            <div class="settings-section-body">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Dark / Light Mode</div>
+                  <div class="setting-desc">Choose the display mode that's comfortable for your eyes</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleThemeFromSwitch(this)"/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Currency Format</div>
+                  <div class="setting-desc">Number format displayed throughout the system</div>
+                </div>
+                <div class="setting-control">
+                  <select class="form-control" id="currencyFormat" onchange="updateCurrencyPreview()" style="width:auto;padding:8px 12px;">
+                    <option value="IDR">Rp (Rupiah)</option>
+                    <option value="USD">$ (Dollar)</option>
+                    <option value="EUR">€ (Euro)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="currency-preview" id="currencyPreview">
+                Preview: <strong>Rp 250,000</strong> · <strong>Rp 1,500,000</strong>
+              </div>
+              <div class="setting-row" style="margin-top:14px;">
+                <div class="setting-info">
+                  <div class="setting-label">Interface Language</div>
+                  <div class="setting-desc">Language used throughout the ERP pages</div>
+                </div>
+                <div class="setting-control">
+                  <select class="form-control" id="langSelect" style="width:auto;padding:8px 12px;">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="id">🇮🇩 Bahasa Indonesia</option>
+                  </select>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Show Sidebar Labels</div>
+                  <div class="setting-desc">Display text labels on sidebar navigation items</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="sidebarLabels" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top:18px;">
+                <button class="btn btn-primary" onclick="saveAppearance()">
+                  <i class="fas fa-floppy-disk"></i> Save Changes
+                </button>
+                <span class="saved-badge" id="appearSaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i> Saved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div class="settings-panel" id="panel-inventory">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon yellow"><i class="fas fa-boxes-stacked"></i></div>
+              <div>
+                <div class="settings-section-title">Inventory Settings</div>
+                <div class="settings-section-sub">Configure stock thresholds and product categories</div>
+              </div>
+            </div>
+            <div class="settings-section-body">
+              <div class="form-group">
+                <label class="form-label">Default Low Stock Threshold</label>
+                <div class="threshold-wrap">
+                  <div class="threshold-slider-row">
+                    <input type="range" class="threshold-slider" id="lowStockSlider" min="1" max="50" value="5" oninput="updateThresholdVal(this.value)"/>
+                    <div class="threshold-val" id="thresholdVal">5</div>
+                  </div>
+                  <div class="threshold-labels">
+                    <span>1</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+                  </div>
+                </div>
+                <div class="setting-desc" style="margin-top:8px;">Products with stock ≤ this value will appear as a low stock warning</div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Auto Stock Deduction</div>
+                  <div class="setting-desc">Automatically reduce stock when a transaction is completed</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="autoStock" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Weekly Stock Report</div>
+                  <div class="setting-desc">Show a stock summary at the start of each week on the dashboard</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="weeklyReport" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:14px;">
+                <label class="form-label">Active Product Categories</label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;" id="categoryTagList">
+                  <span class="tag tag-copper">🍱 Food</span>
+                  <span class="tag tag-blue">🥤 Beverages</span>
+                  <span class="tag tag-green">💡 Electronics</span>
+                  <span class="tag tag-yellow">👕 Clothing</span>
+                  <span class="tag tag-red">💄 Cosmetics</span>
+                  <span class="tag" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">📦 Others</span>
+                </div>
+              </div>
+
+              <div style="margin-top:18px;">
+                <button class="btn btn-primary" onclick="saveInventory()">
+                  <i class="fas fa-floppy-disk"></i> Save Settings
+                </button>
+                <span class="saved-badge" id="inventSaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i> Saved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="settings-panel" id="panel-notifications">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon green"><i class="fas fa-bell"></i></div>
+              <div>
+                <div class="settings-section-title">Notification Preferences</div>
+                <div class="settings-section-sub">Choose which alerts you want to receive</div>
+              </div>
+            </div>
+            <div class="settings-section-body">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">🔔 Low Stock Alert</div>
+                  <div class="setting-desc">Show bell notification when stock is running low</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="notifLowStock" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">⚠️ Critical Stock Alert</div>
+                  <div class="setting-desc">Special notification when a product's stock reaches 0</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="notifCritical" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">✅ Action Success Confirmation</div>
+                  <div class="setting-desc">Toast notification when a product is successfully added or edited</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="notifSuccess" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">🗑️ Delete Confirmation</div>
+                  <div class="setting-desc">Show a confirmation dialog before deleting any data</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="notifDelete" checked/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">📊 Daily Summary</div>
+                  <div class="setting-desc">Show an activity summary badge when opening the dashboard</div>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="notifDaily"/>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top:18px;">
+                <button class="btn btn-primary" onclick="saveNotifications()">
+                  <i class="fas fa-floppy-disk"></i> Save Preferences
+                </button>
+                <span class="saved-badge" id="notifSaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i> Saved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECURITY -->
+        <div class="settings-panel" id="panel-security">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon blue"><i class="fas fa-shield-halved"></i></div>
+              <div>
+                <div class="settings-section-title">Account Security</div>
+                <div class="settings-section-sub">Manage your password and login session</div>
+              </div>
+            </div>
+            <div class="settings-section-body">
+              <div class="form-group">
+                <label class="form-label">Account Email</label>
+                <input class="form-control" id="secEmail" type="email" placeholder="email@example.com" readonly style="opacity:.7;cursor:not-allowed;"/>
+                <div class="setting-desc" style="margin-top:6px;">Email cannot be changed. Contact admin if needed.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input class="form-control" id="currentPass" type="password" placeholder="••••••••"/>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input class="form-control" id="newPass" type="password" placeholder="Min. 8 characters"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm Password</label>
+                  <input class="form-control" id="confirmPass" type="password" placeholder="Repeat new password"/>
+                </div>
+              </div>
+              <div style="margin-top:6px;">
+                <button class="btn btn-primary" onclick="changePassword()">
+                  <i class="fas fa-key"></i> Change Password
+                </button>
+                <span class="saved-badge" id="passSaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i> Password updated</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section danger-zone">
+            <div class="settings-section-header">
+              <div class="settings-section-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+              <div>
+                <div class="settings-section-title" style="color:var(--red);">Danger Zone</div>
+                <div class="settings-section-sub">These actions cannot be undone</div>
+              </div>
+            </div>
+            <div class="settings-section-body">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Clear All History</div>
+                  <div class="setting-desc">Delete all transaction records and activity logs</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="confirmClearHistory()">
+                  <i class="fas fa-trash"></i> Clear History
+                </button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Reset Settings</div>
+                  <div class="setting-desc">Restore all settings to their default values</div>
+                </div>
+                <button class="btn btn-warn btn-sm" onclick="confirmResetSettings()">
+                  <i class="fas fa-rotate-left"></i> Reset to Default
+                </button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-label">Permanently Delete Account</div>
+                  <div class="setting-desc">Delete your account and all associated data permanently</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteAccount()">
+                  <i class="fas fa-user-xmark"></i> Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end .settings-right -->
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title" id="confirmModalTitle"><i class="fas fa-triangle-exclamation" style="color:var(--red);"></i> Confirm</div>
+    <p id="confirmModalMsg" style="font-size:14px;color:var(--muted);line-height:1.6;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirmModalOk">Yes, Proceed</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/guard.js"></script>
+<script type="module" src="../js/firebase.js"></script>
+<script type="module" src="../js/notifications.js"></script>
+<script>
+/* ── Panel switching ── */
+function switchPanel(panelId) {
+  document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+  document.querySelector(`[data-panel="${panelId}"]`).classList.add('active');
+  localStorage.setItem('cocacoy_settings_tab', panelId);
+}
+
+(function(){
+  const last = localStorage.getItem('cocacoy_settings_tab');
+  if (last) switchPanel(last);
+})();
+
+/* ── Profile ── */
+function previewAvatar(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 1048576) { showToast('File too large (max 1 MB)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const prev = document.getElementById('avatarPreview');
+    prev.innerHTML = `<img src="${ev.target.result}" alt="Logo"/>`;
+    localStorage.setItem('cocacoy_store_logo', ev.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveProfile() {
+  const data = {
+    storeName:     document.getElementById('storeName').value.trim(),
+    ownerName:     document.getElementById('ownerName').value.trim(),
+    storeDesc:     document.getElementById('storeDesc').value.trim(),
+    storePhone:    document.getElementById('storePhone').value.trim(),
+    storeCategory: document.getElementById('storeCategory').value,
+  };
+  localStorage.setItem('cocacoy_profile', JSON.stringify(data));
+  if (data.ownerName) {
+    const el = document.getElementById('sidebarName');
+    if (el) el.textContent = data.ownerName;
+    const av = document.getElementById('sidebarAvatar');
+    if (av) av.textContent = data.ownerName.charAt(0).toUpperCase();
+  }
+  flashSaved('profileSaved');
+  showToast('Store profile saved successfully!', 'success');
+}
+
+/* ── Appearance ── */
+function toggleThemeFromSwitch(checkbox) {
+  applyGlobalTheme(checkbox.checked ? 'dark' : 'light');
+}
+
+function updateCurrencyPreview() {
+  const val = document.getElementById('currencyFormat').value;
+  const symbols = { IDR: 'Rp', USD: '$', EUR: '€' };
+  const s = symbols[val] || 'Rp';
+  const fmt = (n) => n.toLocaleString('en-US');
+  document.getElementById('currencyPreview').innerHTML =
+    `Preview: <strong>${s} ${fmt(250000)}</strong> · <strong>${s} ${fmt(1500000)}</strong>`;
+  localStorage.setItem('cocacoy_currency', val);
+}
+
+function saveAppearance() {
+  localStorage.setItem('cocacoy_currency', document.getElementById('currencyFormat').value);
+  localStorage.setItem('cocacoy_lang', document.getElementById('langSelect').value);
+  flashSaved('appearSaved');
+  showToast('Appearance settings saved!', 'success');
+}
+
+/* ── Inventory ── */
+function updateThresholdVal(v) {
+  document.getElementById('thresholdVal').textContent = v;
+  localStorage.setItem('cocacoy_low_stock_threshold', v);
+}
+
+function saveInventory() {
+  localStorage.setItem('cocacoy_low_stock_threshold', document.getElementById('lowStockSlider').value);
+  localStorage.setItem('cocacoy_auto_stock',    document.getElementById('autoStock').checked);
+  localStorage.setItem('cocacoy_weekly_report', document.getElementById('weeklyReport').checked);
+  flashSaved('inventSaved');
+  showToast('Inventory settings saved!', 'success');
+}
+
+/* ── Notifications ── */
+function saveNotifications() {
+  const prefs = {
+    lowStock: document.getElementById('notifLowStock').checked,
+    critical: document.getElementById('notifCritical').checked,
+    success:  document.getElementById('notifSuccess').checked,
+    delete:   document.getElementById('notifDelete').checked,
+    daily:    document.getElementById('notifDaily').checked,
+  };
+  localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(prefs));
+  flashSaved('notifSaved');
+  showToast('Notification preferences saved!', 'success');
+}
+
+/* ── Security ── */
+function changePassword() {
+  const curr = document.getElementById('currentPass').value;
+  const nw   = document.getElementById('newPass').value;
+  const conf = document.getElementById('confirmPass').value;
+  if (!curr || !nw || !conf) { showToast('All password fields are required', 'error'); return; }
+  if (nw.length < 8)         { showToast('Password must be at least 8 characters', 'error'); return; }
+  if (nw !== conf)           { showToast('Password confirmation does not match', 'error'); return; }
+  flashSaved('passSaved');
+  showToast('Password updated successfully!', 'success');
+  document.getElementById('currentPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+}
+
+/* ── Confirm Modal ── */
+function openConfirmModal(title, msg, cb) {
+  document.getElementById('confirmModalTitle').innerHTML = `<i class="fas fa-triangle-exclamation" style="color:var(--red);"></i> ${title}`;
+  document.getElementById('confirmModalMsg').textContent = msg;
+  document.getElementById('confirmModalOk').onclick = () => { closeConfirmModal(); if (cb) cb(); };
+  document.getElementById('confirmModal').classList.add('open');
+}
+function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('open'); }
+
+function confirmClearHistory() {
+  openConfirmModal('Clear History', 'All transaction history will be permanently deleted. This action cannot be undone.', () => {
+    localStorage.removeItem('cocacoy_history');
+    showToast('History cleared successfully', 'success');
+  });
+}
+function confirmResetSettings() {
+  openConfirmModal('Reset Settings', 'All settings will be restored to their default values. Continue?', () => {
+    ['cocacoy_profile','cocacoy_currency','cocacoy_lang','cocacoy_notif_prefs',
+     'cocacoy_low_stock_threshold','cocacoy_auto_stock','cocacoy_weekly_report'].forEach(k => localStorage.removeItem(k));
+    showToast('Settings reset to default', 'info');
+    setTimeout(() => location.reload(), 800);
+  });
+}
+function confirmDeleteAccount() {
+  openConfirmModal('Delete Account', 'Your account and all data will be permanently deleted. This action CANNOT be undone!', () => {
+    showToast('This feature requires email confirmation', 'warning');
+  });
+}
+
+/* ── Load saved settings ── */
+(function loadSettings() {
+  try {
+    const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+    if (p.storeName)     document.getElementById('storeName').value      = p.storeName;
+    if (p.ownerName)     document.getElementById('ownerName').value      = p.ownerName;
+    if (p.storeDesc)     document.getElementById('storeDesc').value      = p.storeDesc;
+    if (p.storePhone)    document.getElementById('storePhone').value     = p.storePhone;
+    if (p.storeCategory) document.getElementById('storeCategory').value  = p.storeCategory;
+  } catch(e){}
+
+  const logo = localStorage.getItem('cocacoy_store_logo');
+  if (logo) document.getElementById('avatarPreview').innerHTML = `<img src="${logo}" alt="Logo"/>`;
+
+  const theme = localStorage.getItem('cocacoy_theme') || 'dark';
+  document.getElementById('darkModeToggle').checked = (theme === 'dark');
+
+  const cur = localStorage.getItem('cocacoy_currency');
+  if (cur) { document.getElementById('currencyFormat').value = cur; updateCurrencyPreview(); }
+
+  const lang = localStorage.getItem('cocacoy_lang');
+  if (lang) document.getElementById('langSelect').value = lang;
+
+  const th = localStorage.getItem('cocacoy_low_stock_threshold');
+  if (th) { document.getElementById('lowStockSlider').value = th; updateThresholdVal(th); }
+
+  try {
+    const np = JSON.parse(localStorage.getItem('cocacoy_notif_prefs') || '{}');
+    if (np.lowStock !== undefined) document.getElementById('notifLowStock').checked = np.lowStock;
+    if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
+    if (np.success  !== undefined) document.getElementById('notifSuccess').checked  = np.success;
+    if (np.delete   !== undefined) document.getElementById('notifDelete').checked   = np.delete;
+    if (np.daily    !== undefined) document.getElementById('notifDaily').checked    = np.daily;
+  } catch(e){}
+})();
+
+/* ── Flash saved ── */
+function flashSaved(id) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ── Mobile ── */
+function checkMobile() {
+  document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
+}
+checkMobile();
+window.addEventListener('resize', checkMobile);
+
+/* ── Toast ── */
+window.showToast = function(msg, type='info') {
+  const ic = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warning:'fa-triangle-exclamation'};
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<i class="fas ${ic[type]||ic.info}"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+};
+
+/* ── Theme toggle ── */
+function applyGlobalTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme','light');
+    document.getElementById('themeIcon').className = 'fas fa-sun';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('themeIcon').className = 'fas fa-moon';
+  }
+  localStorage.setItem('cocacoy_theme', theme);
+  document.getElementById('darkModeToggle').checked = (theme === 'dark');
+}
+(function() {
+  const btn = document.getElementById('themeToggleBtn');
+  applyGlobalTheme(localStorage.getItem('cocacoy_theme') || 'dark');
+  btn.addEventListener('click', () => {
+    const current = localStorage.getItem('cocacoy_theme') || 'dark';
+    applyGlobalTheme(current === 'dark' ? 'light' : 'dark');
+  });
+})();
+
+/* ── Sidebar user ── */
+(function(){
+  try {
+    const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+    if (p.ownerName) {
+      document.getElementById('sidebarName').textContent = p.ownerName;
+      document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+    }
+  } catch(e) {}
+})();
+
+/* ── Logout ── */
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try {
+    const { signOut } = await import('../js/firebase.js');
+    await signOut();
+  } catch(e) {}
+  window.location.href = 'login.html';
+});
+</script>
+</body>
+</html>

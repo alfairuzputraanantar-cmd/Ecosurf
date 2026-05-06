@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CocaCoy ERP – Help & Guide</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- FOUC prevention -->
+  <script>
+    (function(){
+      const t = localStorage.getItem('cocacoy_theme');
+      if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+    })();
+  </script>
+  <style>
+    /* ── Help Page Specific ── */
+    .help-hero {
+      background: linear-gradient(135deg, rgba(200,149,108,.12) 0%, rgba(91,156,246,.08) 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; margin-bottom: 28px;
+      position: relative; overflow: hidden;
+    }
+    .help-hero::before {
+      content: '';
+      position: absolute; top: -40px; right: -20px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,149,108,.1) 0%, transparent 70%);
+    }
+    .help-hero-title {
+      font-family: var(--font-hd);
+      font-size: 26px; font-weight: 800;
+      background: var(--brand-grd);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .help-hero-sub { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 480px; }
+    .help-hero-icon {
+      font-size: 64px; opacity: .18; flex-shrink: 0;
+      background: var(--brand-grd);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; opacity: 1;
+      filter: drop-shadow(0 4px 12px rgba(200,149,108,.3));
+    }
+
+    /* ── Search ── */
+    .help-search-wrap {
+      margin-bottom: 28px;
+    }
+    .help-search {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 14px 20px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .help-search:focus-within {
+      border-color: var(--brand-1);
+      box-shadow: 0 0 0 3px rgba(200,149,108,.12);
+    }
+    .help-search i { color: var(--muted); font-size: 16px; }
+    .help-search input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 15px; font-family: var(--font);
+    }
+    .help-search input::placeholder { color: var(--muted); }
+    .help-search-clear {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 14px; padding: 4px;
+      transition: color .2s; display: none;
+    }
+    .help-search-clear:hover { color: var(--text); }
+
+    /* ── Quick Links ── */
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .quick-link-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .quick-link-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0,0,0,.18);
+      border-color: var(--brand-1);
+    }
+    .quick-link-icon {
+      width: 48px; height: 48px;
+      border-radius: 13px;
+      display: grid; place-items: center;
+      font-size: 20px; margin: 0 auto 12px;
+    }
+    .quick-link-label { font-size: 13px; font-weight: 600; }
+    .quick-link-sub   { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Accordion FAQ ── */
+    .help-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .faq-section { margin-bottom: 28px; }
+    .faq-section-title {
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1.2px;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .faq-section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .faq-item.open { border-color: rgba(200,149,108,.35); }
+
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      gap: 14px;
+    }
+    .faq-q-left   { display: flex; align-items: center; gap: 12px; }
+    .faq-q-icon   {
+      width: 32px; height: 32px; border-radius: 9px;
+      display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+      background: rgba(200,149,108,.12); color: var(--brand-1);
+    }
+    .faq-q-text   { font-size: 14px; font-weight: 600; }
+    .faq-chevron  {
+      color: var(--muted); font-size: 12px; flex-shrink: 0;
+      transition: transform .3s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--brand-1); }
+
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height .35s cubic-bezier(.4,0,.2,1), padding .3s;
+    }
+    .faq-item.open .faq-answer { max-height: 600px; }
+    .faq-answer-inner {
+      padding: 0 20px 20px 20px;
+      font-size: 13px; color: var(--muted); line-height: 1.8;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .faq-answer-inner strong { color: var(--text); }
+    .faq-answer-inner ul { padding-left: 18px; margin-top: 8px; }
+    .faq-answer-inner li { margin-bottom: 5px; }
+    .faq-answer-inner .step {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .faq-answer-inner .step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--brand-grd); color: #fff;
+      display: grid; place-items: center; font-size: 11px; font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    /* ── Right Sidebar ── */
+    .help-sidebar { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 88px; }
+
+    .help-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .help-info-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-hd); font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .help-info-header i { color: var(--brand-1); }
+    .help-info-body { padding: 18px; }
+
+    /* Contact card */
+    .contact-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .contact-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .contact-row:first-child { padding-top: 0; }
+    .contact-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 15px; flex-shrink: 0;
+    }
+    .contact-info { flex: 1; }
+    .contact-label { font-size: 12px; color: var(--muted); }
+    .contact-val   { font-size: 13px; font-weight: 600; }
+    .contact-btn   {
+      font-size: 11px; font-weight: 600; color: var(--brand-1);
+      background: rgba(200,149,108,.1); border: none;
+      border-radius: 7px; padding: 5px 10px; cursor: pointer;
+      transition: background .2s;
+    }
+    .contact-btn:hover { background: rgba(200,149,108,.2); }
+
+    /* Tip card */
+    .tip-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .tip-item:last-child { margin-bottom: 0; }
+    .tip-emoji { font-size: 20px; flex-shrink: 0; }
+    .tip-text  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .tip-text strong { color: var(--text); }
+
+    /* Version card */
+    .version-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .version-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .version-row:first-child { padding-top: 0; }
+    .version-key { color: var(--muted); }
+    .version-val { font-weight: 600; }
+
+    /* Changelog */
+    .changelog-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .changelog-ver {
+      font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px;
+      background: rgba(200,149,108,.14); color: var(--brand-1);
+      white-space: nowrap; margin-top: 2px; flex-shrink: 0;
+    }
+    .changelog-info { flex: 1; }
+    .changelog-title { font-size: 13px; font-weight: 600; }
+    .changelog-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+    .changelog-date  { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    /* No result state */
+    .no-result { text-align: center; padding: 40px 20px; color: var(--muted); display: none; }
+    .no-result i { font-size: 36px; opacity: .3; display: block; margin-bottom: 12px; }
+    .no-result p { font-size: 14px; }
+
+    @media (max-width: 1100px) {
+      .quick-links { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .help-grid { grid-template-columns: 1fr; }
+      .help-sidebar { position: static; }
+      .help-hero { flex-direction: column; text-align: center; }
+      .help-hero::before { display: none; }
+      .quick-links { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .quick-links { grid-template-columns: 1fr 1fr; }
+      .help-hero { padding: 24px 20px; }
+      .help-hero-title { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy"/></div>
+    <div class="logo-text-wrap">
+      <div class="logo-name">CocaCoy</div>
+      <div class="logo-tag">ERP System</div>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main Menu</div>
+    <a class="nav-link" href="index.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a class="nav-link" href="product.html"><i class="fas fa-boxes-stacked"></i> Products</a>
+    <a class="nav-link" href="history.html"><i class="fas fa-clock-rotate-left"></i> History</a>
+    <a class="nav-link" href="chart.html"><i class="fas fa-chart-line"></i> Charts</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:6px;">
+    <div class="sidebar-label">Other</div>
+    <a class="nav-link" href="settings.html"><i class="fas fa-gear"></i> Settings</a>
+    <a class="nav-link active" href="help.html"><i class="fas fa-circle-question"></i> Help</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Owner</div>
+        <div class="user-role">UMKM Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Help & Guide</div>
+      <div class="topbar-sub">CocaCoy ERP help center — find answers quickly</div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+      <div class="bell-wrap" id="bellWrap">
+        <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel()" title="Low stock alerts">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+        </button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-panel-header">
+            <div class="notif-panel-title"><i class="fas fa-triangle-exclamation"></i> Low Stock Alerts</div>
+            <button class="notif-panel-clear" onclick="document.getElementById('notifPanel').classList.remove('open')">✕</button>
+          </div>
+          <div class="notif-panel-body" id="notifPanelBody">
+            <div class="notif-panel-empty"><i class="fas fa-circle-check" style="color:var(--green);opacity:1;"></i>Loading...</div>
+          </div>
+          <div class="notif-panel-footer">
+            <a href="product.html"><i class="fas fa-arrow-right"></i> Manage Products</a>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" id="menuToggle" style="display:none;"
+        onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Hero ── -->
+    <div class="help-hero">
+      <div>
+        <div class="help-hero-title">CocaCoy ERP Help Center</div>
+        <div class="help-hero-sub">Find comprehensive guides, usage tips, and answers to frequently asked questions about your ERP system.</div>
+      </div>
+      <div class="help-hero-icon">
+        <i class="fas fa-circle-question"></i>
+      </div>
+    </div>
+
+    <!-- ── Search ── -->
+    <div class="help-search-wrap">
+      <div class="help-search">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="helpSearchInput" placeholder="Search for guides, features, or questions..." oninput="searchHelp(this.value)"/>
+        <button class="help-search-clear" id="clearSearch" onclick="clearHelpSearch()"><i class="fas fa-xmark"></i></button>
+      </div>
+    </div>
+
+    <!-- ── Quick Links ── -->
+    <div class="quick-links" id="quickLinks">
+      <div class="quick-link-card" onclick="scrollToFaq('getting-started')">
+        <div class="quick-link-icon si-copper"><i class="fas fa-rocket"></i></div>
+        <div class="quick-link-label">Getting Started</div>
+        <div class="quick-link-sub">Initial setup guide</div>
+      </div>
+      <div class="quick-link-card" onclick="scrollToFaq('products')">
+        <div class="quick-link-icon si-blue"><i class="fas fa-boxes-stacked"></i></div>
+        <div class="quick-link-label">Product Management</div>
+        <div class="quick-link-sub">Add, edit, delete</div>
+      </div>
+      <div class="quick-link-card" onclick="scrollToFaq('reports')">
+        <div class="quick-link-icon si-green"><i class="fas fa-chart-line"></i></div>
+        <div class="quick-link-label">Reports & Charts</div>
+        <div class="quick-link-sub">Inventory analysis</div>
+      </div>
+      <div class="quick-link-card" onclick="scrollToFaq('account')">
+        <div class="quick-link-icon si-yellow"><i class="fas fa-user-gear"></i></div>
+        <div class="quick-link-label">Account & Security</div>
+        <div class="quick-link-sub">Login, password, profile</div>
+      </div>
+    </div>
+
+    <!-- ── Main Grid ── -->
+    <div class="help-grid">
+      <!-- LEFT: FAQ -->
+      <div>
+        <div class="no-result" id="noResult">
+          <i class="fas fa-magnifying-glass"></i>
+          <p>No results found for your search.<br/>Try using more general keywords.</p>
+        </div>
+
+        <!-- Section: Getting Started -->
+        <div class="faq-section" id="section-getting-started">
+          <div class="faq-section-title"><i class="fas fa-rocket"></i> Getting Started</div>
+
+          <div class="faq-item" data-search="start setup login register account create begin">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-play"></i></div>
+                <div class="faq-q-text">How to get started with CocaCoy ERP?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                <strong>Follow these steps to get started:</strong>
+                <div class="step"><div class="step-num">1</div><div>Open the <strong>Register</strong> page and create a new account with your email and password.</div></div>
+                <div class="step"><div class="step-num">2</div><div>Login using your newly created account.</div></div>
+                <div class="step"><div class="step-num">3</div><div>Go to <strong>Settings → Store Profile</strong> and complete your business information.</div></div>
+                <div class="step"><div class="step-num">4</div><div>Add your first product on the <strong>Products</strong> page.</div></div>
+                <div class="step"><div class="step-num">5</div><div>The dashboard will automatically display real-time statistics of your data.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="dashboard main page stats card overview">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-chart-pie"></i></div>
+                <div class="faq-q-text">What is displayed on the Dashboard page?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                The Dashboard displays a real-time inventory summary:
+                <ul>
+                  <li><strong>Total Products</strong> — number of distinct product types registered</li>
+                  <li><strong>Inventory Value</strong> — total value of stock (price × quantity)</li>
+                  <li><strong>Low Stock Items</strong> — products with running low stock</li>
+                  <li><strong>Total Stock Units</strong> — sum of all individual items in stock</li>
+                  <li><strong>Stock by Category</strong> — bar chart grouping products by category</li>
+                  <li><strong>Recently Added</strong> — last 5 products added to the system</li>
+                  <li><strong>Low Stock Alerts</strong> — quick list of products needing restock</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="dark light mode theme toggle switch color scheme">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-moon"></i></div>
+                <div class="faq-q-text">How to toggle dark/light mode?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Click the <strong>🌙 / ☀️</strong> icon in the top right corner of any page to toggle between dark and light modes. Your preference is automatically saved in your browser. You can also configure this by going to <strong>Settings → Appearance → Dark / Light Mode</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Products -->
+        <div class="faq-section" id="section-products">
+          <div class="faq-section-title"><i class="fas fa-boxes-stacked"></i> Product Management</div>
+
+          <div class="faq-item" data-search="add new product create name price stock">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-plus"></i></div>
+                <div class="faq-q-text">How do I add a new product?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                <div class="step"><div class="step-num">1</div><div>Navigate to the <strong>Products</strong> page from the sidebar.</div></div>
+                <div class="step"><div class="step-num">2</div><div>Click the <strong>+ Add Product</strong> button in the top right.</div></div>
+                <div class="step"><div class="step-num">3</div><div>Fill in the form: Product Name, Category, Price, and Initial Stock Quantity.</div></div>
+                <div class="step"><div class="step-num">4</div><div>Click <strong>Save Product</strong> — the data is instantly saved to Firebase and appears in your list.</div></div>
+                <p style="margin-top:8px;">💡 Available categories: Food, Drink, Electronics, Clothing, Cosmetics, Goods, Others.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="edit update modify product stock price">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-pen-to-square"></i></div>
+                <div class="faq-q-text">How do I edit or update product stock?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                To edit a product, click the <strong>✏️ Edit</strong> icon on the corresponding row in the products table. The edit modal will appear with pre-filled details — change any necessary values and click <strong>Save Changes</strong>. All modifications are synchronized to Firebase immediately and recorded in the History.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="delete remove product erase recover undo">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-trash"></i></div>
+                <div class="faq-q-text">Can a deleted product be recovered?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                <strong>No.</strong> Deleting a product is permanent in the Firebase database. However, a deletion log is still recorded on the <strong>History</strong> page (labeled as <em>Deleted</em>) so you can review what products existed previously with their latest details.
+                <br/><br/>💡 Tip: It is recommended to reduce stock to 0 instead of deleting the item, keeping historical data intact.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="low stock alert notification threshold warning danger">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                <div class="faq-q-text">How do low stock notifications work?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                The system automatically monitors stock for every product. When stock is ≤ the threshold limit (default: <strong>5 units</strong>), the 🔔 icon in the topbar displays a red badge with the number of low-stock products.
+                <ul>
+                  <li><strong>Red (Critical)</strong> — stock = 0, restock immediately!</li>
+                  <li><strong>Yellow (Warning)</strong> — stock is running low</li>
+                </ul>
+                You can change the default threshold by going to <strong>Settings → Inventory → Default Low Stock Threshold</strong>.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="filter search find category product columns sort">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-magnifying-glass"></i></div>
+                <div class="faq-q-text">How do I search and filter products?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                On the <strong>Products</strong> page you can use:
+                <ul>
+                  <li><strong>Search bar</strong> — type the product name to filter results in real-time</li>
+                  <li><strong>Category Filter</strong> — not available natively here, but you can search by category name</li>
+                  <li><strong>Column Sort</strong> — click on table headers to sort items (if implemented)</li>
+                </ul>
+                All active filters work together simultaneously without page reload.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Reports -->
+        <div class="faq-section" id="section-reports">
+          <div class="faq-section-title"><i class="fas fa-chart-line"></i> Reports & Charts</div>
+
+          <div class="faq-item" data-search="chart graph report analytics view analysis">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="faq-q-text">What can I see on the Charts page?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                The Charts page displays visual analytics of your inventory:
+                <ul>
+                  <li><strong>Bar Chart</strong> — top products by stock quantity</li>
+                  <li><strong>Pie/Donut Chart</strong> — product distribution by category</li>
+                  <li><strong>Line Chart</strong> — item additions trend over the last 14 days</li>
+                </ul>
+                Data is fetched in real-time from Firebase, ensuring the graphs constantly reflect up-to-date conditions.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="history transaction log past logs added edited deleted">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-clock-rotate-left"></i></div>
+                <div class="faq-q-text">What is the History page and how do I read it?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                The <strong>History</strong> page logs all changes made to your products:
+                <ul>
+                  <li>🟢 <strong>Added</strong> — new products registered</li>
+                  <li>🔵 <strong>Edited</strong> — product details updated (name/price/stock)</li>
+                  <li>🔴 <strong>Deleted</strong> — products removed from the database</li>
+                </ul>
+                Use the filter tabs at the top to narrow down activities by action type, or use the search box to find specific logs.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="export download report data excel csv pdf print">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-file-export"></i></div>
+                <div class="faq-q-text">Can data be exported to Excel or PDF?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                A native export feature is currently unavailable. However, you can press <strong>Ctrl+P</strong> to print any page layout to PDF. Proper CSV/Excel export functionality is on the roadmap for an upcoming update. Keep an eye on our Changelog!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Account -->
+        <div class="faq-section" id="section-account">
+          <div class="faq-section-title"><i class="fas fa-user-gear"></i> Account & Security</div>
+
+          <div class="faq-item" data-search="login sign in forgotten password reset email recovery">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-key"></i></div>
+                <div class="faq-q-text">What if I forget my password?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                On the Login page, click the <strong>"Forgot Password?"</strong> link. Enter your registered email address and the system will send you a password reset link. Please verify your <em>Spam/Junk</em> folders if you can't find it in your inbox.
+                <br/><br/>Alternatively: Contact your system admin via the support channels listed below.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="change password security account settings update pass">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-shield-halved"></i></div>
+                <div class="faq-q-text">How do I change my password?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Go to <a href="settings.html" style="color:var(--brand-1);">Settings</a> → <strong>Account Security</strong>. Type your current password, enter your new password (minimum 8 characters), and confirm it. Click <strong>Change Password</strong> to save the update.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="logout sign out exit end session safe leave">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-right-from-bracket"></i></div>
+                <div class="faq-q-text">How do I log out safely?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Click the <strong>Sign Out</strong> button positioned at the bottom of the left sidebar. You will automatically be redirected to the Login page. Always remember to log out, especially on shared devices, to protect business data.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-search="data firebase real-time sync cloud secure database privacy">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <div class="faq-q-left">
+                <div class="faq-q-icon"><i class="fas fa-cloud"></i></div>
+                <div class="faq-q-text">Where is my data stored? Is it secure?</div>
+              </div>
+              <i class="fas fa-chevron-down faq-chevron"></i>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                All product and transaction data are housed securely on <strong>Google Firebase Firestore</strong> — an encrypted cloud database maintained globally by Google. Your data is:
+                <ul>
+                  <li>✅ Hosted securely on enterprise Google servers</li>
+                  <li>✅ Automatically backed up by Firebase</li>
+                  <li>✅ Accessible across any device with authentication</li>
+                  <li>✅ Synchronized in real-time without constant page refreshes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sidebar info -->
+      <div class="help-sidebar">
+
+        <!-- Contact Support -->
+        <div class="help-info-card">
+          <div class="help-info-header"><i class="fas fa-headset"></i> Contact Us</div>
+          <div class="help-info-body">
+            <div class="contact-row">
+              <div class="contact-icon si-green"><i class="fab fa-whatsapp"></i></div>
+              <div class="contact-info">
+                <div class="contact-label">WhatsApp</div>
+                <div class="contact-val">+62 812-3456-7890</div>
+              </div>
+              <button class="contact-btn" onclick="window.open('https://wa.me/6281234567890','_blank')">Chat</button>
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon si-blue"><i class="fas fa-envelope"></i></div>
+              <div class="contact-info">
+                <div class="contact-label">Email Support</div>
+                <div class="contact-val">support@cocacoy.id</div>
+              </div>
+              <button class="contact-btn" onclick="window.location.href='mailto:support@cocacoy.id'">Email</button>
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon si-yellow"><i class="fas fa-clock"></i></div>
+              <div class="contact-info">
+                <div class="contact-label">Operating Hours</div>
+                <div class="contact-val">Mon–Fri, 09:00–17:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips & Shortcuts -->
+        <div class="help-info-card">
+          <div class="help-info-header"><i class="fas fa-lightbulb"></i> Tips & Shortcuts</div>
+          <div class="help-info-body">
+            <div class="tip-item">
+              <div class="tip-emoji">⚡</div>
+              <div class="tip-text"><strong>Ctrl+F</strong> is not required — use the provided search box on each page to find items faster.</div>
+            </div>
+            <div class="tip-item">
+              <div class="tip-emoji">📊</div>
+              <div class="tip-text">The Dashboard <strong>auto-refreshes</strong> whenever products change — no manual reloading needed.</div>
+            </div>
+            <div class="tip-item">
+              <div class="tip-emoji">🔔</div>
+              <div class="tip-text">Click the 🔔 icon in the top header to view the full list of products holding critical stock.</div>
+            </div>
+            <div class="tip-item">
+              <div class="tip-emoji">🌙</div>
+              <div class="tip-text">Toggle dark/light themes via the header on <strong>any page</strong> — this setting automatically persists.</div>
+            </div>
+            <div class="tip-item">
+              <div class="tip-emoji">📱</div>
+              <div class="tip-text">This ERP system is <strong>fully responsive</strong> — access effortlessly from your mobile device.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- About Application -->
+        <div class="help-info-card">
+          <div class="help-info-header"><i class="fas fa-circle-info"></i> About Application</div>
+          <div class="help-info-body">
+            <div class="version-row">
+              <span class="version-key">Application</span>
+              <span class="version-val">CocaCoy ERP</span>
+            </div>
+            <div class="version-row">
+              <span class="version-key">Version</span>
+              <span class="version-val">1.0.0</span>
+            </div>
+            <div class="version-row">
+              <span class="version-key">Platform</span>
+              <span class="version-val">Web App (Firebase)</span>
+            </div>
+            <div class="version-row">
+              <span class="version-key">Created by</span>
+              <span class="version-val">CocaCoy Team</span>
+            </div>
+            <div class="version-row">
+              <span class="version-key">Last updated</span>
+              <span class="version-val" id="lastUpdateDate">Apr 2026</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Changelog -->
+        <div class="help-info-card">
+          <div class="help-info-header"><i class="fas fa-code-branch"></i> Changelog</div>
+          <div class="help-info-body">
+            <div class="changelog-item">
+              <div class="changelog-ver">v1.0.0</div>
+              <div class="changelog-info">
+                <div class="changelog-title">🚀 Initial Release</div>
+                <div class="changelog-desc">Dashboard, product management, transaction history, low stock alerts, dark/light mode, Firebase Firestore integration.</div>
+                <div class="changelog-date">April 2026</div>
+              </div>
+            </div>
+            <div class="changelog-item">
+              <div class="changelog-ver" style="background:rgba(91,156,246,.12);color:var(--blue);">Soon</div>
+              <div class="changelog-info">
+                <div class="changelog-title">📤 Data Export</div>
+                <div class="changelog-desc">Export products & history to CSV/Excel/PDF formats.</div>
+                <div class="changelog-date">Coming soon</div>
+              </div>
+            </div>
+            <div class="changelog-item">
+              <div class="changelog-ver" style="background:rgba(34,201,151,.12);color:var(--green);">Soon</div>
+              <div class="changelog-info">
+                <div class="changelog-title">👥 Multi-User</div>
+                <div class="changelog-desc">Team management with Admin, Staff, and Viewer roles.</div>
+                <div class="changelog-date">Coming soon</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end .help-sidebar -->
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module" src="../js/guard.js"></script>
+<script type="module" src="../js/firebase.js"></script>
+<script type="module" src="../js/notifications.js"></script>
+<script>
+/* ── FAQ accordion ── */
+function toggleFaq(questionEl) {
+  const item = questionEl.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ── Search ── */
+function searchHelp(q) {
+  const query = q.trim().toLowerCase();
+  const clearBtn = document.getElementById('clearSearch');
+  clearBtn.style.display = query ? 'block' : 'none';
+
+  const allItems = document.querySelectorAll('.faq-item');
+  let visibleCount = 0;
+
+  allItems.forEach(item => {
+    const text = (item.dataset.search || '') + ' ' + (item.querySelector('.faq-q-text')?.textContent || '') + ' ' + (item.querySelector('.faq-answer-inner')?.textContent || '');
+    const match = !query || text.toLowerCase().includes(query);
+    item.style.display = match ? '' : 'none';
+    if (match) visibleCount++;
+  });
+
+  document.querySelectorAll('.faq-section').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.faq-item')].some(i => i.style.display !== 'none');
+    sec.style.display = visible ? '' : 'none';
+  });
+
+  document.getElementById('noResult').style.display = visibleCount === 0 ? 'block' : 'none';
+  document.getElementById('quickLinks').style.display = query ? 'none' : 'grid';
+
+  if (visibleCount === 1) {
+    const single = [...allItems].find(i => i.style.display !== 'none');
+    if (single) single.classList.add('open');
+  }
+}
+
+function clearHelpSearch() {
+  document.getElementById('helpSearchInput').value = '';
+  searchHelp('');
+}
+
+/* ── Scroll to section ── */
+function scrollToFaq(sectionId) {
+  const el = document.getElementById('section-' + sectionId);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── Mobile ── */
+function checkMobile() {
+  document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
+}
+checkMobile();
+window.addEventListener('resize', checkMobile);
+
+/* ── Toast ── */
+window.showToast = function(msg, type='info') {
+  const ic = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warning:'fa-triangle-exclamation'};
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<i class="fas ${ic[type]||ic.info}"></i> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+};
+
+/* ── Theme toggle ── */
+(function() {
+  const btn  = document.getElementById('themeToggleBtn');
+  const icon = document.getElementById('themeIcon');
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme','light');
+      icon.className = 'fas fa-sun';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      icon.className = 'fas fa-moon';
+    }
+    localStorage.setItem('cocacoy_theme', theme);
+  }
+  applyTheme(localStorage.getItem('cocacoy_theme') || 'dark');
+  btn.addEventListener('click', () => {
+    const current = localStorage.getItem('cocacoy_theme') || 'dark';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+})();
+
+/* ── Sidebar user ── */
+(function(){
+  try {
+    const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+    if (p.ownerName) {
+      document.getElementById('sidebarName').textContent = p.ownerName;
+      document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+    }
+  } catch(e) {}
+})();
+
+/* ── Logout ── */
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try {
+    const { signOut } = await import('../js/firebase.js');
+    await signOut();
+  } catch(e) {}
+  window.location.href = 'login.html';
+});
+</script>
+</body>
+</html>
