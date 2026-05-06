@@ -1,34 +1,39 @@
-import { db } from './firebase.js';
-import { collection, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { userCol } from './firebase.js';
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================================================================
-   NOTIFICATIONS — Low Stock Watcher
-   Shared module loaded by all pages.
-   Reads `products` from Firestore, compares each product's stock
-   against its `lowStockThreshold` (default: 10).
-   Updates:
-     • Bell badge count (#notifBadge)
-     • Notification panel body (#notifPanelBody)
+   NOTIFICATIONS — Low Stock Watcher, scoped per authenticated user.
+   Waits for 'userReady' event dispatched by guard.js.
 ================================================================ */
 
 let _lowItems = [];
 
-onSnapshot(collection(db, 'products'), snap => {
-  _lowItems = [];
-  snap.forEach(d => {
-    const data = d.data();
-    if (!data.Name) return;
-    const stock     = parseInt(data.Stock)              || 0;
-    const threshold = parseInt(data.lowStockThreshold)  || 10;
-    if (stock <= threshold) {
-      _lowItems.push({ id: d.id, name: data.Name, stock, threshold, category: data.Category || 'Others', unit: data.Unit || 'pcs' });
-    }
+/* ── Start listener only after auth is ready ── */
+document.addEventListener('userReady', ({ detail: { uid } }) => {
+  // ✅ Listen to users/{uid}/products
+  onSnapshot(userCol(uid, 'products'), snap => {
+    _lowItems = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (!data.Name) return;
+      const stock     = parseInt(data.Stock)             || 0;
+      const threshold = parseInt(data.lowStockThreshold) || 10;
+      if (stock <= threshold) {
+        _lowItems.push({
+          id: d.id,
+          name: data.Name,
+          stock,
+          threshold,
+          category: data.Category || 'Others',
+          unit: data.Unit || 'pcs'
+        });
+      }
+    });
+    // Sort: most critical (lowest stock) first
+    _lowItems.sort((a, b) => a.stock - b.stock);
+    renderBadge();
+    renderPanel();
   });
-  // Sort: most critical (lowest stock) first
-  _lowItems.sort((a, b) => a.stock - b.stock);
-  renderBadge();
-  renderPanel();
 });
 
 /* ── Badge count ── */
@@ -58,10 +63,9 @@ function renderPanel() {
   }
 
   body.innerHTML = _lowItems.map(item => {
-    const isCritical = item.stock <= Math.ceil(item.threshold * 0.3); // ≤30% of threshold = critical
-    const cls    = isCritical ? 'critical' : 'warning';
-    const emoji  = isCritical ? '🚨' : '⚠️';
-    const pct    = item.threshold > 0 ? Math.round((item.stock / item.threshold) * 100) : 0;
+    const isCritical = item.stock <= Math.ceil(item.threshold * 0.3);
+    const cls   = isCritical ? 'critical' : 'warning';
+    const emoji = isCritical ? '🚨' : '⚠️';
     return `
       <div class="notif-item">
         <div class="notif-item-icon ${cls}">${emoji}</div>

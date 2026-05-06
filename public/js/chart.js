@@ -1,29 +1,33 @@
-import { db } from './firebase.js';
-import { collection, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { userCol } from './firebase.js';
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================================================================
-   CHARTS — all data from Firebase realtime
+   CHARTS — all data from Firebase, scoped per authenticated user.
+   Waits for 'userReady' event dispatched by guard.js.
 ================================================================ */
 
 const PALETTE = ['#c8956c','#a0714f','#7a9aaa','#22c997','#f5a623','#5b9cf6','#f75f5f','#e8c9b0'];
 
 let _stockChart = null, _catChart = null, _histChart = null;
-
 let products = [];
 let history  = [];
 
-/* ── Realtime listeners ── */
-onSnapshot(collection(db, 'products'), snap => {
-  products = [];
-  snap.forEach(d => { if (d.data().Name) products.push(d.data()); });
-  renderAll();
-});
+/* ── Start listeners only after auth is ready ── */
+document.addEventListener('userReady', ({ detail: { uid } }) => {
 
-onSnapshot(collection(db, 'history'), snap => {
-  history = [];
-  snap.forEach(d => history.push(d.data()));
-  renderAll();
+  // ✅ Listen to users/{uid}/products
+  onSnapshot(userCol(uid, 'products'), snap => {
+    products = [];
+    snap.forEach(d => { if (d.data().Name) products.push(d.data()); });
+    renderAll();
+  });
+
+  // ✅ Listen to users/{uid}/history
+  onSnapshot(userCol(uid, 'history'), snap => {
+    history = [];
+    snap.forEach(d => history.push(d.data()));
+    renderAll();
+  });
 });
 
 /* ================================================================
@@ -45,7 +49,7 @@ function renderSummaryCards() {
   const totalStk = products.reduce((s,p) => s + (parseInt(p.Stock)||0), 0);
   const cats     = new Set(products.map(p => p.Category||'Others')).size;
   const low      = products.filter(p => {
-    const stock  = parseInt(p.Stock)     || 0;
+    const stock  = parseInt(p.Stock)             || 0;
     const thresh = parseInt(p.lowStockThreshold) || 10;
     return stock <= thresh;
   }).length;
@@ -89,9 +93,7 @@ function renderStockChart() {
         data,
         backgroundColor: labels.map((_,i) => PALETTE[i % PALETTE.length] + 'CC'),
         borderColor:     labels.map((_,i) => PALETTE[i % PALETTE.length]),
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false
+        borderWidth: 2, borderRadius: 8, borderSkipped: false
       }]
     },
     options: {
@@ -109,12 +111,11 @@ function renderStockChart() {
    DONUT CHART — stock distribution by category
 ================================================================ */
 function renderCategoryChart() {
-  const canvas  = document.getElementById('categoryChart');
-  const empty   = document.getElementById('emptyCategory');
-  const legendEl= document.getElementById('categoryLegend');
+  const canvas   = document.getElementById('categoryChart');
+  const empty    = document.getElementById('emptyCategory');
+  const legendEl = document.getElementById('categoryLegend');
   if (!canvas) return;
 
-  // Group total stock by category
   const catMap = {};
   products.forEach(p => {
     const cat = p.Category || 'Others';
@@ -154,7 +155,6 @@ function renderCategoryChart() {
     }
   });
 
-  // Custom legend
   if (legendEl) {
     const total = data.reduce((s,v) => s+v, 0) || 1;
     legendEl.innerHTML = labels.map((l,i) => `
@@ -175,15 +175,11 @@ function renderHistoryChart() {
   const empty  = document.getElementById('emptyHistory');
   if (!canvas) return;
 
-  // Count Added events per day
   const dayMap = {};
-
-  // Build last 14 days as keys
   for (let i = 13; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0,10); // YYYY-MM-DD
-    dayMap[key] = 0;
+    dayMap[d.toISOString().slice(0,10)] = 0;
   }
 
   history.forEach(h => {
@@ -192,20 +188,14 @@ function renderHistoryChart() {
     if (h.createdAt) {
       dateKey = h.createdAt.slice(0,10);
     } else if (h.timestamp) {
-      // parse DD/MM/YYYY
       const m = h.timestamp.match(/(\d{2})\/(\d{2})\/(\d{4})/);
       if (m) dateKey = `${m[3]}-${m[2]}-${m[1]}`;
     }
-    if (dateKey && dayMap[dateKey] !== undefined) {
-      dayMap[dateKey]++;
-    }
+    if (dateKey && dayMap[dateKey] !== undefined) dayMap[dateKey]++;
   });
 
-  const labels = Object.keys(dayMap).map(k => {
-    const [y,m,d] = k.split('-');
-    return `${d}/${m}`;
-  });
-  const data = Object.values(dayMap);
+  const labels = Object.keys(dayMap).map(k => { const [y,m,d] = k.split('-'); return `${d}/${m}`; });
+  const data   = Object.values(dayMap);
 
   if (data.every(v => v === 0)) {
     canvas.style.display = 'none';
@@ -225,13 +215,10 @@ function renderHistoryChart() {
         data,
         borderColor: '#c8956c',
         backgroundColor: 'rgba(200,149,108,.12)',
-        fill: true,
-        tension: 0.45,
+        fill: true, tension: 0.45,
         pointBackgroundColor: '#c8956c',
         pointBorderColor: '#13161f',
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7
+        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
       }]
     },
     options: {
@@ -254,8 +241,8 @@ function renderLowStockTable() {
 
   const low = products
     .filter(p => {
-      const stock  = parseInt(p.Stock)              || 0;
-      const thresh = parseInt(p.lowStockThreshold)  || 10;
+      const stock  = parseInt(p.Stock)             || 0;
+      const thresh = parseInt(p.lowStockThreshold) || 10;
       return stock <= thresh;
     })
     .sort((a,b) => (parseInt(a.Stock)||0) - (parseInt(b.Stock)||0));
