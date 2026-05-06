@@ -7,20 +7,20 @@ import {
    COLUMNS
    Core 5 always shown. Extra saved to localStorage.
 ================================================================ */
-const CORE   = ["Name", "Category", "Unit", "Price", "Stock"];
-let   extra  = [];
+const CORE = ["Name", "Category", "Unit", "Price", "Stock"];
+let extra = [];
 
 try { extra = JSON.parse(localStorage.getItem('cocacoy_extra_cols') || '[]'); }
-catch(e) { extra = []; }
+catch (e) { extra = []; }
 
-const allCols   = () => [...CORE, ...extra];
+const allCols = () => [...CORE, ...extra];
 const saveExtra = () => localStorage.setItem('cocacoy_extra_cols', JSON.stringify(extra));
 
 /* ================================================================
    DOM REFS
 ================================================================ */
-const headEl  = () => document.getElementById('productHead');
-const bodyEl  = () => document.getElementById('productTable');
+const headEl = () => document.getElementById('productHead');
+const bodyEl = () => document.getElementById('productTable');
 const chipsEl = () => document.getElementById('activeColumnsList');
 const emptyEl = () => document.getElementById('emptyProducts');
 
@@ -66,8 +66,8 @@ function addColumn() {
   showToast(`Column "${name}" added!`, 'success');
 }
 
-window.addColumn  = addColumn;
-window.removeCol  = (name) => {
+window.addColumn = addColumn;
+window.removeCol = (name) => {
   extra = extra.filter(c => c !== name);
   saveExtra();
   renderHeader();
@@ -122,17 +122,17 @@ window.openAddModal = () => {
    SAVE NEW PRODUCT
 ================================================================ */
 window.saveProduct = async () => {
-  const v    = id => (document.getElementById(id)?.value || '').trim();
-  const name  = v('core-name');
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const name = v('core-name');
   const stock = v('core-stock');
   const price = v('core-price') || '0';
-  const cat   = v('core-category');
-  const sku   = v('core-sku');
-  const unit  = v('core-unit') || 'pcs';
+  const cat = v('core-category');
+  const sku = v('core-sku');
+  const unit = v('core-unit') || 'pcs';
   const notes = v('core-notes');
   const thresh = v('core-threshold') || '10';
 
-  if (!name)  { showToast('Product name is required!',   'error'); return; }
+  if (!name) { showToast('Product name is required!', 'error'); return; }
   if (!stock) { showToast('Stock quantity is required!', 'error'); return; }
   if (isNaN(Number(stock)) || Number(stock) < 0) {
     showToast('Stock must be a non-negative number!', 'error'); return;
@@ -160,18 +160,18 @@ window.saveProduct = async () => {
 
     await addDoc(collection(db, 'history'), {
       productName: name,
-      action:      'Added',
-      details:     `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat||'-'}`,
-      timestamp:   now.toLocaleString('en-GB'),
-      createdAt:   now.toISOString(),
-      category:    cat || 'Others'
+      action: 'Added',
+      details: `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat || '-'}`,
+      timestamp: now.toLocaleString('en-GB'),
+      createdAt: now.toISOString(),
+      category: cat || 'Others'
     });
 
     showToast(`"${name}" saved successfully!`, 'success');
     window.closeAddModal();
 
     // clear form
-    ['core-name','core-stock','core-price','core-sku','core-notes','core-threshold']
+    ['core-name', 'core-stock', 'core-price', 'core-sku', 'core-notes', 'core-threshold']
       .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     const catEl = document.getElementById('core-category');
     if (catEl) catEl.value = '';
@@ -212,12 +212,12 @@ function startTable() {
       if (!data.Name) return;
       count++;
 
-      const stockNum    = parseInt(data.Stock)             || 0;
-      const priceNum    = parseInt(data.Price)             || 0;
-      const threshold   = parseInt(data.lowStockThreshold) || 10;
-      const stockCls    = stockNum <= Math.ceil(threshold * 0.3) ? 'tag-red'
-                        : stockNum <= threshold                   ? 'tag-yellow'
-                        : 'tag-green';
+      const stockNum = parseInt(data.Stock) || 0;
+      const priceNum = parseInt(data.Price) || 0;
+      const threshold = parseInt(data.lowStockThreshold) || 10;
+      const stockCls = stockNum <= Math.ceil(threshold * 0.3) ? 'tag-red'
+        : stockNum <= threshold ? 'tag-yellow'
+          : 'tag-green';
 
       const tr = document.createElement('tr');
 
@@ -232,7 +232,7 @@ function startTable() {
           const warn = stockNum <= threshold
             ? `<i class="fas fa-triangle-exclamation" style="color:var(--yellow);margin-left:5px;font-size:11px;" title="Low stock!"></i>`
             : '';
-          td.innerHTML = `<span class="tag ${stockCls}">${stockNum} ${data.Unit||''}</span>${warn}`;
+          td.innerHTML = `<span class="tag ${stockCls}">${stockNum} ${data.Unit || ''}</span>${warn}`;
         } else if (col === 'Category') {
           td.innerHTML = data.Category
             ? `<span class="tag tag-copper">${data.Category}</span>`
@@ -258,7 +258,7 @@ function startTable() {
       delBtn.className = 'btn btn-danger btn-sm';
       delBtn.innerHTML = '<i class="fas fa-trash"></i>';
       delBtn.title = 'Delete Product';
-      delBtn.onclick = () => window.confirmDelete(d.id, data.Name||'', data.Category||'Others');
+      delBtn.onclick = () => window.confirmDelete(d.id, data.Name || '', data.Category || 'Others');
 
       actionTd.appendChild(editBtn);
       actionTd.appendChild(delBtn);
@@ -283,12 +283,12 @@ window.openEditModal = (id, data) => {
     const el = document.getElementById(elId);
     if (el) el.value = val ?? '';
   };
-  set('edit-name',      data.Name);
-  set('edit-stock',     data.Stock);
-  set('edit-price',     data.Price);
-  set('edit-category',  data.Category);
-  set('edit-unit',      data.Unit);
-  set('edit-notes',     data.Notes);
+  set('edit-name', data.Name);
+  set('edit-stock', data.Stock);
+  set('edit-price', data.Price);
+  set('edit-category', data.Category);
+  set('edit-unit', data.Unit);
+  set('edit-notes', data.Notes);
   set('edit-threshold', data.lowStockThreshold ?? 10);
   document.getElementById('editModal').classList.add('open');
 };
@@ -296,17 +296,17 @@ window.openEditModal = (id, data) => {
 window.saveEdit = async () => {
   if (!_editDocId) return;
 
-  const v    = id => (document.getElementById(id)?.value || '').trim();
-  const name  = v('edit-name');
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const name = v('edit-name');
   const stock = v('edit-stock');
   const price = v('edit-price') || '0';
-  const cat   = v('edit-category');
-  const unit  = v('edit-unit') || 'pcs';
+  const cat = v('edit-category');
+  const unit = v('edit-unit') || 'pcs';
   const notes = v('edit-notes');
   const thresh = v('edit-threshold') || '10';
 
   // Validation
-  if (!name)  { showToast('Product name is required!', 'error'); return; }
+  if (!name) { showToast('Product name is required!', 'error'); return; }
   if (!stock && stock !== '0') { showToast('Stock quantity is required!', 'error'); return; }
   if (isNaN(Number(stock)) || Number(stock) < 0) {
     showToast('Stock cannot be negative!', 'error'); return;
@@ -324,28 +324,28 @@ window.saveEdit = async () => {
   try {
     const now = new Date();
     await updateDoc(doc(db, 'products', _editDocId), {
-      Name:              name,
-      Stock:             stock,
-      Price:             price,
-      Category:          cat,
-      Unit:              unit,
-      Notes:             notes,
+      Name: name,
+      Stock: stock,
+      Price: price,
+      Category: cat,
+      Unit: unit,
+      Notes: notes,
       lowStockThreshold: thresh,
-      updatedAt:         now.toISOString()
+      updatedAt: now.toISOString()
     });
 
     await addDoc(collection(db, 'history'), {
       productName: name,
-      action:      'Edited',
-      details:     `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat||'-'}`,
-      timestamp:   now.toLocaleString('en-GB'),
-      createdAt:   now.toISOString(),
-      category:    cat || 'Others'
+      action: 'Edited',
+      details: `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat || '-'}`,
+      timestamp: now.toLocaleString('en-GB'),
+      createdAt: now.toISOString(),
+      category: cat || 'Others'
     });
 
     showToast(`"${name}" updated successfully!`, 'success');
     window.closeEditModal();
-  } catch(e) {
+  } catch (e) {
     showToast('Update failed: ' + e.message, 'error');
     console.error('saveEdit error:', e);
   }
@@ -377,11 +377,11 @@ window.confirmDelete = (id, name, category) => {
       const now = new Date();
       await addDoc(collection(db, 'history'), {
         productName: name,
-        action:      'Deleted',
-        details:     'Product removed from inventory',
-        timestamp:   now.toLocaleString('en-GB'),
-        createdAt:   now.toISOString(),
-        category:    category || 'Others'
+        action: 'Deleted',
+        details: 'Product removed from inventory',
+        timestamp: now.toLocaleString('en-GB'),
+        createdAt: now.toISOString(),
+        category: category || 'Others'
       });
       showToast(`"${name}" deleted.`, 'success');
     } catch (e) {

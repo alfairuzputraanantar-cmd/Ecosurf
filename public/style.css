@@ -69,7 +69,16 @@
   --notif-panel-shadow: 0 20px 60px rgba(0,0,0,.18);
 }
 
-body { font-family: var(--font); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; overflow-x: hidden; transition: background .25s, color .25s; }
+body { 
+  font-family: var(--font); 
+  background: var(--bg); 
+  color: var(--text); 
+  margin: 0;
+  min-height: 100vh; 
+  overflow-x: hidden; 
+  transition: background .25s, color .25s; 
+}
+
 a    { text-decoration: none; color: inherit; }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -171,7 +180,14 @@ a    { text-decoration: none; color: inherit; }
 /* ================================================================
    MAIN WRAP
 ================================================================ */
-.main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.main-wrap { 
+  margin-left: var(--sidebar-w); 
+  max-width: calc(100vw - var(--sidebar-w));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
 
 .topbar {
   background: var(--surface); border-bottom: 1px solid var(--border);
@@ -207,7 +223,7 @@ a    { text-decoration: none; color: inherit; }
 }
 .theme-toggle-btn:hover { color: var(--brand-1); background: var(--border); }
 
-.content { padding: 26px 28px; flex: 1; }
+.content { padding: 26px 28px; flex: 1; min-width: 0; overflow-x: hidden; box-sizing: border-box; }
 
 /* ================================================================
    STATS GRID
@@ -331,8 +347,8 @@ select.form-control option { background: var(--surface); color: var(--text); }
 .col-toggle-item { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
 .col-toggle-item label { display: flex; align-items: center; gap: 9px; font-size: 14px; cursor: pointer; }
 
-.switch { position: relative; width: 36px; height: 20px; }
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; vertical-align: middle; }
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .slider { position: absolute; inset: 0; background: var(--border); border-radius: 20px; transition: .3s; cursor: pointer; }
 .slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .3s; }
 .switch input:checked + .slider { background: var(--brand-1); }

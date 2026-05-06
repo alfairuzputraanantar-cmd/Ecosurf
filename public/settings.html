@@ -17,6 +17,9 @@
       grid-template-columns: 220px 1fr;
       gap: 24px;
       align-items: start;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .settings-nav {
@@ -47,7 +50,8 @@
     }
     .settings-nav-item.active i { color: var(--brand-1); }
 
-    .settings-panel { display: none; flex-direction: column; gap: 20px; }
+    .settings-right { min-width: 0; }
+    .settings-panel { display: none; flex-direction: column; gap: 20px; min-width: 0; }
     .settings-panel.active { display: flex; }
 
     .settings-section {
@@ -55,6 +59,8 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      min-width: 0;
+      width: 100%;
     }
 
     .settings-section-header {
@@ -76,21 +82,25 @@
 
     .settings-section-title { font-family: var(--font-hd); font-size: 15px; font-weight: 700; }
     .settings-section-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .settings-section-body  { padding: 22px; }
+    .settings-section-body  { 
+      padding: 20px 22px; 
+      box-sizing: border-box; 
+    }
 
     .setting-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 14px 0;
       border-bottom: 1px solid var(--border);
       gap: 16px;
+      min-width: 0;
     }
     .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
     .setting-row:first-child { padding-top: 0; }
 
-    .setting-info { flex: 1; }
+    .setting-info { flex: 1; min-width: 0; overflow: hidden; }
     .setting-label { font-size: 14px; font-weight: 600; }
     .setting-desc  { font-size: 12px; color: var(--muted); margin-top: 3px; }
-    .setting-control { flex-shrink: 0; }
+    .setting-control { flex-shrink: 0; padding-right: 2px; }
 
     .avatar-upload-wrap {
       display: flex; align-items: center; gap: 18px; margin-bottom: 22px;
@@ -155,9 +165,13 @@
     }
     .saved-badge.show { opacity: 1; }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
+      .settings-layout { grid-template-columns: 200px 1fr; gap: 16px; }
+      .settings-nav-item { padding: 12px 14px; font-size: 12px; }
+    }
+    @media (max-width: 850px) {
       .settings-layout { grid-template-columns: 1fr; }
-      .settings-nav { position: static; display: flex; flex-wrap: wrap; }
+      .settings-nav { position: static; display: flex; flex-wrap: wrap; margin-bottom: 20px; }
       .settings-nav-item { flex: 1; min-width: 120px; border-bottom: none; border-right: 1px solid var(--border); justify-content: center; text-align: center; }
       .settings-nav-item.active { border-left: none; border-bottom: 3px solid var(--brand-1); }
     }
