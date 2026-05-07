@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CocaCoy – Kasir</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- FOUC prevention -->
+  <script>
+    (function(){
+      const t = localStorage.getItem('cocacoy_theme');
+      if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+    })();
+  </script>
+  <style>
+    /* ── Cashier Layout ── */
+    body { overflow-x: hidden; }
+
+    .cashier-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      padding-bottom: 90px; /* room for floating cart bar */
+    }
+
+    /* ── Top Header ── */
+    .cashier-header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cashier-header-back {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-size: 15px; text-decoration: none;
+      transition: background .2s;
+      flex-shrink: 0;
+    }
+    .cashier-header-back:hover { background: var(--border); }
+    .cashier-header-title {
+      flex: 1;
+      font-family: var(--font-hd); font-size: 17px; font-weight: 800;
+      background: var(--brand-grd);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .cashier-header-right { display: flex; align-items: center; gap: 8px; }
+
+    /* ── Today Summary Bar ── */
+    .today-bar {
+      background: linear-gradient(135deg, rgba(200,149,108,.12), rgba(160,113,79,.08));
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      display: flex; gap: 0;
+    }
+    .today-stat {
+      flex: 1; text-align: center;
+      border-right: 1px solid var(--border);
+      padding: 2px 0;
+    }
+    .today-stat:last-child { border-right: none; }
+    .today-stat-val {
+      font-family: var(--font-hd); font-size: 15px; font-weight: 800;
+      color: var(--brand-1);
+    }
+    .today-stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Search ── */
+    .cashier-search-wrap { padding: 14px 18px 10px; }
+    .cashier-search {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 11px 16px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .cashier-search:focus-within {
+      border-color: var(--brand-1);
+      box-shadow: 0 0 0 3px rgba(200,149,108,.12);
+    }
+    .cashier-search i { color: var(--muted); font-size: 15px; flex-shrink: 0; }
+    .cashier-search input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 15px; font-family: var(--font);
+    }
+    .cashier-search input::placeholder { color: var(--muted); }
+
+    /* ── Filter Tabs ── */
+    .cashier-filter {
+      padding: 0 18px 12px;
+      display: flex; gap: 8px; overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cashier-filter::-webkit-scrollbar { display: none; }
+    .cashier-filter-btn {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted);
+      cursor: pointer; transition: all .2s;
+      white-space: nowrap;
+    }
+    .cashier-filter-btn.active {
+      background: var(--brand-grd); color: #fff; border-color: transparent;
+    }
+
+    /* ── Product Grid ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 18px 14px;
+    }
+    @media (min-width: 600px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 900px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: all .2s; cursor: pointer;
+      position: relative; overflow: hidden;
+    }
+    .product-card:hover:not(.out-of-stock) {
+      border-color: var(--brand-1);
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      transform: translateY(-2px);
+    }
+    .product-card.out-of-stock { opacity: .5; cursor: not-allowed; }
+    .product-card.in-cart {
+      border-color: var(--brand-1);
+      background: linear-gradient(135deg, rgba(200,149,108,.08), var(--surface));
+    }
+
+    .product-card-emoji {
+      font-size: 28px; text-align: center; margin-bottom: 4px;
+    }
+    .product-card-name {
+      font-size: 13px; font-weight: 700;
+      color: var(--text); line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .product-card-price {
+      font-size: 13px; font-weight: 800;
+      color: var(--brand-1); font-family: var(--font-hd);
+    }
+    .product-card-stock {
+      font-size: 11px; color: var(--muted);
+    }
+    .product-card-stock span { font-weight: 700; }
+
+    .product-card-add {
+      margin-top: 6px;
+      width: 100%; padding: 9px 0;
+      border-radius: 10px;
+      background: var(--brand-grd); color: #fff;
+      border: none; font-size: 18px; font-weight: 700;
+      cursor: pointer; transition: opacity .2s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .product-card-add:hover:not(:disabled) { opacity: .88; }
+    .product-card-add:active:not(:disabled) { transform: scale(.96); }
+    .product-card-add:disabled {
+      background: var(--surface2); color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    /* Cart badge on card */
+    .cart-badge {
+      position: absolute; top: 8px; right: 8px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--brand-grd); color: #fff;
+      font-size: 11px; font-weight: 800;
+      display: none; align-items: center; justify-content: center;
+    }
+    .product-card.in-cart .cart-badge { display: flex; }
+
+    /* ── Empty State ── */
+    .cashier-empty {
+      text-align: center; padding: 48px 20px;
+      color: var(--muted);
+    }
+    .cashier-empty i { font-size: 40px; opacity: .25; display: block; margin-bottom: 14px; }
+    .cashier-empty p { font-size: 14px; }
+
+    /* ── Floating Cart Bar ── */
+    .cart-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      padding: 12px 18px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -8px 32px rgba(0,0,0,.2);
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .cart-bar.visible { transform: translateY(0); }
+
+    .cart-bar-inner {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cart-bar-info {
+      flex: 1;
+    }
+    .cart-bar-count { font-size: 12px; color: var(--muted); }
+    .cart-bar-total {
+      font-family: var(--font-hd); font-size: 18px; font-weight: 800;
+      color: var(--text);
+    }
+    .cart-bar-btn {
+      padding: 12px 22px;
+      background: var(--brand-grd); color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: opacity .2s;
+      white-space: nowrap;
+    }
+    .cart-bar-btn:hover { opacity: .88; }
+
+    /* ── Cart Sheet (overlay) ── */
+    .cart-sheet-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,.5);
+      display: none;
+    }
+    .cart-sheet-overlay.open { display: block; }
+
+    .cart-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 400;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      max-height: 80vh;
+      display: flex; flex-direction: column;
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .cart-sheet.open { transform: translateY(0); }
+
+    .cart-sheet-handle {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: var(--border); margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+    .cart-sheet-header {
+      padding: 14px 20px 12px;
+      font-family: var(--font-hd); font-size: 16px; font-weight: 800;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .cart-sheet-close {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; width: 32px; height: 32px;
+      display: grid; place-items: center; cursor: pointer;
+      color: var(--muted); font-size: 13px; transition: color .2s;
+    }
+    .cart-sheet-close:hover { color: var(--text); }
+
+    .cart-sheet-body { flex: 1; overflow-y: auto; padding: 12px 20px; }
+
+    .cart-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-name { font-size: 14px; font-weight: 700; }
+    .cart-item-price { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .cart-item-subtotal {
+      font-size: 13px; font-weight: 800;
+      color: var(--brand-1); flex-shrink: 0;
+    }
+    .cart-qty-ctrl {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2); border-radius: 10px;
+      padding: 4px 6px;
+    }
+    .cart-qty-btn {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); font-size: 14px; font-weight: 700;
+      cursor: pointer; display: grid; place-items: center;
+      transition: background .2s;
+    }
+    .cart-qty-btn:hover { background: var(--border); }
+    .cart-qty-btn.remove { color: var(--red); border-color: rgba(247,95,95,.3); }
+    .cart-qty-num { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
+
+    .cart-sheet-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cart-total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .cart-total-label { font-size: 14px; color: var(--muted); }
+    .cart-total-val {
+      font-family: var(--font-hd); font-size: 22px; font-weight: 800;
+      color: var(--text);
+    }
+    .cart-checkout-btn {
+      width: 100%; padding: 15px;
+      background: var(--brand-grd); color: #fff;
+      border: none; border-radius: 14px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: opacity .2s, transform .1s;
+    }
+    .cart-checkout-btn:hover { opacity: .9; }
+    .cart-checkout-btn:active { transform: scale(.98); }
+    .cart-checkout-btn:disabled {
+      background: var(--surface2); color: var(--muted); cursor: not-allowed;
+    }
+
+    /* ── Toast container (reuse existing) ── */
+    #toast-container { z-index: 1000; }
+
+    /* ── Success Anim Overlay ── */
+    .success-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,.7);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+    }
+    .success-overlay.show { display: flex; }
+    .success-overlay i {
+      font-size: 72px;
+      color: var(--green);
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .success-overlay p {
+      color: #fff; font-size: 18px; font-weight: 700;
+      font-family: var(--font-hd);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cashier-wrap">
+
+  <!-- ── HEADER ── -->
+  <div class="cashier-header">
+    <a class="cashier-header-back" href="/" title="Back to Dashboard">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="cashier-header-title">
+      <i class="fas fa-cash-register" style="font-size:14px;opacity:.7;"></i> Kasir
+    </div>
+    <div class="cashier-header-right">
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TODAY SUMMARY ── -->
+  <div class="today-bar">
+    <div class="today-stat">
+      <div class="today-stat-val" id="todayRevenue">Rp 0</div>
+      <div class="today-stat-lbl">Penjualan Hari Ini</div>
+    </div>
+    <div class="today-stat">
+      <div class="today-stat-val" id="todayTxCount">0</div>
+      <div class="today-stat-lbl">Transaksi</div>
+    </div>
+    <div class="today-stat">
+      <div class="today-stat-val" id="todayItemCount">0</div>
+      <div class="today-stat-lbl">Item Terjual</div>
+    </div>
+  </div>
+
+  <!-- ── SEARCH ── -->
+  <div class="cashier-search-wrap">
+    <div class="cashier-search">
+      <i class="fas fa-magnifying-glass"></i>
+      <input type="text" id="cashierSearch" placeholder="Cari produk..." oninput="filterProducts(this.value)"/>
+    </div>
+  </div>
+
+  <!-- ── CATEGORY FILTER ── -->
+  <div class="cashier-filter" id="categoryFilter">
+    <button class="cashier-filter-btn active" data-cat="all" onclick="setCategory('all', this)">Semua</button>
+  </div>
+
+  <!-- ── PRODUCT GRID ── -->
+  <div class="product-grid" id="productGrid">
+    <div class="cashier-empty" style="grid-column:1/-1;">
+      <i class="fas fa-box-open"></i>
+      <p>Memuat produk...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── FLOATING CART BAR ── -->
+<div class="cart-bar" id="cartBar">
+  <div class="cart-bar-inner">
+    <div class="cart-bar-info">
+      <div class="cart-bar-count" id="cartBarCount">0 item</div>
+      <div class="cart-bar-total" id="cartBarTotal">Rp 0</div>
+    </div>
+    <button class="cart-bar-btn" onclick="openCartSheet()">
+      <i class="fas fa-shopping-cart"></i> Lihat Keranjang
+    </button>
+  </div>
+</div>
+
+<!-- ── CART SHEET OVERLAY ── -->
+<div class="cart-sheet-overlay" id="cartOverlay" onclick="closeCartSheet()"></div>
+<div class="cart-sheet" id="cartSheet">
+  <div class="cart-sheet-handle"></div>
+  <div class="cart-sheet-header">
+    <span><i class="fas fa-shopping-cart" style="color:var(--brand-1);margin-right:8px;"></i>Keranjang</span>
+    <button class="cart-sheet-close" onclick="closeCartSheet()"><i class="fas fa-xmark"></i></button>
+  </div>
+  <div class="cart-sheet-body" id="cartBody">
+    <!-- items rendered dynamically -->
+  </div>
+  <div class="cart-sheet-footer">
+    <div class="cart-total-row">
+      <div class="cart-total-label">Total Pembayaran</div>
+      <div class="cart-total-val" id="cartTotalVal">Rp 0</div>
+    </div>
+    <button class="cart-checkout-btn" id="checkoutBtn" onclick="processCheckout()">
+      <i class="fas fa-check-circle"></i> Proses Transaksi
+    </button>
+  </div>
+</div>
+
+<!-- ── SUCCESS OVERLAY ── -->
+<div class="success-overlay" id="successOverlay">
+  <i class="fas fa-circle-check"></i>
+  <p id="successMsg">Transaksi Berhasil!</p>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module" src="./js/guard.js"></script>
+<script type="module" src="./js/cashier.js"></script>
+<script>
+  /* ── Theme toggle ── */
+  (function() {
+    const btn  = document.getElementById('themeToggleBtn');
+    const icon = document.getElementById('themeIcon');
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme','light');
+        icon.className = 'fas fa-sun';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        icon.className = 'fas fa-moon';
+      }
+      localStorage.setItem('cocacoy_theme', theme);
+    }
+    applyTheme(localStorage.getItem('cocacoy_theme') || 'dark');
+    btn.addEventListener('click', () => {
+      applyTheme((localStorage.getItem('cocacoy_theme') || 'dark') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+
+  /* ── Toast ── */
+  window.showToast = function(msg, type='info') {
+    const ic = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warning:'fa-triangle-exclamation'};
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.innerHTML = `<i class="fas ${ic[type]||ic.info}"></i> ${msg}`;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  };
+</script>
+
+</body>
+</html>

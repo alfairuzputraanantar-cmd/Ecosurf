@@ -24,7 +24,20 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
     snap.forEach(d => history.push(d.data()));
     renderDashboard();
   });
+
+  /* ── Listen transactions → today's sales ── */
+  onSnapshot(userCol(uid, 'transactions'), snap => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    let revenue = 0;
+    snap.forEach(d => {
+      const data = d.data();
+      if ((data.createdAt || '').startsWith(todayStr)) revenue += data.total || 0;
+    });
+    const el = document.getElementById('todaySales');
+    if (el) el.textContent = 'Rp ' + revenue.toLocaleString('id-ID');
+  });
 });
+
 
 /* ================================================================
    MAIN RENDER

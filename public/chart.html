@@ -47,6 +47,7 @@
     <a class="nav-link" href="product"><i class="fas fa-boxes-stacked"></i> Products</a>
     <a class="nav-link" href="history"><i class="fas fa-clock-rotate-left"></i> History</a>
     <a class="nav-link active" href="chart"><i class="fas fa-chart-line"></i> Charts</a>
+    <a class="nav-link" href="cashier" style="background:linear-gradient(135deg,rgba(200,149,108,.15),rgba(160,113,79,.1));border:1px solid rgba(200,149,108,.25);"><i class="fas fa-cash-register" style="color:var(--brand-1);"></i> <span style="color:var(--brand-1);font-weight:700;">Kasir</span></a>
   </div>
   <div class="sidebar-section" style="margin-top:6px;">
     <div class="sidebar-label">Other</div>
@@ -128,6 +129,10 @@
         <div class="stat-icon si-red"><i class="fas fa-triangle-exclamation"></i></div>
         <div><div class="stat-val" id="cLowStock">–</div><div class="stat-label">Low Stock</div></div>
       </div>
+      <div class="stat-card" style="border-color:rgba(200,149,108,.3);">
+        <div class="stat-icon si-green"><i class="fas fa-cash-register"></i></div>
+        <div><div class="stat-val" id="cTodaySales">Rp 0</div><div class="stat-label">Sales Today</div></div>
+      </div>
     </div>
 
     <!-- CHARTS ROW 1 -->
@@ -158,16 +163,28 @@
       </div>
     </div>
 
-    <!-- CHARTS ROW 2: Line chart -->
+    <!-- CHARTS ROW 2: Line charts -->
     <div class="chart-grid">
-      <div class="chart-card full">
+      <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title"><i class="fas fa-chart-line"></i> Products Added – Last 14 Days</div>
+          <div class="chart-card-title"><i class="fas fa-clock-rotate-left"></i> Products Added – Last 14 Days</div>
         </div>
         <div class="chart-card-body">
           <canvas id="historyChart"></canvas>
           <div class="chart-empty" id="emptyHistory" style="display:none;">
             <i class="fas fa-clock"></i><span>No activity in the last 14 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title"><i class="fas fa-money-bill-trend-up"></i> Daily Revenue – Last 7 Days</div>
+        </div>
+        <div class="chart-card-body">
+          <canvas id="salesChart"></canvas>
+          <div class="chart-empty" id="emptySales" style="display:none;">
+            <i class="fas fa-receipt"></i><span>No sales data yet</span>
           </div>
         </div>
       </div>

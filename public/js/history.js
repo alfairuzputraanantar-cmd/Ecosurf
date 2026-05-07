@@ -60,13 +60,16 @@ function renderHistory() {
   listEl.innerHTML = shown.map(r => {
     const isDeleted = r.action === 'Deleted';
     const isEdited  = r.action === 'Edited';
-    const emoji   = isDeleted ? '🗑️' : isEdited ? '✏️' : (CAT_EMOJI[r.category] || '📦');
-    const tagCls  = isDeleted ? 'tag-red' : isEdited ? 'tag-blue' : 'tag-green';
+    const isSold    = r.action === 'Sold';
+    const emoji   = isDeleted ? '🗑️' : isEdited ? '✏️' : isSold ? '🛒' : (CAT_EMOJI[r.category] || '📦');
+    const tagCls  = isDeleted ? 'tag-red' : isEdited ? 'tag-blue' : isSold ? 'tag-green' : 'tag-green';
     const iconBg  = isDeleted
       ? 'background:rgba(247,95,95,.13)'
       : isEdited
         ? 'background:rgba(91,156,246,.13)'
-        : 'background:rgba(34,201,151,.13)';
+        : isSold
+          ? 'background:rgba(34,201,151,.13)'
+          : 'background:rgba(34,201,151,.13)';
 
     return `
       <div class="history-item" data-search="${(r.productName||'').toLowerCase()}">

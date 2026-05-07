@@ -8,9 +8,10 @@ import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-f
 
 const PALETTE = ['#c8956c','#a0714f','#7a9aaa','#22c997','#f5a623','#5b9cf6','#f75f5f','#e8c9b0'];
 
-let _stockChart = null, _catChart = null, _histChart = null;
+let _stockChart = null, _catChart = null, _histChart = null, _salesChart = null;
 let products = [];
 let history  = [];
+let transactions = [];
 
 /* ── Start listeners only after auth is ready ── */
 document.addEventListener('userReady', ({ detail: { uid } }) => {
@@ -28,7 +29,15 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
     snap.forEach(d => history.push(d.data()));
     renderAll();
   });
+
+  // ✅ Listen to users/{uid}/transactions
+  onSnapshot(userCol(uid, 'transactions'), snap => {
+    transactions = [];
+    snap.forEach(d => transactions.push(d.data()));
+    renderAll();
+  });
 });
+
 
 /* ================================================================
    RENDER ALL
@@ -38,6 +47,7 @@ function renderAll() {
   renderStockChart();
   renderCategoryChart();
   renderHistoryChart();
+  renderSalesChart();
   renderLowStockTable();
 }
 
@@ -54,10 +64,17 @@ function renderSummaryCards() {
     return stock <= thresh;
   }).length;
 
+  // Today's Sales
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayRevenue = transactions
+    .filter(t => (t.createdAt || '').startsWith(todayStr))
+    .reduce((s, t) => s + (t.total || 0), 0);
+
   setText('cTotalProducts', total);
   setText('cTotalStock',    totalStk.toLocaleString('id-ID'));
   setText('cCategories',    cats);
   setText('cLowStock',      low);
+  setText('cTodaySales',    'Rp ' + todayRevenue.toLocaleString('id-ID'));
 }
 
 /* ================================================================
@@ -270,6 +287,72 @@ function renderLowStockTable() {
         <td style="color:var(--brand-1);font-weight:700;">Rp ${price.toLocaleString('id-ID')}</td>
       </tr>`;
   }).join('');
+}
+
+/* ================================================================
+   SALES CHART — daily revenue (last 7 days)
+================================================================ */
+function renderSalesChart() {
+  const canvas = document.getElementById('salesChart');
+  const empty  = document.getElementById('emptySales');
+  if (!canvas) return;
+
+  const dayMap = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dayMap[d.toISOString().slice(0,10)] = 0;
+  }
+
+  transactions.forEach(t => {
+    const dateKey = (t.createdAt || '').slice(0,10);
+    if (dateKey && dayMap[dateKey] !== undefined) {
+      dayMap[dateKey] += (t.total || 0);
+    }
+  });
+
+  const labels = Object.keys(dayMap).map(k => { const [y,m,d] = k.split('-'); return `${d}/${m}`; });
+  const data   = Object.values(dayMap);
+
+  if (data.every(v => v === 0)) {
+    canvas.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  canvas.style.display = '';
+  if (empty) empty.style.display = 'none';
+
+  if (_salesChart) _salesChart.destroy();
+  _salesChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Revenue',
+        data,
+        borderColor: '#22c997',
+        backgroundColor: 'rgba(34,201,151,.12)',
+        fill: true, tension: 0.4,
+        pointBackgroundColor: '#22c997',
+        pointBorderColor: '#13161f',
+        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { 
+          grid: { color: 'rgba(255,255,255,0.05)' }, 
+          beginAtZero: true,
+          ticks: {
+            callback: (val) => 'Rp ' + val.toLocaleString('id-ID')
+          }
+        }
+      }
+    }
+  });
 }
 
 /* ================================================================
