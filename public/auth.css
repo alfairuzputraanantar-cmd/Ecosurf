@@ -129,6 +129,21 @@ body.auth-page {
   opacity: .92; transform: translateY(-1px); box-shadow: 0 8px 26px rgba(200,149,108,.38);
 }
 
+#demoBtn {
+  width: 100%; padding: 13px; margin-top: 4px;
+  border-radius: 12px; border: 1.5px solid rgba(245,166,35,.25);
+  background: rgba(245,166,35,.08);
+  color: #f5a623; font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .2s;
+}
+#demoBtn:hover {
+  background: rgba(245,166,35,.15);
+  border-color: rgba(245,166,35,.4);
+  transform: translateY(-1px);
+  color: #ffb84d;
+}
+
 hr, .divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
 
 .link { text-align: center; font-size: 13.5px; color: var(--muted); }
