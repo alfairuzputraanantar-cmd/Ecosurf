@@ -35,10 +35,23 @@ if (demoBtn) {
       await signInWithEmailAndPassword(auth, "demo@cocacoy.com", "DemoCocacoy123!");
       window.location.href = "/";
     } catch (err) {
-      showToast("Demo initialization failed: " + err.message, "error");
+      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
+        try {
+          // Jika akun belum ada, buat otomatis
+          await createUserWithEmailAndPassword(auth, "demo@cocacoy.com", "DemoCocacoy123!");
+          window.location.href = "/";
+          return;
+        } catch (createErr) {
+          showToast("Failed to create demo account: " + createErr.message, "error");
+          console.error(createErr);
+        }
+      } else {
+        showToast("Demo initialization failed: " + err.message, "error");
+        console.error(err);
+      }
+      
       demoBtn.innerHTML = '<i class="fas fa-rocket"></i> Try Demo';
       demoBtn.disabled  = false;
-      console.error(err);
     }
   };
 }
