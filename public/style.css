@@ -99,33 +99,35 @@ a    { text-decoration: none; color: inherit; }
 }
 
 .sidebar-logo {
-  height: 64px;
-  padding: 0 16px;
-  display: flex; align-items: center; gap: 11px;
+  height: 82px;
+  padding: 0 20px;
+  display: flex; align-items: center; gap: 14px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .logo-img-wrap {
-  width: 42px; height: 42px;
-  border-radius: 10px;
+  width: 54px; height: 54px;
+  border-radius: 14px;
   overflow: hidden;
   flex-shrink: 0;
   background: #fff;
   display: grid; place-items: center;
-  padding: 2px;
+  padding: 3px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
-.logo-img-wrap img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+.logo-img-wrap img { width: 100%; height: 100%; object-fit: contain; border-radius: 11px; }
 
 .logo-text-wrap .logo-name {
   font-family: var(--font-hd);
-  font-size: 17px; font-weight: 700;
+  font-size: 21px; font-weight: 800;
+  line-height: 1.1;
   background: var(--brand-grd);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.logo-text-wrap .logo-tag { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.logo-text-wrap .logo-tag { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.8px; margin-top: 2px; }
 
 .sidebar-section { padding: 16px 12px 4px; flex-shrink: 0; }
 .sidebar-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 8px 10px; }
