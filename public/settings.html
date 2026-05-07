@@ -896,13 +896,39 @@ function applyGlobalTheme(theme) {
   } catch(e) {}
 })();
 
-/* ── Logout ── */
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   try {
     const { signOut } = await import('./js/firebase.js');
     await signOut();
   } catch(e) {}
   window.location.href = 'login.html';
+});
+
+/* ── Demo Account Restrictions ── */
+document.addEventListener('userReady', () => {
+  import('./js/firebase.js').then(({ auth }) => {
+    if (auth.currentUser) {
+      document.getElementById("secEmail").value = auth.currentUser.email;
+      
+      if (auth.currentUser.email === "demo@cocacoy.com") {
+        const btnPass = document.querySelector('button[onclick="changePassword()"]');
+        if (btnPass) {
+          btnPass.disabled = true;
+          btnPass.innerHTML = '<i class="fas fa-ban"></i> Disabled in Demo';
+          btnPass.style.opacity = "0.5";
+          btnPass.style.cursor = "not-allowed";
+        }
+        
+        const btnDel = document.querySelector('button[onclick="confirmDeleteAccount()"]');
+        if (btnDel) {
+          btnDel.disabled = true;
+          btnDel.innerHTML = '<i class="fas fa-ban"></i> Disabled in Demo';
+          btnDel.style.opacity = "0.5";
+          btnDel.style.cursor = "not-allowed";
+        }
+      }
+    }
+  });
 });
 </script>
 </body>
