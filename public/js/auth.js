@@ -16,7 +16,7 @@ if (loginBtn) {
     loginBtn.disabled  = true;
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = "index.html";
+      window.location.href = "/";
     } catch (err) {
       showToast(err.code === "auth/invalid-credential" ? "Wrong email or password." : err.message, "error");
       loginBtn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Sign In';
@@ -38,7 +38,7 @@ if (registerBtn) {
     registerBtn.disabled  = true;
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      window.location.href = "index.html";
+      window.location.href = "/";
     } catch (err) {
       showToast(err.code === "auth/email-already-in-use" ? "Email already registered." : err.message, "error");
       registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';

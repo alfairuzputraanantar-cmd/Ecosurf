@@ -9,7 +9,7 @@ import { onAuthStateChanged, signOut }
 ================================================================ */
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.href = "login.html";
+    window.location.href = "login";
     return;
   }
 
@@ -31,6 +31,6 @@ const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
   logoutBtn.onclick = async () => {
     await signOut(auth);
-    window.location.href = "login.html";
+    window.location.href = "login";
   };
 }

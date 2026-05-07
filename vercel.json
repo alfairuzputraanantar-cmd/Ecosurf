@@ -1,9 +1,9 @@
 {
-  "outputDirectory": "public",
-  "routes": [
+  "cleanUrls": true,
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/(.*)",
+      "destination": "/$1"
     }
   ]
 }
