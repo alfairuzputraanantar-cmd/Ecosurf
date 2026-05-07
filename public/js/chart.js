@@ -43,7 +43,6 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
    RENDER ALL
 ================================================================ */
 function renderAll() {
-  renderSummaryCards();
   renderStockChart();
   renderCategoryChart();
   renderHistoryChart();
@@ -51,29 +50,6 @@ function renderAll() {
   renderLowStockTable();
 }
 
-/* ================================================================
-   SUMMARY CARDS
-================================================================ */
-function renderSummaryCards() {
-  const total    = products.length;
-  const cats     = new Set(products.map(p => p.Category||'Others')).size;
-  const low      = products.filter(p => {
-    const stock  = parseInt(p.Stock)             || 0;
-    const thresh = parseInt(p.lowStockThreshold) || 10;
-    return stock <= thresh;
-  }).length;
-
-  // Today's Sales
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todayRevenue = transactions
-    .filter(t => (t.createdAt || '').startsWith(todayStr))
-    .reduce((s, t) => s + (t.total || 0), 0);
-
-  setText('cTotalProducts', total);
-  setText('cCategories',    cats);
-  setText('cLowStock',      low);
-  setText('cTodaySales',    'Rp ' + todayRevenue.toLocaleString('id-ID'));
-}
 
 /* ================================================================
    BAR CHART — top 10 products by stock
