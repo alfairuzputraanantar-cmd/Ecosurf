@@ -73,7 +73,7 @@ function renderCategoryFilter() {
 
   const cats = [...new Set(_products.map(p => p.Category || 'Others'))].sort();
   el.innerHTML = `<button class="cashier-filter-btn ${_activecat === 'all' ? 'active' : ''}"
-    data-cat="all" onclick="setCategory('all', this)">Semua</button>`;
+    data-cat="all" onclick="setCategory('all', this)">All</button>`;
   cats.forEach(cat => {
     const emoji = CATEGORY_EMOJI[cat] || '📦';
     el.innerHTML += `<button class="cashier-filter-btn ${_activecat === cat ? 'active' : ''}"
@@ -97,7 +97,7 @@ function renderProducts() {
   if (filtered.length === 0) {
     el.innerHTML = `<div class="cashier-empty" style="grid-column:1/-1;">
       <i class="fas fa-box-open"></i>
-      <p>Tidak ada produk${_searchq ? ' yang cocok' : ''}.</p>
+      <p>No products${_searchq ? ' found' : ''}.</p>
     </div>`;
     return;
   }
@@ -117,13 +117,13 @@ function renderProducts() {
         <div class="product-card-name">${p.Name}</div>
         <div class="product-card-price">Rp ${price.toLocaleString('id-ID')}</div>
         <div class="product-card-stock">
-          Stok: <span class="tag ${stockCls}" style="font-size:10px;padding:1px 7px;">${stock} ${p.Unit||'pcs'}</span>
+          Stock: <span class="tag ${stockCls}" style="font-size:10px;padding:1px 7px;">${stock} ${p.Unit||'pcs'}</span>
         </div>
         <button
           class="product-card-add"
           onclick="addToCart('${p.id}')"
           ${oos ? 'disabled' : ''}
-          title="${oos ? 'Stok habis' : 'Tambah ke keranjang'}">
+          title="${oos ? 'Out of stock' : 'Add to cart'}">
           ${oos ? '<i class="fas fa-ban" style="font-size:14px;"></i>' : '<i class="fas fa-plus"></i>'}
         </button>
       </div>`;
@@ -158,7 +158,7 @@ window.addToCart = (productId) => {
   const inCart = _cart[productId]?.qty || 0;
 
   if (inCart >= stock) {
-    showToast(`Stok "${prod.Name}" hanya ${stock}!`, 'warning');
+    showToast(`Stock for "${prod.Name}" is only ${stock}!`, 'warning');
     return;
   }
 
@@ -202,7 +202,7 @@ window.changeQty = (productId, delta) => {
     }
   } else if (_cart[productId].qty > maxStock) {
     _cart[productId].qty = maxStock;
-    showToast('Melebihi batas stok!', 'warning');
+    showToast('Exceeds available stock!', 'warning');
   } else {
     const badge = document.getElementById(`badge-${productId}`);
     if (badge) badge.textContent = _cart[productId].qty;
@@ -247,7 +247,7 @@ function renderCartSheet() {
   const body = document.getElementById('cartBody');
   if (!body) return;
   const items = Object.entries(_cart);
-  if (items.length === 0) { body.innerHTML = '<p style="text-align:center;color:var(--muted);padding:24px;">Keranjang kosong.</p>'; return; }
+  if (items.length === 0) { body.innerHTML = '<p style="text-align:center;color:var(--muted);padding:24px;">Cart is empty.</p>'; return; }
 
   body.innerHTML = items.map(([id, item]) => `
     <div class="cart-item">
@@ -272,7 +272,7 @@ window.processCheckout = async () => {
   if (!_uid || items.length === 0) return;
 
   const btn = document.getElementById('checkoutBtn');
-  if (btn) { btn.innerHTML = '<span class="spinner"></span> Memproses...'; btn.disabled = true; }
+  if (btn) { btn.innerHTML = '<span class="spinner"></span> Processing...'; btn.disabled = true; }
 
   try {
     const now   = new Date();
@@ -281,9 +281,9 @@ window.processCheckout = async () => {
     // Validate stock first
     for (const [id, item] of items) {
       const prod = _products.find(p => p.id === id);
-      if (!prod) throw new Error(`Produk "${item.name}" tidak ditemukan.`);
+      if (!prod) throw new Error(`Product "${item.name}" not found.`);
       const currentStock = parseInt(prod.Stock) || 0;
-      if (item.qty > currentStock) throw new Error(`Stok "${item.name}" tidak mencukupi! Sisa ${currentStock}.`);
+      if (item.qty > currentStock) throw new Error(`Insufficient stock for "${item.name}"! Available: ${currentStock}.`);
     }
 
     // 1. Decrease each product's stock
@@ -317,7 +317,7 @@ window.processCheckout = async () => {
       batch.set(histRef, {
         productName: item.name,
         action: 'Sold',
-        details: `Terjual: ${item.qty} ${item.unit} | Subtotal: Rp ${(item.qty * item.price).toLocaleString('id-ID')}`,
+        details: `Sold: ${item.qty} ${item.unit} | Subtotal: Rp ${(item.qty * item.price).toLocaleString('id-ID')}`,
         timestamp: now.toLocaleString('en-GB'),
         createdAt: now.toISOString(),
         category: item.category
@@ -335,18 +335,18 @@ window.processCheckout = async () => {
     // Success animation
     const overlay = document.getElementById('successOverlay');
     const msg     = document.getElementById('successMsg');
-    if (msg) msg.textContent = `Transaksi Berhasil! Rp ${totalRevenue.toLocaleString('id-ID')}`;
+    if (msg) msg.textContent = `Transaction Successful! Rp ${totalRevenue.toLocaleString('id-ID')}`;
     if (overlay) {
       overlay.classList.add('show');
       setTimeout(() => overlay.classList.remove('show'), 2000);
     }
 
   } catch (err) {
-    showToast(err.message || 'Transaksi gagal!', 'error');
+    showToast(err.message || 'Transaction failed!', 'error');
     console.error('checkout error:', err);
   }
 
-  if (btn) { btn.innerHTML = '<i class="fas fa-check-circle"></i> Proses Transaksi'; btn.disabled = false; }
+  if (btn) { btn.innerHTML = '<i class="fas fa-check-circle"></i> Process Transaction'; btn.disabled = false; }
 };
 
 /* ================================================================
