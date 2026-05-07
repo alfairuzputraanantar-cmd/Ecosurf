@@ -56,7 +56,6 @@ function renderAll() {
 ================================================================ */
 function renderSummaryCards() {
   const total    = products.length;
-  const totalStk = products.reduce((s,p) => s + (parseInt(p.Stock)||0), 0);
   const cats     = new Set(products.map(p => p.Category||'Others')).size;
   const low      = products.filter(p => {
     const stock  = parseInt(p.Stock)             || 0;
@@ -71,7 +70,6 @@ function renderSummaryCards() {
     .reduce((s, t) => s + (t.total || 0), 0);
 
   setText('cTotalProducts', total);
-  setText('cTotalStock',    totalStk.toLocaleString('id-ID'));
   setText('cCategories',    cats);
   setText('cLowStock',      low);
   setText('cTodaySales',    'Rp ' + todayRevenue.toLocaleString('id-ID'));
