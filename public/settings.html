@@ -888,6 +888,7 @@
     </div>
   </div>
 
+  <script type="module" src="./js/auth.js"></script>
   <script type="module" src="./js/guard.js"></script>
   <script type="module" src="./js/firebase.js"></script>
   <script type="module" src="./js/notifications.js"></script>
@@ -997,18 +998,36 @@
 
     /* ── Security ── */
     function changePassword() {
-      const curr = document.getElementById('currentPass').value;
-      const nw = document.getElementById('newPass').value;
-      const conf = document.getElementById('confirmPass').value;
-      if (!curr || !nw || !conf) { showToast('All password fields are required', 'error'); return; }
-      if (nw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
-      if (nw !== conf) { showToast('Password confirmation does not match', 'error'); return; }
-      flashSaved('passSaved');
-      showToast('Password updated successfully!', 'success');
-      document.getElementById('currentPass').value = '';
-      document.getElementById('newPass').value = '';
-      document.getElementById('confirmPass').value = '';
+        const curr = document.getElementById('currentPass').value;
+        const nw = document.getElementById('newPass').value;
+        const conf = document.getElementById('confirmPass').value;
+        if (!curr || !nw || !conf) { showToast('All password fields are required', 'error'); return; }
+        if (nw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
+        if (nw !== conf) { showToast('Password confirmation does not match', 'error'); return; }
+        const btn = document.querySelector('button[onclick="changePassword()"]');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Updating...'; }
+        (async () => {
+            try {
+                await reauthenticateUser(curr);
+                await changeUserPassword(nw);
+                flashSaved('passSaved');
+                showToast('Password updated successfully!', 'success');
+                document.getElementById('currentPass').value = '';
+                document.getElementById('newPass').value = '';
+                document.getElementById('confirmPass').value = '';
+            } catch (err) {
+                let msg = err.message;
+                if (err.code === 'auth/wrong-password') { msg = 'Current password is incorrect.'; }
+                else if (err.code === 'auth/weak-password') { msg = 'New password is too weak.'; }
+                else if (err.code === 'auth/requires-recent-login') { msg = 'Please sign out and sign in again before changing password.'; }
+                showToast(msg, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Change Password'; }
+            }
+        })();
     }
+
+
 
     /* ── Confirm Modal ── */
     function openConfirmModal(title, msg, cb) {

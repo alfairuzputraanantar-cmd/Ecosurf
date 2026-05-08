@@ -1,4 +1,5 @@
 import { auth } from "./firebase.js";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword
@@ -77,3 +78,21 @@ if (registerBtn) {
     }
   };
 }
+
+// Password update utilities
+export async function reauthenticateUser(currentPassword) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('No authenticated user');
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  return await reauthenticateWithCredential(user, credential);
+}
+
+export async function changeUserPassword(newPassword) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('No authenticated user');
+  return await updatePassword(user, newPassword);
+}
+
+// Expose to window for inline scripts
+window.reauthenticateUser = reauthenticateUser;
+window.changeUserPassword = changeUserPassword;
