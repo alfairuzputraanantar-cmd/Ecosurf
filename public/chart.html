@@ -28,10 +28,11 @@
     .chart-empty  { display:flex; flex-direction:column; align-items:center; justify-content:center;
                     height:200px; color:var(--muted); font-size:13px; gap:12px; }
     .chart-empty i { font-size:36px; opacity:.35; }
-    @media(max-width:900px){ .chart-grid{ grid-template-columns:1fr; } .chart-card.full{ grid-column:1; } }
   </style>
 </head>
 <body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active')"></div>
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
@@ -68,9 +69,15 @@
 
 <div class="main-wrap">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">Statistics &amp; Charts</div>
-      <div class="topbar-sub">Visual overview of your inventory</div>
+    <div class="topbar-left">
+      <button class="icon-btn" id="menuToggle" style="display:none;"
+        onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active')">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div>
+        <div class="topbar-title">Statistics &amp; Charts</div>
+        <div class="topbar-sub">Visual overview of your inventory</div>
+      </div>
     </div>
     <div class="topbar-right">
       <button class="btn btn-ghost btn-sm" onclick="window.loadChartData && window.loadChartData()">
@@ -102,10 +109,6 @@
         </div>
       </div>
 
-      <button class="icon-btn" id="menuToggle" style="display:none;"
-        onclick="document.getElementById('sidebar').classList.toggle('open')">
-        <i class="fas fa-bars"></i>
-      </button>
     </div>
   </div>
 
@@ -176,7 +179,7 @@
         </div>
         <a href="product" class="btn btn-ghost btn-sm">Manage</a>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-responsive">
         <table>
           <thead>
             <tr>

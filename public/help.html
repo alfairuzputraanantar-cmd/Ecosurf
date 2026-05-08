@@ -255,24 +255,12 @@
     .no-result i { font-size: 36px; opacity: .3; display: block; margin-bottom: 12px; }
     .no-result p { font-size: 14px; }
 
-    @media (max-width: 1100px) {
-      .quick-links { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 900px) {
-      .help-grid { grid-template-columns: 1fr; }
-      .help-sidebar { position: static; }
-      .help-hero { flex-direction: column; text-align: center; }
-      .help-hero::before { display: none; }
-      .quick-links { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 480px) {
-      .quick-links { grid-template-columns: 1fr 1fr; }
-      .help-hero { padding: 24px 20px; }
-      .help-hero-title { font-size: 20px; }
     }
   </style>
 </head>
 <body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active')"></div>
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
@@ -309,9 +297,15 @@
 
 <div class="main-wrap">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">Help & Guide</div>
-      <div class="topbar-sub">CocaCoy ERP help center — find answers quickly</div>
+    <div class="topbar-left">
+      <button class="icon-btn" id="menuToggle" style="display:none;"
+        onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active')">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div>
+        <div class="topbar-title">Help & Guide</div>
+        <div class="topbar-sub">CocaCoy ERP help center — find answers quickly</div>
+      </div>
     </div>
     <div class="topbar-right">
       <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
@@ -335,10 +329,6 @@
           </div>
         </div>
       </div>
-      <button class="icon-btn" id="menuToggle" style="display:none;"
-        onclick="document.getElementById('sidebar').classList.toggle('open')">
-        <i class="fas fa-bars"></i>
-      </button>
     </div>
   </div>
 

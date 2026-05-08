@@ -15,6 +15,8 @@
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active')"></div>
+
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy"/></div>
@@ -50,9 +52,15 @@
 
 <div class="main-wrap">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">Dashboard</div>
-      <div class="topbar-sub">Welcome back to CocaCoy ERP 👋</div>
+    <div class="topbar-left">
+      <button class="icon-btn" id="menuToggle" style="display:none;"
+        onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active')">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-sub">Welcome back to CocaCoy ERP 👋</div>
+      </div>
     </div>
     <div class="topbar-right">
 
@@ -81,10 +89,6 @@
         </div>
       </div>
 
-      <button class="icon-btn" id="menuToggle" style="display:none;"
-        onclick="document.getElementById('sidebar').classList.toggle('open')">
-        <i class="fas fa-bars"></i>
-      </button>
     </div>
   </div>
 

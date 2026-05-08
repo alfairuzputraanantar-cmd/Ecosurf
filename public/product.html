@@ -18,6 +18,8 @@
 
 <body>
 
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active')"></div>
+
   <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
@@ -55,9 +57,15 @@
   <!-- ===== MAIN ===== -->
   <div class="main-wrap">
     <div class="topbar">
-      <div>
-        <div class="topbar-title">Product Management</div>
-        <div class="topbar-sub">Manage your inventory and incoming stock</div>
+      <div class="topbar-left">
+        <button class="icon-btn" id="menuToggle" style="display:none;"
+          onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active')">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <div class="topbar-title">Product Management</div>
+          <div class="topbar-sub">Manage your inventory and incoming stock</div>
+        </div>
       </div>
       <div class="topbar-right">
         <button class="btn btn-ghost btn-sm" onclick="openCustomizeModal()">
@@ -95,10 +103,6 @@
           </div>
         </div>
 
-        <button class="icon-btn" id="menuToggle" style="display:none;"
-          onclick="document.getElementById('sidebar').classList.toggle('open')">
-          <i class="fas fa-bars"></i>
-        </button>
       </div>
     </div>
 
@@ -132,7 +136,7 @@
             <input type="text" id="searchInput" placeholder="Search products..." oninput="filterTable()" />
           </div>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="table-responsive">
           <table>
             <thead>
               <tr id="productHead"></tr>
