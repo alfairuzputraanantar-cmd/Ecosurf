@@ -202,6 +202,10 @@
           <input class="form-control" type="number" id="core-threshold" placeholder="10" min="0" value="10" />
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-control" id="core-notes" placeholder="Optional notes..." rows="2" style="resize:none;"></textarea>
+      </div>
 
       <!-- Custom column fields injected here -->
       <div id="dynamicInputs"></div>
@@ -367,6 +371,32 @@
     <i class="fas fa-plus"></i>
   </button>
 
+  <!-- =========================================================
+       MODAL: PRODUCT DETAIL
+  ========================================================= -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <div class="modal-title" id="detail-title">Product Details</div>
+        <button class="modal-close" onclick="closeDetailModal()">✕</button>
+      </div>
+      <div class="modal-body" id="detail-body" style="padding:20px;">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-actions" style="padding:15px 20px; background:var(--surface2); border-radius:0 0 16px 16px; justify-content: flex-end; gap:10px;">
+        <button class="btn btn-success" id="detail-restock-btn">
+          <i class="fas fa-plus-circle"></i> Restock
+        </button>
+        <button class="btn btn-warn" id="detail-edit-btn">
+          <i class="fas fa-pen-to-square"></i> Edit
+        </button>
+        <button class="btn btn-danger" id="detail-delete-btn">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
 
   <script type="module" src="./js/guard.js"></script>
@@ -382,6 +412,7 @@
     function closeCustomizeModal() { document.getElementById('customizeModal').classList.remove('open'); }
     function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('open'); }
     function closeEditModal() { if (window.closeEditModal) window.closeEditModal(); else document.getElementById('editModal').classList.remove('open'); }
+    function closeDetailModal() { document.getElementById('detailModal').classList.remove('open'); }
 
     window.closeAddModal = closeAddModal;
     window.openCustomizeModal = openCustomizeModal;

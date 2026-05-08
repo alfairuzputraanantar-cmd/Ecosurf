@@ -53,7 +53,6 @@ function renderDashboard() {
    STAT CARDS
 ================================================================ */
 function renderStats() {
-  const totalStock = products.reduce((s, p) => s + (parseInt(p.Stock) || 0), 0);
   const totalValue = products.reduce((s, p) => s + ((parseInt(p.Stock)||0) * (parseInt(p.Price)||0)), 0);
   const lowStock   = products.filter(p => {
     const stock  = parseInt(p.Stock)             || 0;
@@ -61,8 +60,6 @@ function renderStats() {
     return stock <= thresh;
   }).length;
   const totalProds = products.length;
-
-  setText('totalStock',    totalStock.toLocaleString('id-ID'));
   setText('totalValue',    'Rp ' + totalValue.toLocaleString('id-ID'));
   setText('lowStock',      lowStock);
   setText('totalProducts', totalProds);

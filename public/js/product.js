@@ -35,7 +35,7 @@ const emptyEl = () => document.getElementById('emptyProducts');
 function renderHeader() {
   const h = headEl();
   if (!h) return;
-  h.innerHTML = visibleCols().map(c => `<th>${c}</th>`).join('') + '<th>Actions</th>';
+  h.innerHTML = visibleCols().map(c => `<th>${c}</th>`).join('');
 }
 
 /* ================================================================
@@ -147,6 +147,7 @@ window.saveProduct = async () => {
   const cat   = v('core-category');
   const unit  = v('core-unit') || 'pcs';
   const thresh = v('core-threshold') || '10';
+  const notes = v('core-notes');
 
   if (!name)  { showToast('Product name is required!',   'error'); return; }
   if (!stock) { showToast('Stock quantity is required!', 'error'); return; }
@@ -162,7 +163,7 @@ window.saveProduct = async () => {
     const product = {
       Name: name, Stock: stock, Price: sellPrice,
       BuyPrice: buyPrice, SellPrice: sellPrice,
-      Category: cat, Unit: unit,
+      Category: cat, Unit: unit, Notes: notes,
       lowStockThreshold: thresh,
       createdAt: now.toISOString()
     };
@@ -235,6 +236,9 @@ function renderTableBody() {
                     : 'tag-green';
 
     const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.onclick = () => window.openDetailModal(id, data);
+
     visibleCols().forEach(col => {
       const td = document.createElement('td');
       td.setAttribute('data-label', col);
@@ -264,40 +268,93 @@ function renderTableBody() {
       }
       tr.appendChild(td);
     });
-
-    const actionTd = document.createElement('td');
-    actionTd.setAttribute('data-label', 'Actions');
-    actionTd.style.whiteSpace = 'nowrap';
-
-    const btnGroup = document.createElement('div');
-    btnGroup.style.display = 'flex';
-    btnGroup.style.gap = '8px';
-
-    const resBtn = document.createElement('button');
-    resBtn.className = 'btn btn-success btn-sm';
-    resBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
-    resBtn.title = 'Restock Product';
-    resBtn.onclick = () => window.openRestockModal(id, data);
-
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-warn btn-sm';
-    editBtn.innerHTML = '<i class="fas fa-pen-to-square"></i>';
-    editBtn.title = 'Edit Product';
-    editBtn.onclick = () => window.openEditModal(id, data);
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-danger btn-sm';
-    delBtn.innerHTML = '<i class="fas fa-trash"></i>';
-    delBtn.title = 'Delete Product';
-    delBtn.onclick = () => window.confirmDelete(id, data.Name||'', data.Category||'Others');
-
-    btnGroup.appendChild(resBtn);
-    btnGroup.appendChild(editBtn);
-    btnGroup.appendChild(delBtn);
-    actionTd.appendChild(btnGroup);
-    tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
+
+  if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+  renderHeader();
+}
+
+/* ================================================================
+   PRODUCT DETAIL MODAL
+================================================================ */
+window.openDetailModal = (id, data) => {
+  const title = document.getElementById('detail-title');
+  const body  = document.getElementById('detail-body');
+  if (!title || !body) return;
+
+  title.innerHTML = `<i class="fas fa-box"></i> ${data.Name}`;
+  
+  const buy = parseInt(data.BuyPrice) || 0;
+  const sell = parseInt(data.SellPrice || data.Price) || 0;
+  const margin = sell - buy;
+  const marginPct = sell > 0 ? Math.round((margin / sell) * 100) : 0;
+
+  body.innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div>
+        <div class="stat-label" style="font-size:11px; margin-bottom:4px;">CATEGORY</div>
+        <div style="font-weight:700;">${data.Category || 'Others'}</div>
+      </div>
+      <div>
+        <div class="stat-label" style="font-size:11px; margin-bottom:4px;">STOCK</div>
+        <div style="font-weight:700;">${data.Stock} ${data.Unit || 'pcs'}</div>
+      </div>
+      <div>
+        <div class="stat-label" style="font-size:11px; margin-bottom:4px;">BUY PRICE</div>
+        <div style="font-weight:700;">Rp ${buy.toLocaleString('id-ID')}</div>
+      </div>
+      <div>
+        <div class="stat-label" style="font-size:11px; margin-bottom:4px;">SELL PRICE</div>
+        <div style="font-weight:700; color:var(--brand-1);">Rp ${sell.toLocaleString('id-ID')}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; padding-top:20px; border-top: 1px solid var(--border);">
+      <div class="stat-label" style="font-size:11px; margin-bottom:4px;">MARGIN / PROFIT</div>
+      <div style="font-weight:700; color:var(--green);">
+        Rp ${margin.toLocaleString('id-ID')} (${marginPct}%)
+      </div>
+    </div>
+
+    <div style="margin-top:20px; padding-top:20px; border-top: 1px solid var(--border);">
+      <div class="stat-label" style="font-size:11px; margin-bottom:4px;">NOTES</div>
+      <div style="font-size:14px; color:var(--muted); font-style: italic;">
+        ${data.Notes || 'No notes available.'}
+      </div>
+    </div>
+
+    ${extra.length > 0 ? `
+      <div style="margin-top:20px; padding-top:20px; border-top: 1px solid var(--border);">
+        <div class="stat-label" style="font-size:11px; margin-bottom:10px;">CUSTOM FIELDS</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          ${extra.map(c => `
+            <div>
+              <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">${c}</div>
+              <div style="font-size:13px; font-weight:600;">${data[c] || '-'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+  `;
+
+  // Setup actions
+  document.getElementById('detail-restock-btn').onclick = () => {
+    window.closeDetailModal();
+    window.openRestockModal(id, data);
+  };
+  document.getElementById('detail-edit-btn').onclick = () => {
+    window.closeDetailModal();
+    window.openEditModal(id, data);
+  };
+  document.getElementById('detail-delete-btn').onclick = () => {
+    window.closeDetailModal();
+    window.confirmDelete(id, data.Name || '', data.Category || 'Others');
+  };
+
+  document.getElementById('detailModal').classList.add('open');
+};  });
 
   if (empty) empty.style.display = count === 0 ? 'block' : 'none';
   renderHeader();
@@ -330,6 +387,7 @@ window.openEditModal = (id, data) => {
   set('edit-category',  data.Category);
   set('edit-unit',      data.Unit);
   set('edit-threshold', data.lowStockThreshold ?? 10);
+  set('edit-notes',     data.Notes);
 
   const dyn = document.getElementById('editDynamicInputs');
   if (dyn) {
@@ -361,6 +419,7 @@ window.saveEdit = async () => {
   const cat   = v('edit-category');
   const unit  = v('edit-unit') || 'pcs';
   const thresh = v('edit-threshold') || '10';
+  const notes = v('edit-notes');
 
   if (!name)  { showToast('Product name is required!', 'error'); return; }
   if (!stock && stock !== '0') { showToast('Stock quantity is required!', 'error'); return; }
@@ -376,7 +435,7 @@ window.saveEdit = async () => {
     const updateData = {
       Name: name, Stock: stock, Price: sellPrice,
       BuyPrice: buyPrice, SellPrice: sellPrice,
-      Category: cat, Unit: unit,
+      Category: cat, Unit: unit, Notes: notes,
       lowStockThreshold: thresh,
       updatedAt: now.toISOString()
     };
