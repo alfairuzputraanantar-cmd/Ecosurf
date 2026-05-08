@@ -1,214 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CocaCoy ERP – Dashboard</title>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <!-- FOUC prevention -->
   <script>
-    (function(){
+    (function () {
       const t = localStorage.getItem('cocacoy_theme');
-      if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
     })();
   </script>
 </head>
+
 <body>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active')"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy"/></div>
-    <div class="logo-text-wrap">
-      <div class="logo-name">CocaCoy</div>
-      <div class="logo-tag">ERP System</div>
-    </div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-label">Main Menu</div>
-    <a class="nav-link active" href="/"><i class="fas fa-chart-pie"></i> Dashboard</a>
-    <a class="nav-link" href="product"><i class="fas fa-boxes-stacked"></i> Products</a>
-    <a class="nav-link" href="history"><i class="fas fa-clock-rotate-left"></i> History</a>
-    <a class="nav-link" href="chart"><i class="fas fa-chart-line"></i> Charts</a>
-    <a class="nav-link" href="cashier"><i class="fas fa-cash-register"></i> Cashier</a>
-  </div>
-  <div class="sidebar-section" style="margin-top:6px;">
-    <div class="sidebar-label">Other</div>
-    <a class="nav-link" href="settings"><i class="fas fa-gear"></i> Settings</a>
-    <a class="nav-link" href="help"><i class="fas fa-circle-question"></i> Help</a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="user-pill">
-      <div class="user-avatar" id="sidebarAvatar">U</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebarName">Owner</div>
-        <div class="user-role">UMKM Admin</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy" /></div>
+      <div class="logo-text-wrap">
+        <div class="logo-name">CocaCoy</div>
+        <div class="logo-tag">ERP System</div>
       </div>
     </div>
-    <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
-  </div>
-</aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main Menu</div>
+      <a class="nav-link active" href="/"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a class="nav-link" href="product"><i class="fas fa-boxes-stacked"></i> Products</a>
+      <a class="nav-link" href="history"><i class="fas fa-clock-rotate-left"></i> History</a>
+      <a class="nav-link" href="chart"><i class="fas fa-chart-line"></i> Charts</a>
+      <a class="nav-link" href="cashier"><i class="fas fa-cash-register"></i> Cashier</a>
+    </div>
+    <div class="sidebar-section" style="margin-top:6px;">
+      <div class="sidebar-label">Other</div>
+      <a class="nav-link" href="settings"><i class="fas fa-gear"></i> Settings</a>
+      <a class="nav-link" href="help"><i class="fas fa-circle-question"></i> Help</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sidebarAvatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Owner</div>
+          <div class="user-role">UMKM Admin</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+    </div>
+  </aside>
 
-<div class="main-wrap">
-  <div class="topbar">
-    <div class="topbar-left">
-      <button class="icon-btn" id="menuToggle" style="display:none;"
-        onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active')">
-        <i class="fas fa-bars"></i>
-      </button>
+  <div class="main-wrap">
+    <div class="topbar">
       <div>
         <div class="topbar-title">Dashboard</div>
         <div class="topbar-sub">Welcome back to CocaCoy ERP 👋</div>
       </div>
-    </div>
-    <div class="topbar-right">
+      <div class="topbar-right">
 
-      <!-- Theme toggle -->
-      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
-        <i class="fas fa-moon" id="themeIcon"></i>
-      </button>
-
-      <!-- Notification bell -->
-      <div class="bell-wrap" id="bellWrap">
-        <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel()" title="Low stock alerts">
-          <i class="fas fa-bell"></i>
-          <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+        <!-- Theme toggle -->
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
+          <i class="fas fa-moon" id="themeIcon"></i>
         </button>
-        <div class="notif-panel" id="notifPanel">
-          <div class="notif-panel-header">
-            <div class="notif-panel-title"><i class="fas fa-triangle-exclamation"></i> Low Stock Alerts</div>
-            <button class="notif-panel-clear" onclick="document.getElementById('notifPanel').classList.remove('open')">✕</button>
+
+        <!-- Notification bell -->
+        <div class="bell-wrap" id="bellWrap">
+          <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel()" title="Low stock alerts">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <div class="notif-panel-title"><i class="fas fa-triangle-exclamation"></i> Low Stock Alerts</div>
+              <button class="notif-panel-clear"
+                onclick="document.getElementById('notifPanel').classList.remove('open')">✕</button>
+            </div>
+            <div class="notif-panel-body" id="notifPanelBody">
+              <div class="notif-panel-empty"><i class="fas fa-circle-check"
+                  style="color:var(--green);opacity:1;"></i>Loading...</div>
+            </div>
+            <div class="notif-panel-footer">
+              <a href="product"><i class="fas fa-arrow-right"></i> Manage Products</a>
+            </div>
           </div>
-          <div class="notif-panel-body" id="notifPanelBody">
-            <div class="notif-panel-empty"><i class="fas fa-circle-check" style="color:var(--green);opacity:1;"></i>Loading...</div>
+        </div>
+
+        <button class="icon-btn" id="menuToggle" style="display:none;"
+          onclick="document.getElementById('sidebar').classList.toggle('open')">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
+          <div>
+            <div class="stat-val" id="totalProducts">–</div>
+            <div class="stat-label">Total Products</div>
           </div>
-          <div class="notif-panel-footer">
-            <a href="product"><i class="fas fa-arrow-right"></i> Manage Products</a>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green"><i class="fas fa-money-bill-wave"></i></div>
+          <div>
+            <div class="stat-val" id="totalValue" style="font-size:16px;">–</div>
+            <div class="stat-label">Inventory Value</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-yellow"><i class="fas fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="stat-val" id="lowStock">–</div>
+            <div class="stat-label">Low Stock Items</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-blue"><i class="fas fa-layer-group"></i></div>
+          <div>
+            <div class="stat-val" id="totalStock">–</div>
+            <div class="stat-label">Total Stock Units</div>
           </div>
         </div>
       </div>
 
-    </div>
-  </div>
-
-  <div class="content">
-
-    <!-- STAT CARDS -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
-        <div><div class="stat-val" id="totalProducts">–</div><div class="stat-label">Total Products</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon si-green"><i class="fas fa-money-bill-wave"></i></div>
-        <div><div class="stat-val" id="totalValue" style="font-size:16px;">–</div><div class="stat-label">Inventory Value</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon si-yellow"><i class="fas fa-triangle-exclamation"></i></div>
-        <div><div class="stat-val" id="lowStock">–</div><div class="stat-label">Low Stock Items</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon si-blue"><i class="fas fa-layer-group"></i></div>
-        <div><div class="stat-val" id="totalStock">–</div><div class="stat-label">Total Stock Units</div></div>
-      </div>
-    </div>
-
-    <!-- TODAY SALES STAT -->
-    <div class="stat-card" style="border-color:rgba(200,149,108,.3);">
-      <div class="stat-icon si-copper"><i class="fas fa-cash-register"></i></div>
-      <div><div class="stat-val" id="todaySales" style="font-size:15px;">Rp 0</div><div class="stat-label">Today's Sales</div></div>
-    </div>
-
-    <!-- ROW 1: Mini bar chart + Recent products -->
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i class="fas fa-chart-bar"></i> Stock by Category</div>
+      <!-- TODAY SALES STAT -->
+      <div class="stat-card" style="border-color:rgba(200,149,108,.3);">
+        <div class="stat-icon si-copper"><i class="fas fa-cash-register"></i></div>
+        <div>
+          <div class="stat-val" id="todaySales" style="font-size:15px;">Rp 0</div>
+          <div class="stat-label">Today's Sales</div>
         </div>
-        <div class="card-body">
-          <div style="position:relative;height:200px;">
-            <canvas id="barChart"></canvas>
-            <div id="barEmpty" style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px;gap:8px;">
-              <i class="fas fa-chart-bar" style="font-size:28px;opacity:.3;"></i>
-              No data yet
+      </div>
+
+      <!-- ROW 1: Mini bar chart + Recent products -->
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-chart-bar"></i> Stock by Category</div>
+          </div>
+          <div class="card-body">
+            <div style="position:relative;height:200px;">
+              <canvas id="barChart"></canvas>
+              <div id="barEmpty"
+                style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px;gap:8px;">
+                <i class="fas fa-chart-bar" style="font-size:28px;opacity:.3;"></i>
+                No data yet
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recently Added</div>
+            <a href="product" class="btn btn-ghost btn-sm">View All</a>
+          </div>
+          <div class="card-body" id="recentProducts">
+            <div class="empty-state" style="padding:20px 0;">
+              <i class="fas fa-inbox"></i>
+              <p>No products yet.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card">
+      <!-- ROW 2: Low stock alerts -->
+      <div class="card" style="margin-top:18px;">
         <div class="card-header">
-          <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recently Added</div>
-          <a href="product" class="btn btn-ghost btn-sm">View All</a>
-        </div>
-        <div class="card-body" id="recentProducts">
-          <div class="empty-state" style="padding:20px 0;">
-            <i class="fas fa-inbox"></i><p>No products yet.</p>
+          <div class="card-title">
+            <i class="fas fa-triangle-exclamation" style="color:var(--yellow);"></i>
+            Low Stock Alerts
           </div>
+          <a href="product" class="btn btn-ghost btn-sm">Manage Stock</a>
+        </div>
+        <div class="card-body" id="lowStockList">
+          <div style="text-align:center;padding:20px;color:var(--muted);">Loading...</div>
         </div>
       </div>
-    </div>
 
-    <!-- ROW 2: Low stock alerts -->
-    <div class="card" style="margin-top:18px;">
-      <div class="card-header">
-        <div class="card-title">
-          <i class="fas fa-triangle-exclamation" style="color:var(--yellow);"></i>
-          Low Stock Alerts
-        </div>
-        <a href="product" class="btn btn-ghost btn-sm">Manage Stock</a>
-      </div>
-      <div class="card-body" id="lowStockList">
-        <div style="text-align:center;padding:20px;color:var(--muted);">Loading...</div>
-      </div>
     </div>
-
   </div>
-</div>
 
-<div id="toast-container"></div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="./js/guard.js"></script>
-<script type="module" src="./js/firebase.js"></script>
-<script type="module" src="./js/dashboard.js"></script>
-<script type="module" src="./js/notifications.js"></script>
-<script>
-function checkMobile() {
-  document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
-}
-checkMobile();
-window.addEventListener('resize', checkMobile);
-
-window.showToast = function(msg, type='info') {
-  const ic = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warning:'fa-triangle-exclamation'};
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.innerHTML = '<i class="fas ' + (ic[type]||ic.info) + '"></i> ' + msg;
-  document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-};
-
-/* ── Theme toggle ── */
-(function() {
-  const btn  = document.getElementById('themeToggleBtn');
-  const icon = document.getElementById('themeIcon');
-  function applyTheme(theme) {
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme','light');
-      icon.className = 'fas fa-sun';
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      icon.className = 'fas fa-moon';
+  <div id="toast-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="./js/guard.js"></script>
+  <script type="module" src="./js/firebase.js"></script>
+  <script type="module" src="./js/dashboard.js"></script>
+  <script type="module" src="./js/notifications.js"></script>
+  <script>
+    function checkMobile() {
+      document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
     }
-    localStorage.setItem('cocacoy_theme', theme);
-  }
-  applyTheme(localStorage.getItem('cocacoy_theme') || 'dark');
-  btn.addEventListener('click', () => {
-    const current = localStorage.getItem('cocacoy_theme') || 'dark';
-    applyTheme(current === 'dark' ? 'light' : 'dark');
-  });
-})();
-</script>
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    window.showToast = function (msg, type = 'info') {
+      const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
+      const el = document.createElement('div');
+      el.className = 'toast ' + type;
+      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    };
+
+    /* ── Theme toggle ── */
+    (function () {
+      const btn = document.getElementById('themeToggleBtn');
+      const icon = document.getElementById('themeIcon');
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          icon.className = 'fas fa-sun';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          icon.className = 'fas fa-moon';
+        }
+        localStorage.setItem('cocacoy_theme', theme);
+      }
+      applyTheme(localStorage.getItem('cocacoy_theme') || 'dark');
+      btn.addEventListener('click', () => {
+        const current = localStorage.getItem('cocacoy_theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
 </body>
+
 </html>

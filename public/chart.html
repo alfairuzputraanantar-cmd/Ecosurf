@@ -1,265 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CocaCoy ERP – Charts</title>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- FOUC prevention -->
   <script>
-    (function(){
+    (function () {
       const t = localStorage.getItem('cocacoy_theme');
-      if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
     })();
   </script>
   <style>
-    .chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
-    .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:background .25s,border-color .25s; }
-    .chart-card.full { grid-column:1/-1; }
-    .chart-card-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-    .chart-card-title  { font-size:15px; font-weight:700; display:flex; align-items:center; gap:9px; }
-    .chart-card-title i { color:var(--brand-1); }
-    .chart-card-body   { padding:20px; }
-    .chart-card-body canvas { max-height:270px; }
-    .chart-legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
-    .legend-item  { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
-    .legend-dot   { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
-    .chart-empty  { display:flex; flex-direction:column; align-items:center; justify-content:center;
-                    height:200px; color:var(--muted); font-size:13px; gap:12px; }
-    .chart-empty i { font-size:36px; opacity:.35; }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: background .25s, border-color .25s;
+    }
+
+    .chart-card.full {
+      grid-column: 1/-1;
+    }
+
+    .chart-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .chart-card-title i {
+      color: var(--brand-1);
+    }
+
+    .chart-card-body {
+      padding: 20px;
+    }
+
+    .chart-card-body canvas {
+      max-height: 270px;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .chart-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--muted);
+      font-size: 13px;
+      gap: 12px;
+    }
+
+    .chart-empty i {
+      font-size: 36px;
+      opacity: .35;
+    }
+
+    @media(max-width:900px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-card.full {
+        grid-column: 1;
+      }
+    }
   </style>
 </head>
+
 <body>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active')"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy"/></div>
-    <div class="logo-text-wrap">
-      <div class="logo-name">CocaCoy</div>
-      <div class="logo-tag">ERP System</div>
-    </div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-label">Main Menu</div>
-    <a class="nav-link" href="/"><i class="fas fa-chart-pie"></i> Dashboard</a>
-    <a class="nav-link" href="product"><i class="fas fa-boxes-stacked"></i> Products</a>
-    <a class="nav-link" href="history"><i class="fas fa-clock-rotate-left"></i> History</a>
-    <a class="nav-link active" href="chart"><i class="fas fa-chart-line"></i> Charts</a>
-    <a class="nav-link" href="cashier"><i class="fas fa-cash-register"></i> Cashier</a>
-  </div>
-  <div class="sidebar-section" style="margin-top:6px;">
-    <div class="sidebar-label">Other</div>
-    <a class="nav-link" href="settings"><i class="fas fa-gear"></i> Settings</a>
-    <a class="nav-link" href="help"><i class="fas fa-circle-question"></i> Help</a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="user-pill">
-      <div class="user-avatar" id="sidebarAvatar">U</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebarName">Owner</div>
-        <div class="user-role">UMKM Admin</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-img-wrap"><img src="cocacoy_logo.jpeg" alt="CocaCoy" /></div>
+      <div class="logo-text-wrap">
+        <div class="logo-name">CocaCoy</div>
+        <div class="logo-tag">ERP System</div>
       </div>
     </div>
-    <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
-  </div>
-</aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main Menu</div>
+      <a class="nav-link" href="/"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a class="nav-link" href="product"><i class="fas fa-boxes-stacked"></i> Products</a>
+      <a class="nav-link" href="history"><i class="fas fa-clock-rotate-left"></i> History</a>
+      <a class="nav-link active" href="chart"><i class="fas fa-chart-line"></i> Charts</a>
+      <a class="nav-link" href="cashier"><i class="fas fa-cash-register"></i> Cashier</a>
+    </div>
+    <div class="sidebar-section" style="margin-top:6px;">
+      <div class="sidebar-label">Other</div>
+      <a class="nav-link" href="settings"><i class="fas fa-gear"></i> Settings</a>
+      <a class="nav-link" href="help"><i class="fas fa-circle-question"></i> Help</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sidebarAvatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Owner</div>
+          <div class="user-role">UMKM Admin</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+    </div>
+  </aside>
 
-<div class="main-wrap">
-  <div class="topbar">
-    <div class="topbar-left">
-      <button class="icon-btn" id="menuToggle" style="display:none;"
-        onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active')">
-        <i class="fas fa-bars"></i>
-      </button>
+  <div class="main-wrap">
+    <div class="topbar">
       <div>
         <div class="topbar-title">Statistics &amp; Charts</div>
         <div class="topbar-sub">Visual overview of your inventory</div>
       </div>
-    </div>
-    <div class="topbar-right">
-      <button class="btn btn-ghost btn-sm" onclick="window.loadChartData && window.loadChartData()">
-        <i class="fas fa-rotate-right"></i> Refresh
-      </button>
-
-      <!-- Theme toggle -->
-      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
-        <i class="fas fa-moon" id="themeIcon"></i>
-      </button>
-
-      <!-- Notification bell -->
-      <div class="bell-wrap" id="bellWrap">
-        <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel()" title="Low stock alerts">
-          <i class="fas fa-bell"></i>
-          <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="window.loadChartData && window.loadChartData()">
+          <i class="fas fa-rotate-right"></i> Refresh
         </button>
-        <div class="notif-panel" id="notifPanel">
-          <div class="notif-panel-header">
-            <div class="notif-panel-title"><i class="fas fa-triangle-exclamation"></i> Low Stock Alerts</div>
-            <button class="notif-panel-clear" onclick="document.getElementById('notifPanel').classList.remove('open')">✕</button>
+
+        <!-- Theme toggle -->
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">
+          <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- Notification bell -->
+        <div class="bell-wrap" id="bellWrap">
+          <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel()" title="Low stock alerts">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <div class="notif-panel-title"><i class="fas fa-triangle-exclamation"></i> Low Stock Alerts</div>
+              <button class="notif-panel-clear"
+                onclick="document.getElementById('notifPanel').classList.remove('open')">✕</button>
+            </div>
+            <div class="notif-panel-body" id="notifPanelBody">
+              <div class="notif-panel-empty"><i class="fas fa-circle-check"
+                  style="color:var(--green);opacity:1;"></i>Loading...</div>
+            </div>
+            <div class="notif-panel-footer">
+              <a href="product"><i class="fas fa-arrow-right"></i> Manage Products</a>
+            </div>
           </div>
-          <div class="notif-panel-body" id="notifPanelBody">
-            <div class="notif-panel-empty"><i class="fas fa-circle-check" style="color:var(--green);opacity:1;"></i>Loading...</div>
+        </div>
+
+        <button class="icon-btn" id="menuToggle" style="display:none;"
+          onclick="document.getElementById('sidebar').classList.toggle('open')">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- SUMMARY CARDS REMOVED AS THEY ARE ACCESSIBLE ON DASHBOARD -->
+
+      <!-- CHARTS ROW 1 -->
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Top Products by Stock</div>
           </div>
-          <div class="notif-panel-footer">
-            <a href="product"><i class="fas fa-arrow-right"></i> Manage Products</a>
+          <div class="chart-card-body">
+            <canvas id="stockChart"></canvas>
+            <div class="chart-empty" id="emptyStock" style="display:none;">
+              <i class="fas fa-inbox"></i><span>No product data yet</span>
+            </div>
           </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-chart-pie"></i> Category Distribution</div>
+          </div>
+          <div class="chart-card-body">
+            <canvas id="categoryChart"></canvas>
+            <div class="chart-empty" id="emptyCategory" style="display:none;">
+              <i class="fas fa-inbox"></i><span>No category data yet</span>
+            </div>
+            <div class="chart-legend" id="categoryLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 2: Line charts -->
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-clock-rotate-left"></i> Products Added – Last 14 Days</div>
+          </div>
+          <div class="chart-card-body">
+            <canvas id="historyChart"></canvas>
+            <div class="chart-empty" id="emptyHistory" style="display:none;">
+              <i class="fas fa-clock"></i><span>No activity in the last 14 days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-money-bill-trend-up"></i> Daily Revenue – Last 7 Days</div>
+          </div>
+          <div class="chart-card-body">
+            <canvas id="salesChart"></canvas>
+            <div class="chart-empty" id="emptySales" style="display:none;">
+              <i class="fas fa-receipt"></i><span>No sales data yet</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOW STOCK TABLE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-triangle-exclamation" style="color:var(--yellow);"></i> Low Stock Products
+          </div>
+          <a href="product" class="btn btn-ghost btn-sm">Manage</a>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Stock Left</th>
+                <th>Threshold</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody id="lowStockTable">
+              <tr>
+                <td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
     </div>
   </div>
 
-  <div class="content">
+  <div id="toast-container"></div>
 
-    <!-- SUMMARY CARDS REMOVED AS THEY ARE ACCESSIBLE ON DASHBOARD -->
+  <!-- Chart.js defaults -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof Chart === 'undefined') return;
+      Chart.defaults.color = '#7a7265';
+      Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+      Chart.defaults.plugins.legend.display = false;
+    });
+  </script>
 
-    <!-- CHARTS ROW 1 -->
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Top Products by Stock</div>
-        </div>
-        <div class="chart-card-body">
-          <canvas id="stockChart"></canvas>
-          <div class="chart-empty" id="emptyStock" style="display:none;">
-            <i class="fas fa-inbox"></i><span>No product data yet</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title"><i class="fas fa-chart-pie"></i> Category Distribution</div>
-        </div>
-        <div class="chart-card-body">
-          <canvas id="categoryChart"></canvas>
-          <div class="chart-empty" id="emptyCategory" style="display:none;">
-            <i class="fas fa-inbox"></i><span>No category data yet</span>
-          </div>
-          <div class="chart-legend" id="categoryLegend"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHARTS ROW 2: Line charts -->
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title"><i class="fas fa-clock-rotate-left"></i> Products Added – Last 14 Days</div>
-        </div>
-        <div class="chart-card-body">
-          <canvas id="historyChart"></canvas>
-          <div class="chart-empty" id="emptyHistory" style="display:none;">
-            <i class="fas fa-clock"></i><span>No activity in the last 14 days</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title"><i class="fas fa-money-bill-trend-up"></i> Daily Revenue – Last 7 Days</div>
-        </div>
-        <div class="chart-card-body">
-          <canvas id="salesChart"></canvas>
-          <div class="chart-empty" id="emptySales" style="display:none;">
-            <i class="fas fa-receipt"></i><span>No sales data yet</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LOW STOCK TABLE -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <i class="fas fa-triangle-exclamation" style="color:var(--yellow);"></i> Low Stock Products
-        </div>
-        <a href="product" class="btn btn-ghost btn-sm">Manage</a>
-      </div>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Category</th>
-              <th>Stock Left</th>
-              <th>Threshold</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody id="lowStockTable">
-            <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div id="toast-container"></div>
-
-<!-- Chart.js defaults -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof Chart === 'undefined') return;
-  Chart.defaults.color           = '#7a7265';
-  Chart.defaults.font.family     = "'Plus Jakarta Sans', sans-serif";
-  Chart.defaults.plugins.legend.display = false;
-});
-</script>
-
-<script type="module" src="./js/guard.js"></script>
-<script type="module" src="./js/firebase.js"></script>
-<script type="module" src="./js/chart.js"></script>
-<script type="module" src="./js/notifications.js"></script>
-<script>
-function checkMobile() {
-  document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
-}
-checkMobile();
-window.addEventListener('resize', checkMobile);
-
-window.showToast = function(msg, type='info') {
-  const ic = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warning:'fa-triangle-exclamation'};
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.innerHTML = '<i class="fas '+(ic[type]||ic.info)+'"></i> ' + msg;
-  document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-};
-
-/* ── Theme toggle ── */
-(function() {
-  const btn  = document.getElementById('themeToggleBtn');
-  const icon = document.getElementById('themeIcon');
-  function applyTheme(theme) {
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme','light');
-      icon.className = 'fas fa-sun';
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      icon.className = 'fas fa-moon';
+  <script type="module" src="./js/guard.js"></script>
+  <script type="module" src="./js/firebase.js"></script>
+  <script type="module" src="./js/chart.js"></script>
+  <script type="module" src="./js/notifications.js"></script>
+  <script>
+    function checkMobile() {
+      document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
     }
-    localStorage.setItem('cocacoy_theme', theme);
-    // Update Chart.js defaults for the new theme
-    if (typeof Chart !== 'undefined') {
-      const tick = theme === 'light' ? '#888077' : '#7a7265';
-      const grid = theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
-      Chart.defaults.color = tick;
-      // Trigger re-render if loadChartData is available
-      if (window.loadChartData) window.loadChartData();
-    }
-  }
-  applyTheme(localStorage.getItem('cocacoy_theme') || 'dark');
-  btn.addEventListener('click', () => {
-    const current = localStorage.getItem('cocacoy_theme') || 'dark';
-    applyTheme(current === 'dark' ? 'light' : 'dark');
-  });
-})();
-</script>
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    window.showToast = function (msg, type = 'info') {
+      const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
+      const el = document.createElement('div');
+      el.className = 'toast ' + type;
+      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    };
+
+    /* ── Theme toggle ── */
+    (function () {
+      const btn = document.getElementById('themeToggleBtn');
+      const icon = document.getElementById('themeIcon');
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          icon.className = 'fas fa-sun';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          icon.className = 'fas fa-moon';
+        }
+        localStorage.setItem('cocacoy_theme', theme);
+        // Update Chart.js defaults for the new theme
+        if (typeof Chart !== 'undefined') {
+          const tick = theme === 'light' ? '#888077' : '#7a7265';
+          const grid = theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
+          Chart.defaults.color = tick;
+          // Trigger re-render if loadChartData is available
+          if (window.loadChartData) window.loadChartData();
+        }
+      }
+      applyTheme(localStorage.getItem('cocacoy_theme') || 'dark');
+      btn.addEventListener('click', () => {
+        const current = localStorage.getItem('cocacoy_theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
 </body>
+
 </html>
