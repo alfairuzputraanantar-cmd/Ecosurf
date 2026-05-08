@@ -260,9 +260,12 @@ function renderTableBody() {
     actionTd.setAttribute('data-label', 'Actions');
     actionTd.style.whiteSpace = 'nowrap';
 
+    const btnGroup = document.createElement('div');
+    btnGroup.style.display = 'flex';
+    btnGroup.style.gap = '8px';
+
     const editBtn = document.createElement('button');
     editBtn.className = 'btn btn-warn btn-sm';
-    editBtn.style.marginRight = '6px';
     editBtn.innerHTML = '<i class="fas fa-pen-to-square"></i>';
     editBtn.title = 'Edit Product';
     editBtn.onclick = () => window.openEditModal(id, data);
@@ -273,8 +276,9 @@ function renderTableBody() {
     delBtn.title = 'Delete Product';
     delBtn.onclick = () => window.confirmDelete(id, data.Name||'', data.Category||'Others');
 
-    actionTd.appendChild(editBtn);
-    actionTd.appendChild(delBtn);
+    btnGroup.appendChild(editBtn);
+    btnGroup.appendChild(delBtn);
+    actionTd.appendChild(btnGroup);
     tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
