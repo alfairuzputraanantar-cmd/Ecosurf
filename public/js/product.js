@@ -503,15 +503,6 @@ window.confirmDelete = (id, name, category) => {
   };
 };
 
-function startTable(uid) {
-  onSnapshot(userCol(uid, 'products'), snap => {
-    productsCache = [];
-    snap.forEach(doc => {
-      productsCache.push({ id: doc.id, data: doc.data() });
-    });
-    renderTableBody();
-  });
-}
 
 /* ================================================================
    BOOT — wait for userReady event from guard.js
