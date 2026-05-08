@@ -86,8 +86,7 @@
           </div>
         </div>
 
-        <button class="icon-btn" id="menuToggle" style="display:none;"
-          onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+        <button class="icon-btn" id="menuToggle" style="display:none;"><i class="fas fa-bars"></i></button>
       </div>
     </div>
     <div class="content">
@@ -101,7 +100,7 @@
             style="background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:var(--font);width:100%;" />
         </div>
         <!-- Tab buttons -->
-        <div style="display:flex;gap:8px;flex-shrink:0;">
+        <div class="scroll-tabs">
           <button class="hist-tab btn btn-sm" data-tab="all" onclick="switchHistoryTab('all')"
             style="background:var(--brand-grd);color:#fff;border:1px solid transparent;">
             <i class="fas fa-list"></i> All

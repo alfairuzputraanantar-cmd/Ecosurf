@@ -1405,9 +1405,26 @@ input::-webkit-credentials-auto-fill-button {
 }
 
 /* ---- Chart wrapper ---- */
-.chart-wrapper {
-  width: 100%;
-  height: clamp(250px, 45vh, 500px);
+.chart-wrapper canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 300px;
+}
+
+.scroll-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-tabs::-webkit-scrollbar {
+  display: none;
+}
+.scroll-tabs .btn {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ---- Utility classes ---- */
@@ -1451,7 +1468,7 @@ input::-webkit-credentials-auto-fill-button {
     z-index: 999;
   }
 
-  .sidebar.open + .sidebar-backdrop {
+  .sidebar-backdrop.open {
     opacity: 1;
     visibility: visible;
   }
@@ -1475,12 +1492,26 @@ input::-webkit-credentials-auto-fill-button {
   }
 
   .topbar {
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-xs) var(--space-sm);
   }
 
   .notif-panel {
-    width: 300px;
-    right: -10px;
+    width: calc(100vw - 32px);
+    right: -8px;
+  }
+
+  .topbar-right {
+    gap: 6px;
+  }
+
+  .icon-btn, .theme-toggle-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  .topbar-right .btn span {
+    display: none; /* Hide text on small buttons in topbar */
   }
 
   #menuToggle {
@@ -1511,9 +1542,17 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 500px) {
+  .stats-grid, .grid-auto {
+    grid-template-columns: 1fr !important;
+  }
+
+  .topbar-title {
+    font-size: 16px;
+  }
+
+  .topbar-sub {
+    display: none; /* Hide subtext on very small screens to save space */
   }
 
   .modal {
