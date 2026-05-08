@@ -1564,14 +1564,17 @@ input::-webkit-credentials-auto-fill-button {
   /* Responsive Table */
   .responsive-table { 
     display: block; 
-    width: 100%; 
+    width: 100% !important; 
     border-collapse: collapse;
+    box-sizing: border-box;
   }
   .responsive-table thead { 
     display: none; 
   }
   .responsive-table tr { 
     display: block;
+    width: 100% !important;
+    box-sizing: border-box;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -1582,6 +1585,8 @@ input::-webkit-credentials-auto-fill-button {
   .responsive-table td {
     display: flex;
     justify-content: space-between;
+    width: 100% !important;
+    box-sizing: border-box;
     align-items: center;
     padding: 8px 0;
     border-bottom: 1px solid rgba(255,255,255,0.03);
