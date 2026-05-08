@@ -133,7 +133,7 @@
           </div>
         </div>
         <div style="overflow-x:auto;">
-          <table>
+          <table class="responsive-table">
             <thead>
               <tr id="productHead"></tr>
             </thead>
@@ -330,6 +330,7 @@
   <div id="toast-container"></div>
 
   <script type="module" src="./js/guard.js"></script>
+  <script src="./js/ui.js"></script>
   <script type="module" src="./js/product.js"></script>
   <script type="module" src="./js/notifications.js"></script>
 
@@ -352,9 +353,10 @@
       o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
     );
 
-    /* Mobile sidebar */
+    /* Mobile sidebar toggle visibility managed by CSS now, but keeping function for safety if needed */
     function checkMobile() {
-      document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
+      const toggle = document.getElementById('menuToggle');
+      if (toggle) toggle.style.display = window.innerWidth <= 768 ? 'grid' : 'none';
     }
     checkMobile();
     window.addEventListener('resize', checkMobile);

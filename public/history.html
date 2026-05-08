@@ -138,6 +138,7 @@
 
   <div id="toast-container"></div>
   <script type="module" src="./js/guard.js"></script>
+  <script src="./js/ui.js"></script>
   <script type="module" src="./js/history.js"></script>
   <script type="module" src="./js/notifications.js"></script>
   <script>
@@ -148,8 +149,13 @@
       list.innerHTML = rows.map(r => `<div class="history-item" data-search="${(r.product || r.name || '').toLowerCase()}"><div class="history-icon">${em[r.category] || '📦'}</div><div class="history-info"><div class="history-name">${r.product || r.name || '-'}</div><div class="history-meta">${r.details || ''}</div></div><div class="history-date">${r.date || ''}</div></div>`).join('');
     };
     window.filterHistory = function () { const q = document.getElementById('historySearch').value.toLowerCase(); document.querySelectorAll('.history-item').forEach(el => { el.style.display = el.dataset.search.includes(q) ? '' : 'none'; }); };
-    if (window.innerWidth <= 768) document.getElementById('menuToggle').style.display = 'grid';
-    window.addEventListener('resize', () => { document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none'; });
+    /* Mobile sidebar toggle visibility managed by CSS now, but keeping function for safety if needed */
+    function checkMobile() {
+      const toggle = document.getElementById('menuToggle');
+      if (toggle) toggle.style.display = window.innerWidth <= 768 ? 'grid' : 'none';
+    }
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
     window.showToast = function (msg, type = 'info') { const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' }; const el = document.createElement('div'); el.className = `toast ${type}`; el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`; document.getElementById('toast-container').appendChild(el); setTimeout(() => el.remove(), 3500); };
 
     /* ── Theme toggle ── */

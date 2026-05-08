@@ -664,7 +664,7 @@
       </div>
 
       <!-- ── Quick Links ── -->
-      <div class="quick-links" id="quickLinks">
+      <div class="quick-links grid-auto" id="quickLinks">
         <div class="quick-link-card" onclick="scrollToFaq('getting-started')">
           <div class="quick-link-icon si-copper"><i class="fas fa-rocket"></i></div>
           <div class="quick-link-label">Getting Started</div>
@@ -1175,6 +1175,7 @@
 
   <div id="toast-container"></div>
 
+  <script src="./js/ui.js"></script>
   <script type="module" src="./js/guard.js"></script>
   <script type="module" src="./js/firebase.js"></script>
   <script type="module" src="./js/notifications.js"></script>
@@ -1228,9 +1229,10 @@
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    /* ── Mobile ── */
+    /* Mobile sidebar toggle visibility managed by CSS now, but keeping function for safety if needed */
     function checkMobile() {
-      document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';
+      const toggle = document.getElementById('menuToggle');
+      if (toggle) toggle.style.display = window.innerWidth <= 768 ? 'grid' : 'none';
     }
     checkMobile();
     window.addEventListener('resize', checkMobile);

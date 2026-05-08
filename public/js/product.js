@@ -236,6 +236,7 @@ function renderTableBody() {
     const tr = document.createElement('tr');
     visibleCols().forEach(col => {
       const td = document.createElement('td');
+      td.setAttribute('data-label', col);
       if (col === 'Price') {
         td.style.fontWeight = '700';
         td.style.color = 'var(--brand-1)';
@@ -256,6 +257,7 @@ function renderTableBody() {
     });
 
     const actionTd = document.createElement('td');
+    actionTd.setAttribute('data-label', 'Actions');
     actionTd.style.whiteSpace = 'nowrap';
 
     const editBtn = document.createElement('button');

@@ -254,11 +254,11 @@ function renderLowStockTable() {
     const cls    = stock <= Math.ceil(thresh * 0.3) ? 'tag-red' : 'tag-yellow';
     return `
       <tr>
-        <td style="font-weight:600;">${p.Name}</td>
-        <td><span class="tag tag-copper">${p.Category||'-'}</span></td>
-        <td><span class="tag ${cls}">${stock} ${p.Unit||'pcs'}</span></td>
-        <td><span class="tag tag-blue">${thresh} ${p.Unit||'pcs'}</span></td>
-        <td style="color:var(--brand-1);font-weight:700;">Rp ${price.toLocaleString('id-ID')}</td>
+        <td data-label="Product Name" style="font-weight:600;">${p.Name}</td>
+        <td data-label="Category"><span class="tag tag-copper">${p.Category||'-'}</span></td>
+        <td data-label="Stock Left"><span class="tag ${cls}">${stock} ${p.Unit||'pcs'}</span></td>
+        <td data-label="Threshold"><span class="tag tag-blue">${thresh} ${p.Unit||'pcs'}</span></td>
+        <td data-label="Price" style="color:var(--brand-1);font-weight:700;">Rp ${price.toLocaleString('id-ID')}</td>
       </tr>`;
   }).join('');
 }
