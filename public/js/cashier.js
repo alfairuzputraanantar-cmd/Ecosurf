@@ -113,8 +113,7 @@ function renderProducts() {
     return `
       <div class="product-card ${oos ? 'out-of-stock' : ''} ${inCart ? 'in-cart' : ''}" 
         id="card-${p.id}" 
-        onclick="addToCart('${p.id}')"
-        ondblclick="removeFromCart('${p.id}', event)"
+        onclick="toggleCartItem('${p.id}')"
       >
         <div class="cart-badge" id="badge-${p.id}">${inCart}</div>
         <div class="product-card-emoji">${emoji}</div>
@@ -125,6 +124,7 @@ function renderProducts() {
         </div>
         <button
           class="product-card-add"
+          onclick="event.stopPropagation(); addToCart('${p.id}')"
           ${oos ? 'disabled' : ''}
           title="${oos ? 'Out of stock' : 'Add to cart'}">
           ${oos ? '<i class="fas fa-ban" style="font-size:14px;"></i>' : '<i class="fas fa-plus"></i>'}
@@ -188,6 +188,14 @@ window.addToCart = (productId) => {
   }
 };
 
+window.toggleCartItem = (productId) => {
+  if (_cart[productId]) {
+    removeFromCart(productId);
+  } else {
+    addToCart(productId);
+  }
+};
+
 window.removeFromCart = (productId, event) => {
   if (event) event.stopPropagation(); // prevent triggering onclick
   if (!_cart[productId]) return;
@@ -202,7 +210,7 @@ window.removeFromCart = (productId, event) => {
     if (badge) badge.style.display = 'none';
   }
 
-  showToast(`Removed "${itemName}" from cart`, 'info');
+  showToast(`Removed "${itemName}"`, 'info');
   updateCartUI();
   if (Object.keys(_cart).length > 0) renderCartSheet();
 };
