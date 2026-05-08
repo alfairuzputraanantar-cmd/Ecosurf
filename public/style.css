@@ -584,6 +584,11 @@ a {
 /* ================================================================
    TABLE
 ================================================================ */
+.table-responsive-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
 .table-toolbar {
   padding: 14px 18px;
   display: flex;
@@ -1563,13 +1568,20 @@ input::-webkit-credentials-auto-fill-button {
 
   /* Responsive Table */
   .responsive-table { 
-    display: block; 
+    display: flex !important;
+    flex-direction: column;
     width: 100% !important; 
-    border-collapse: collapse;
-    box-sizing: border-box;
+    border: none;
+    background: transparent;
   }
   .responsive-table thead { 
     display: none; 
+  }
+  .responsive-table tbody {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 16px;
   }
   .responsive-table tr { 
     display: block;
@@ -1578,13 +1590,13 @@ input::-webkit-credentials-auto-fill-button {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    margin-bottom: 16px;
     padding: 12px 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .responsive-table td {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 100% !important;
     box-sizing: border-box;
     align-items: center;
