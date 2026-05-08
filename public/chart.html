@@ -140,11 +140,21 @@
         <div class="user-avatar" id="sidebarAvatar">U</div>
         <div class="user-info">
           <div class="user-name" id="sidebarName">Owner</div>
-          <div class="user-role">UMKM Admin</div>
+          <div class="user-role" id="sidebarRole">UMKM Admin</div>
         </div>
       </div>
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
     </div>
+    <script>
+      (function() {
+        try {
+          const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          if (p.ownerName) document.getElementById('sidebarName').textContent = p.ownerName;
+          if (p.role) document.getElementById('sidebarRole').textContent = p.role;
+          if (p.ownerName) document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+        } catch(e) {}
+      })();
+    </script>
   </aside>
 
   <div class="main-wrap">

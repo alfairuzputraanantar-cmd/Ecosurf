@@ -14,17 +14,37 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
-  // Expose UID globally so dashboard.js / product.js / history.js can use it
+  // Expose UID globally so other modules can use it
   window.__uid = user.uid;
 
-  // Update sidebar avatar & name
+  // Fire a custom event
+  document.dispatchEvent(new CustomEvent("userReady", { detail: { uid: user.uid } }));
+
+  // Profile Elements
   const avatarEl = document.getElementById("sidebarAvatar");
   const nameEl   = document.getElementById("sidebarName");
-  if (avatarEl) avatarEl.textContent = (user.email || "U")[0].toUpperCase();
-  if (nameEl)   nameEl.textContent   = user.displayName || user.email || "Owner";
+  const roleEl   = document.getElementById("sidebarRole");
 
-  // Fire a custom event so other scripts can start their Firestore listeners
-  document.dispatchEvent(new CustomEvent("userReady", { detail: { uid: user.uid } }));
+  // Profile Sync
+  import("./firebase.js").then(({ userDoc }) => {
+    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ onSnapshot }) => {
+      onSnapshot(userDoc(user.uid), (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          const p = {
+            ownerName: data.ownerName || user.displayName || user.email || "Owner",
+            role: data.role || "UMKM Admin"
+          };
+          // Update UI
+          if (nameEl) nameEl.textContent = p.ownerName;
+          if (roleEl) roleEl.textContent = p.role;
+          if (avatarEl) avatarEl.textContent = p.ownerName.charAt(0).toUpperCase();
+          
+          localStorage.setItem('cocacoy_profile', JSON.stringify(p));
+        }
+      });
+    });
+  });
 
   // Demo Mode Handling
   if (user.email === "demo@cocacoy.com") {

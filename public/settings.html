@@ -408,11 +408,21 @@
         <div class="user-avatar" id="sidebarAvatar">U</div>
         <div class="user-info">
           <div class="user-name" id="sidebarName">Owner</div>
-          <div class="user-role">UMKM Admin</div>
+          <div class="user-role" id="sidebarRole">UMKM Admin</div>
         </div>
       </div>
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
     </div>
+    <script>
+      (function() {
+        try {
+          const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          if (p.ownerName) document.getElementById('sidebarName').textContent = p.ownerName;
+          if (p.role) document.getElementById('sidebarRole').textContent = p.role;
+          if (p.ownerName) document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+        } catch(e) {}
+      })();
+    </script>
   </aside>
 
   <div class="main-wrap">
@@ -517,16 +527,20 @@
                     <input class="form-control" id="storePhone" type="tel" placeholder="+62 8xx-xxxx-xxxx" />
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Business Category</label>
-                    <select class="form-control" id="storeCategory">
-                      <option value="food">Food & Beverage</option>
-                      <option value="retail">Retail / Shop</option>
-                      <option value="fashion">Fashion & Clothing</option>
-                      <option value="electronics">Electronics</option>
-                      <option value="beauty">Beauty & Cosmetics</option>
-                      <option value="other">Other</option>
-                    </select>
+                    <label class="form-label">Business Role</label>
+                    <input class="form-control" id="userRole" type="text" placeholder="e.g. Owner, Admin, Manager" value="UMKM Admin" />
                   </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Business Category</label>
+                  <select class="form-control" id="storeCategory">
+                    <option value="food">Food & Beverage</option>
+                    <option value="retail">Retail / Shop</option>
+                    <option value="fashion">Fashion & Clothing</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="beauty">Beauty & Cosmetics</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
                   <button class="btn btn-primary" onclick="saveProfile()">
@@ -933,23 +947,49 @@
       reader.readAsDataURL(file);
     }
 
-    function saveProfile() {
+    async function saveProfile() {
       const data = {
         storeName: document.getElementById('storeName').value.trim(),
         ownerName: document.getElementById('ownerName').value.trim(),
+        role:      document.getElementById('userRole').value.trim(),
         storeDesc: document.getElementById('storeDesc').value.trim(),
         storePhone: document.getElementById('storePhone').value.trim(),
         storeCategory: document.getElementById('storeCategory').value,
       };
+
+      // 1. Update UI and LocalStorage (Instant)
       localStorage.setItem('cocacoy_profile', JSON.stringify(data));
       if (data.ownerName) {
-        const el = document.getElementById('sidebarName');
-        if (el) el.textContent = data.ownerName;
-        const av = document.getElementById('sidebarAvatar');
-        if (av) av.textContent = data.ownerName.charAt(0).toUpperCase();
+        if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = data.ownerName;
+        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = data.ownerName.charAt(0).toUpperCase();
       }
+      if (data.role && document.getElementById('sidebarRole')) {
+        document.getElementById('sidebarRole').textContent = data.role;
+      }
+
       flashSaved('profileSaved');
-      showToast('Store profile saved successfully!', 'success');
+      showToast('Store profile saved locally!', 'success');
+
+      // 2. Sync to Firestore (Permanent)
+      try {
+        const { auth, userDoc } = await import('./js/firebase.js');
+        const { updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        if (auth.currentUser) {
+          await updateDoc(userDoc(auth.currentUser.uid), {
+            ownerName: data.ownerName,
+            role: data.role,
+            storeName: data.storeName,
+            storeDesc: data.storeDesc,
+            storePhone: data.storePhone,
+            storeCategory: data.storeCategory,
+            updatedAt: new Date().toISOString()
+          });
+          showToast('Profile synced to cloud!', 'success');
+        }
+      } catch (e) {
+        console.error("Firestore sync error:", e);
+        showToast('Cloud sync failed, but saved locally.', 'warning');
+      }
     }
 
     /* ── Appearance ── */
@@ -1070,6 +1110,7 @@
         const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
         if (p.storeName) document.getElementById('storeName').value = p.storeName;
         if (p.ownerName) document.getElementById('ownerName').value = p.ownerName;
+        if (p.role)      document.getElementById('userRole').value = p.role;
         if (p.storeDesc) document.getElementById('storeDesc').value = p.storeDesc;
         if (p.storePhone) document.getElementById('storePhone').value = p.storePhone;
         if (p.storeCategory) document.getElementById('storeCategory').value = p.storeCategory;
