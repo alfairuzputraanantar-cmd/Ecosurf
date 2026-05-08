@@ -457,7 +457,6 @@ window.openRestockModal = function(id, data) {
   document.getElementById('restockProductName').value = data.Name || '-';
   document.getElementById('restockCurrentStock').value = data.Stock || 0;
   document.getElementById('restockQuantity').value = '';
-  document.getElementById('restockSupplier').value = '';
   document.getElementById('restockNote').value = '';
   document.getElementById('restockModalOverlay').classList.add('open');
 };
@@ -471,7 +470,6 @@ window.processRestock = async function() {
   const name = document.getElementById('restockProductName').value;
   const current = parseInt(document.getElementById('restockCurrentStock').value) || 0;
   const add = parseInt(document.getElementById('restockQuantity').value);
-  const supplier = document.getElementById('restockSupplier').value.trim();
   const note = document.getElementById('restockNote').value.trim();
 
   if (!add || add <= 0) {
@@ -496,13 +494,12 @@ window.processRestock = async function() {
       action: 'Restock',
       productName: name,
       category: 'Restock', // Using Restock as a category for visual grouping
-      details: `Restocked ${add} units from ${supplier || 'Unknown'}. Stock increased from ${current} to ${current + add}.`,
+      details: `Restocked ${add} units. Stock increased from ${current} to ${current + add}.`,
       quantity: add,
       prevStock: current,
       newStock: current + add,
-      supplier: supplier || '-',
       note: note || '-',
-      timestamp: new Date().toLocaleString('id-ID') // Using same format as other logs
+      timestamp: new Date().toLocaleString('id-ID')
     });
 
     window.showToast(`Restocked ${add} items for ${name}!`, 'success');
