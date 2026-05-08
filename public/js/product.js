@@ -1,6 +1,6 @@
 import { db, userCol, userDoc } from './firebase.js';
 import {
-  addDoc, onSnapshot, deleteDoc, updateDoc
+  addDoc, onSnapshot, deleteDoc, updateDoc, increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================================================================
@@ -264,6 +264,12 @@ function renderTableBody() {
     btnGroup.style.display = 'flex';
     btnGroup.style.gap = '8px';
 
+    const resBtn = document.createElement('button');
+    resBtn.className = 'btn btn-success btn-sm';
+    resBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+    resBtn.title = 'Restock Product';
+    resBtn.onclick = () => window.openRestockModal(id, data);
+
     const editBtn = document.createElement('button');
     editBtn.className = 'btn btn-warn btn-sm';
     editBtn.innerHTML = '<i class="fas fa-pen-to-square"></i>';
@@ -276,6 +282,7 @@ function renderTableBody() {
     delBtn.title = 'Delete Product';
     delBtn.onclick = () => window.confirmDelete(id, data.Name||'', data.Category||'Others');
 
+    btnGroup.appendChild(resBtn);
     btnGroup.appendChild(editBtn);
     btnGroup.appendChild(delBtn);
     actionTd.appendChild(btnGroup);
@@ -446,3 +453,69 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
   const inp = document.getElementById('newColumnName');
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addColumn(); });
 });
+/* ================================================================
+   RESTOCK LOGIC
+================================================================ */
+window.openRestockModal = function(id, data) {
+  document.getElementById('restockProductId').value = id;
+  document.getElementById('restockProductName').value = data.Name || '-';
+  document.getElementById('restockCurrentStock').value = data.Stock || 0;
+  document.getElementById('restockQuantity').value = '';
+  document.getElementById('restockSupplier').value = '';
+  document.getElementById('restockNote').value = '';
+  document.getElementById('restockModalOverlay').classList.add('open');
+};
+
+window.closeRestockModal = function() {
+  document.getElementById('restockModalOverlay').classList.remove('open');
+};
+
+window.processRestock = async function() {
+  const id = document.getElementById('restockProductId').value;
+  const name = document.getElementById('restockProductName').value;
+  const current = parseInt(document.getElementById('restockCurrentStock').value) || 0;
+  const add = parseInt(document.getElementById('restockQuantity').value);
+  const supplier = document.getElementById('restockSupplier').value.trim();
+  const note = document.getElementById('restockNote').value.trim();
+
+  if (!add || add <= 0) {
+    return window.showToast('Please enter a valid quantity.', 'error');
+  }
+
+  const btn = document.getElementById('confirmRestockBtn');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+  try {
+    // 1. Update Stock
+    const pRef = userDoc(_uid, 'products', id);
+    await updateDoc(pRef, {
+      Stock: increment(add)
+    });
+
+    // 2. Add History
+    const hCol = userCol(_uid, 'history');
+    await addDoc(hCol, {
+      action: 'Restock',
+      productName: name,
+      category: 'Restock', // Using Restock as a category for visual grouping
+      details: `Restocked ${add} units from ${supplier || 'Unknown'}. Stock increased from ${current} to ${current + add}.`,
+      quantity: add,
+      prevStock: current,
+      newStock: current + add,
+      supplier: supplier || '-',
+      note: note || '-',
+      timestamp: new Date().toLocaleString('id-ID') // Using same format as other logs
+    });
+
+    window.showToast(`Restocked ${add} items for ${name}!`, 'success');
+    window.closeRestockModal();
+  } catch (e) {
+    console.error(e);
+    window.showToast('Failed to restock. Please try again.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+};

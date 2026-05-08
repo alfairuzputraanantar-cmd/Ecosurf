@@ -61,11 +61,13 @@ function renderHistory() {
     const isDeleted = r.action === 'Deleted';
     const isEdited  = r.action === 'Edited';
     const isSold    = r.action === 'Sold';
-    const emoji   = isDeleted ? '🗑️' : isEdited ? '✏️' : isSold ? '🛒' : (CAT_EMOJI[r.category] || '📦');
-    const tagCls  = isDeleted ? 'tag-red' : isEdited ? 'tag-blue' : isSold ? 'tag-green' : 'tag-green';
+    const isRestock = r.action === 'Restock';
+    
+    const emoji   = isDeleted ? '🗑️' : isEdited ? '✏️' : isSold ? '🛒' : isRestock ? '🚚' : (CAT_EMOJI[r.category] || '📦');
+    const tagCls  = isDeleted ? 'tag-red' : isEdited ? 'tag-blue' : isSold ? 'tag-green' : isRestock ? 'tag-blue' : 'tag-green';
     const iconBg  = isDeleted
       ? 'background:rgba(247,95,95,.13)'
-      : isEdited
+      : isEdited || isRestock
         ? 'background:rgba(91,156,246,.13)'
         : isSold
           ? 'background:rgba(34,201,151,.13)'

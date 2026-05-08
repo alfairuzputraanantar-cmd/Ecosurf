@@ -216,10 +216,49 @@
     </div>
   </div>
 
-  <!-- =========================================================
-     MODAL: EDIT PRODUCT
-========================================================= -->
-  <div class="modal-overlay" id="editModal">
+  <!-- ===== RESTOCK MODAL ===== -->
+  <div class="modal-overlay" id="restockModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fas fa-truck-loading"></i> Restock Product</div>
+        <button class="modal-close" onclick="closeRestockModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="restockProductId">
+        <div class="form-group">
+          <label class="form-label">Product Name</label>
+          <input class="form-control" id="restockProductName" readonly style="opacity:0.7;" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Current Stock</label>
+            <input class="form-control" id="restockCurrentStock" readonly style="opacity:0.7;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Restock Quantity</label>
+            <input class="form-control" type="number" id="restockQuantity" placeholder="0" min="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplier (Optional)</label>
+          <input class="form-control" id="restockSupplier" placeholder="e.g. PT Maju Bersama" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note (Optional)</label>
+          <input class="form-control" id="restockNote" placeholder="e.g. Monthly replenishment" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeRestockModal()">Cancel</button>
+        <button class="btn btn-primary" id="confirmRestockBtn" onclick="processRestock()">
+          <i class="fas fa-check"></i> Confirm Restock
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EDIT PRODUCT MODAL ===== -->
+  <div class="modal-overlay" id="editModalOverlay">
     <div class="modal" style="max-width:560px;max-height:90vh;overflow-y:auto;">
       <div class="modal-title"><i class="fas fa-pen-to-square"></i> Edit Product</div>
 

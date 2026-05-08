@@ -528,6 +528,16 @@ a {
   background: rgba(247, 95, 95, .22);
 }
 
+.btn-success {
+  background: rgba(34, 201, 151, .12);
+  color: var(--green);
+  border: 1px solid rgba(34, 201, 151, .28);
+}
+
+.btn-success:hover {
+  background: rgba(34, 201, 151, .22);
+}
+
 .btn-warn {
   background: rgba(245, 166, 35, .12);
   color: var(--yellow);
