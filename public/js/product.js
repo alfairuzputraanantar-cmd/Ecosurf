@@ -144,9 +144,7 @@ window.saveProduct = async () => {
   const stock = v('core-stock');
   const price = v('core-price') || '0';
   const cat   = v('core-category');
-  const sku   = v('core-sku');
   const unit  = v('core-unit') || 'pcs';
-  const notes = v('core-notes');
   const thresh = v('core-threshold') || '10';
 
   if (!name)  { showToast('Product name is required!',   'error'); return; }
@@ -161,7 +159,7 @@ window.saveProduct = async () => {
     const now = new Date();
     const product = {
       Name: name, Stock: stock, Price: price,
-      Category: cat, SKU: sku, Unit: unit, Notes: notes,
+      Category: cat, Unit: unit,
       lowStockThreshold: thresh,
       createdAt: now.toISOString()
     };
@@ -319,7 +317,6 @@ window.openEditModal = (id, data) => {
   set('edit-price',     data.Price);
   set('edit-category',  data.Category);
   set('edit-unit',      data.Unit);
-  set('edit-notes',     data.Notes);
   set('edit-threshold', data.lowStockThreshold ?? 10);
 
   const dyn = document.getElementById('editDynamicInputs');
@@ -350,7 +347,6 @@ window.saveEdit = async () => {
   const price = v('edit-price') || '0';
   const cat   = v('edit-category');
   const unit  = v('edit-unit') || 'pcs';
-  const notes = v('edit-notes');
   const thresh = v('edit-threshold') || '10';
 
   if (!name)  { showToast('Product name is required!', 'error'); return; }
@@ -365,7 +361,7 @@ window.saveEdit = async () => {
     const now = new Date();
     const updateData = {
       Name: name, Stock: stock, Price: price,
-      Category: cat, Unit: unit, Notes: notes,
+      Category: cat, Unit: unit,
       lowStockThreshold: thresh,
       updatedAt: now.toISOString()
     };
