@@ -868,6 +868,13 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
 .modal-title {
   font-family: var(--font-hd);
   font-size: 18px;
@@ -877,6 +884,29 @@ input::-webkit-credentials-auto-fill-button {
   align-items: center;
   gap: 10px;
 }
+
+.modal-header .modal-title {
+  margin-bottom: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color .2s, transform .2s;
+  padding: 4px;
+  line-height: 1;
+  margin-top: -4px;
+  margin-right: -4px;
+}
+
+.modal-close:hover {
+  color: var(--text);
+  transform: rotate(90deg);
+}
+
 
 .modal-title i {
   color: var(--brand-1);
