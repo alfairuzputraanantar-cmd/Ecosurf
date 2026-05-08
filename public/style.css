@@ -732,11 +732,52 @@ select.form-control option {
   color: var(--text);
 }
 
+/* Hide browser default reveal button (Edge/Chrome/Safari) */
+input::-ms-reveal,
+input::-ms-clear,
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap .form-control {
+  padding-right: 46px !important;
+}
+
+.toggle-eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0;
+  transition: color .2s;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.toggle-eye:hover {
+  color: var(--brand-1);
+}
+
 
 .active-cols {
   display: flex;
