@@ -147,7 +147,10 @@
 ========================================================= -->
   <div class="modal-overlay" id="addModal">
     <div class="modal" style="max-width:560px;max-height:90vh;overflow-y:auto;">
-      <div class="modal-title"><i class="fas fa-plus-circle"></i> Add New Product</div>
+      <div class="modal-header">
+        <div class="modal-title"><i class="fas fa-plus-circle"></i> Add New Product</div>
+        <button class="modal-close" onclick="closeAddModal()">✕</button>
+      </div>
 
       <div class="form-row">
         <div class="form-group">
@@ -258,9 +261,12 @@
   </div>
 
   <!-- ===== EDIT PRODUCT MODAL ===== -->
-  <div class="modal-overlay" id="editModalOverlay">
+  <div class="modal-overlay" id="editModal">
     <div class="modal" style="max-width:560px;max-height:90vh;overflow-y:auto;">
-      <div class="modal-title"><i class="fas fa-pen-to-square"></i> Edit Product</div>
+      <div class="modal-header">
+        <div class="modal-title"><i class="fas fa-pen-to-square"></i> Edit Product</div>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
 
       <div class="form-row">
         <div class="form-group">
