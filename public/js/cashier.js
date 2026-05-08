@@ -111,7 +111,11 @@ function renderProducts() {
     const stockCls = stock === 0 ? 'tag-red' : stock <= (parseInt(p.lowStockThreshold)||10) ? 'tag-yellow' : 'tag-green';
 
     return `
-      <div class="product-card ${oos ? 'out-of-stock' : ''} ${inCart ? 'in-cart' : ''}" id="card-${p.id}">
+      <div class="product-card ${oos ? 'out-of-stock' : ''} ${inCart ? 'in-cart' : ''}" 
+        id="card-${p.id}" 
+        onclick="addToCart('${p.id}')"
+        ondblclick="removeFromCart('${p.id}', event)"
+      >
         <div class="cart-badge" id="badge-${p.id}">${inCart}</div>
         <div class="product-card-emoji">${emoji}</div>
         <div class="product-card-name">${p.Name}</div>
@@ -121,7 +125,6 @@ function renderProducts() {
         </div>
         <button
           class="product-card-add"
-          onclick="addToCart('${p.id}')"
           ${oos ? 'disabled' : ''}
           title="${oos ? 'Out of stock' : 'Add to cart'}">
           ${oos ? '<i class="fas fa-ban" style="font-size:14px;"></i>' : '<i class="fas fa-plus"></i>'}
@@ -183,6 +186,25 @@ window.addToCart = (productId) => {
     const badge = document.getElementById(`badge-${productId}`);
     if (badge) { badge.textContent = _cart[productId].qty; badge.style.display = 'flex'; }
   }
+};
+
+window.removeFromCart = (productId, event) => {
+  if (event) event.stopPropagation(); // prevent triggering onclick
+  if (!_cart[productId]) return;
+
+  const itemName = _cart[productId].name;
+  delete _cart[productId];
+
+  const card = document.getElementById(`card-${productId}`);
+  if (card) {
+    card.classList.remove('in-cart');
+    const badge = document.getElementById(`badge-${productId}`);
+    if (badge) badge.style.display = 'none';
+  }
+
+  showToast(`Removed "${itemName}" from cart`, 'info');
+  updateCartUI();
+  if (Object.keys(_cart).length > 0) renderCartSheet();
 };
 
 window.changeQty = (productId, delta) => {
