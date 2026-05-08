@@ -142,7 +142,8 @@ window.saveProduct = async () => {
   const v     = id => (document.getElementById(id)?.value || '').trim();
   const name  = v('core-name');
   const stock = v('core-stock');
-  const price = v('core-price') || '0';
+  const buyPrice = v('core-buyPrice') || '0';
+  const sellPrice = v('core-sellPrice') || '0';
   const cat   = v('core-category');
   const unit  = v('core-unit') || 'pcs';
   const thresh = v('core-threshold') || '10';
@@ -150,7 +151,8 @@ window.saveProduct = async () => {
   if (!name)  { showToast('Product name is required!',   'error'); return; }
   if (!stock) { showToast('Stock quantity is required!', 'error'); return; }
   if (isNaN(Number(stock)) || Number(stock) < 0) { showToast('Stock must be a non-negative number!', 'error'); return; }
-  if (isNaN(Number(price)) || Number(price) < 0) { showToast('Price must be a non-negative number!', 'error'); return; }
+  if (isNaN(Number(buyPrice)) || Number(buyPrice) < 0) { showToast('Buy Price must be a non-negative number!', 'error'); return; }
+  if (isNaN(Number(sellPrice)) || Number(sellPrice) < 0) { showToast('Sell Price must be a non-negative number!', 'error'); return; }
 
   const btn = document.getElementById('addBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Saving...'; btn.disabled = true; }
@@ -158,7 +160,8 @@ window.saveProduct = async () => {
   try {
     const now = new Date();
     const product = {
-      Name: name, Stock: stock, Price: price,
+      Name: name, Stock: stock, Price: sellPrice,
+      BuyPrice: buyPrice, SellPrice: sellPrice,
       Category: cat, Unit: unit,
       lowStockThreshold: thresh,
       createdAt: now.toISOString()
@@ -174,7 +177,7 @@ window.saveProduct = async () => {
     await addDoc(userCol(_uid, 'history'), {
       productName: name,
       action:      'Added',
-      details:     `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat||'-'}`,
+      details:     `Stock: ${stock} | Sell: Rp ${Number(sellPrice).toLocaleString('id-ID')} | Buy: Rp ${Number(buyPrice).toLocaleString('id-ID')}`,
       timestamp:   now.toLocaleString('en-GB'),
       createdAt:   now.toISOString(),
       category:    cat || 'Others'
@@ -236,9 +239,17 @@ function renderTableBody() {
       const td = document.createElement('td');
       td.setAttribute('data-label', col);
       if (col === 'Price') {
+        const sell = parseInt(data.SellPrice || data.Price) || 0;
+        const buy  = parseInt(data.BuyPrice) || 0;
+        
         td.style.fontWeight = '700';
         td.style.color = 'var(--brand-1)';
-        td.textContent = 'Rp ' + priceNum.toLocaleString('id-ID');
+        td.innerHTML = `
+          <div>Rp ${sell.toLocaleString('id-ID')}</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:4px;">
+            Buy: Rp ${buy.toLocaleString('id-ID')}
+          </div>
+        `;
       } else if (col === 'Stock') {
         const warn = stockNum <= threshold
           ? `<i class="fas fa-triangle-exclamation" style="color:var(--yellow);margin-left:5px;font-size:11px;" title="Low stock!"></i>`
@@ -314,7 +325,8 @@ window.openEditModal = (id, data) => {
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val ?? ''; };
   set('edit-name',      data.Name);
   set('edit-stock',     data.Stock);
-  set('edit-price',     data.Price);
+  set('edit-buyPrice',  data.BuyPrice || '0');
+  set('edit-sellPrice', data.SellPrice || data.Price || '0');
   set('edit-category',  data.Category);
   set('edit-unit',      data.Unit);
   set('edit-threshold', data.lowStockThreshold ?? 10);
@@ -344,7 +356,8 @@ window.saveEdit = async () => {
   const v     = id => (document.getElementById(id)?.value || '').trim();
   const name  = v('edit-name');
   const stock = v('edit-stock');
-  const price = v('edit-price') || '0';
+  const buyPrice  = v('edit-buyPrice') || '0';
+  const sellPrice = v('edit-sellPrice') || '0';
   const cat   = v('edit-category');
   const unit  = v('edit-unit') || 'pcs';
   const thresh = v('edit-threshold') || '10';
@@ -352,7 +365,8 @@ window.saveEdit = async () => {
   if (!name)  { showToast('Product name is required!', 'error'); return; }
   if (!stock && stock !== '0') { showToast('Stock quantity is required!', 'error'); return; }
   if (isNaN(Number(stock)) || Number(stock) < 0) { showToast('Stock cannot be negative!', 'error'); return; }
-  if (isNaN(Number(price)) || Number(price) < 0) { showToast('Price must be a valid number!', 'error'); return; }
+  if (isNaN(Number(buyPrice)) || Number(buyPrice) < 0) { showToast('Buy Price must be a valid number!', 'error'); return; }
+  if (isNaN(Number(sellPrice)) || Number(sellPrice) < 0) { showToast('Sell Price must be a valid number!', 'error'); return; }
 
   const btn = document.getElementById('editSaveBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Saving...'; btn.disabled = true; }
@@ -360,7 +374,8 @@ window.saveEdit = async () => {
   try {
     const now = new Date();
     const updateData = {
-      Name: name, Stock: stock, Price: price,
+      Name: name, Stock: stock, Price: sellPrice,
+      BuyPrice: buyPrice, SellPrice: sellPrice,
       Category: cat, Unit: unit,
       lowStockThreshold: thresh,
       updatedAt: now.toISOString()
@@ -377,7 +392,7 @@ window.saveEdit = async () => {
     await addDoc(userCol(_uid, 'history'), {
       productName: name,
       action:      'Edited',
-      details:     `Stock: ${stock} | Price: Rp ${Number(price).toLocaleString('id-ID')} | Category: ${cat||'-'}`,
+      details:     `Stock: ${stock} | Sell: Rp ${Number(sellPrice).toLocaleString('id-ID')} | Buy: Rp ${Number(buyPrice).toLocaleString('id-ID')}`,
       timestamp:   now.toLocaleString('en-GB'),
       createdAt:   now.toISOString(),
       category:    cat || 'Others'

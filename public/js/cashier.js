@@ -104,7 +104,7 @@ function renderProducts() {
 
   el.innerHTML = filtered.map(p => {
     const stock    = parseInt(p.Stock) || 0;
-    const price    = parseInt(p.Price) || 0;
+    const price    = parseInt(p.SellPrice || p.Price) || 0;
     const oos      = stock <= 0;
     const inCart   = _cart[p.id] ? _cart[p.id].qty : 0;
     const emoji    = CATEGORY_EMOJI[p.Category] || '📦';
@@ -166,7 +166,7 @@ window.addToCart = (productId) => {
     _cart[productId] = {
       qty: 1,
       name: prod.Name,
-      price: parseInt(prod.Price) || 0,
+      price: parseInt(prod.SellPrice || prod.Price) || 0,
       stock: stock,
       unit: prod.Unit || 'pcs',
       category: prod.Category || 'Others'
