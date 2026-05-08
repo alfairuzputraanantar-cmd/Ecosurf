@@ -212,6 +212,36 @@ window.changeQty = (productId, delta) => {
   if (Object.keys(_cart).length > 0) renderCartSheet();
 };
 
+window.setQty = (productId, val) => {
+  if (!_cart[productId]) return;
+  const prod = _products.find(p => p.id === productId);
+  const maxStock = prod ? (parseInt(prod.Stock) || 0) : _cart[productId].stock;
+
+  let newQty = parseInt(val);
+  if (isNaN(newQty) || newQty <= 0) {
+    // If user types 0 or invalid, remove it or set to 1. Setting to 1 is safer, but 0 removes.
+    // Let's remove if 0, otherwise 1.
+    if (newQty === 0) {
+      changeQty(productId, -_cart[productId].qty); // Trigger removal logic
+      return;
+    }
+    newQty = 1;
+  }
+
+  if (newQty > maxStock) {
+    newQty = maxStock;
+    showToast('Exceeds available stock!', 'warning');
+  }
+
+  _cart[productId].qty = newQty;
+
+  const badge = document.getElementById(`badge-${productId}`);
+  if (badge) badge.textContent = _cart[productId].qty;
+
+  updateCartUI();
+  if (Object.keys(_cart).length > 0) renderCartSheet();
+};
+
 /* ================================================================
    CART UI UPDATE
 ================================================================ */
@@ -257,7 +287,7 @@ function renderCartSheet() {
       </div>
       <div class="cart-qty-ctrl">
         <button class="cart-qty-btn remove" onclick="changeQty('${id}', -1)">−</button>
-        <div class="cart-qty-num">${item.qty}</div>
+        <input type="number" class="cart-qty-num" value="${item.qty}" min="1" onchange="setQty('${id}', this.value)" onfocus="this.select()" />
         <button class="cart-qty-btn" onclick="changeQty('${id}', 1)">+</button>
       </div>
       <div class="cart-item-subtotal">Rp ${(item.qty * item.price).toLocaleString('id-ID')}</div>

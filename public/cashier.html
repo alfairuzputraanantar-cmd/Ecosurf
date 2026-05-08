@@ -294,7 +294,18 @@
     }
     .cart-qty-btn:hover { background: var(--border); }
     .cart-qty-btn.remove { color: var(--red); border-color: rgba(247,95,95,.3); }
-    .cart-qty-num { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
+    .cart-qty-num {
+      font-size: 15px; font-weight: 700; width: 40px; text-align: center;
+      background: none; border: none; color: var(--text); font-family: var(--font);
+      outline: none; -moz-appearance: textfield; padding: 0;
+    }
+    .cart-qty-num::-webkit-inner-spin-button, 
+    .cart-qty-num::-webkit-outer-spin-button { 
+      -webkit-appearance: none; margin: 0; 
+    }
+    .cart-qty-num:focus {
+      background: var(--surface); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--brand-1);
+    }
 
     .cart-sheet-footer {
       padding: 14px 20px;
