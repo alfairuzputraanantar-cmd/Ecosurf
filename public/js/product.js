@@ -353,11 +353,7 @@ window.openDetailModal = (id, data) => {
   };
 
   document.getElementById('detailModal').classList.add('open');
-};  });
-
-  if (empty) empty.style.display = count === 0 ? 'block' : 'none';
-  renderHeader();
-}
+};
 
 /* ================================================================
    REALTIME PRODUCT SNAPSHOT — waits for userReady
