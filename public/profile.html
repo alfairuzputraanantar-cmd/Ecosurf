@@ -252,6 +252,9 @@
     import { setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { uploadString } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+    let hasUnsavedChanges = false;
+    let pendingLogoData = null;
+
     async function loadProfile() {
       try {
         const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
@@ -297,11 +300,12 @@
       if (file.size > 1048576) { showToast('File too large (max 1 MB)', 'error'); return; }
       const reader = new FileReader();
       reader.onload = ev => {
-        const dataURL = ev.target.result;
-        document.getElementById('profileAvatarLarge').innerHTML = `<img src="${dataURL}" alt="Avatar"/>`;
-        document.getElementById('sidebarAvatar').innerHTML = `<img src="${dataURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+        pendingLogoData = ev.target.result;
+        // Only update the large preview on the profile page, NOT the sidebar yet
+        document.getElementById('profileAvatarLarge').innerHTML = `<img src="${pendingLogoData}" alt="Preview"/>`;
         document.getElementById('removePhotoBtn').style.display = 'inline-flex';
-        localStorage.setItem('cocacoy_store_logo', dataURL);
+        hasUnsavedChanges = true;
+        showToast('Photo selected. Click "Update Profile" to save.', 'info');
       };
       reader.readAsDataURL(file);
     };
@@ -335,21 +339,22 @@
       try {
         if (auth.currentUser) {
           const updateData = { ...data, updatedAt: new Date().toISOString() };
-          const logoData = localStorage.getItem('cocacoy_store_logo');
           
-          // Only upload if it's a new dataURL (starts with data:image)
-          if (logoData && logoData.startsWith('data:image')) {
+          // Only upload if we have pending changes (selected via previewAvatar)
+          if (hasUnsavedChanges && pendingLogoData) {
             const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.png`);
-            // Use uploadString for better mobile compatibility
-            const snapshot = await uploadString(storageRef, logoData, 'data_url');
+            const snapshot = await uploadString(storageRef, pendingLogoData, 'data_url');
             const photoURL = await getDownloadURL(snapshot.ref);
             updateData.photoURL = photoURL;
             localStorage.setItem('cocacoy_store_logo', photoURL);
             newP.photoURL = photoURL;
-            localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
+            pendingLogoData = null;
           }
           
           await setDoc(userDoc(auth.currentUser.uid), updateData, { merge: true });
+          
+          localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
+          hasUnsavedChanges = false;
           
           showToast('Profile updated!', 'success');
           const badge = document.getElementById('profileSaved');
@@ -357,7 +362,7 @@
             badge.classList.add('show');
             setTimeout(() => badge.classList.remove('show'), 2500);
           }
-          loadProfile();
+          loadProfile(); // Now sync to sidebar and finalize
         }
       } catch (e) {
         console.error("Profile sync error:", e);
@@ -386,7 +391,15 @@
       try {
         if (auth.currentUser) {
           await setDoc(userDoc(auth.currentUser.uid), { photoURL: deleteField() }, { merge: true });
-          document.getElementById('avatarInput').value = ""; // Clear any pending upload
+          localStorage.removeItem('cocacoy_store_logo');
+          pendingLogoData = null;
+          hasUnsavedChanges = false;
+          
+          const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          p.photoURL = "";
+          localStorage.setItem('cocacoy_profile', JSON.stringify(p));
+          
+          loadProfile();
           showToast('Photo removed', 'success');
         }
       } catch(e) {
@@ -429,6 +442,33 @@
       document.getElementById('toast-container').appendChild(el);
       setTimeout(() => el.remove(), 3500);
     };
+
+    window.addEventListener('beforeunload', (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // Also handle internal nav links since beforeunload only triggers on real page leaves
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (hasUnsavedChanges) {
+          if (!confirm('You have unsaved changes. Leave anyway?')) {
+            e.preventDefault();
+          }
+        }
+      });
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        if (hasUnsavedChanges && !confirm('Unsaved changes will be lost. Logout?')) {
+          e.preventDefault();
+        }
+      });
+    }
   </script>
 </body>
 </html>
