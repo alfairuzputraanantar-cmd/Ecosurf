@@ -884,9 +884,22 @@
       localStorage.setItem('cocacoy_currency', val);
     }
 
-    function saveAppearance() {
-      localStorage.setItem('cocacoy_currency', document.getElementById('currencyFormat').value);
-      localStorage.setItem('cocacoy_lang', document.getElementById('langSelect').value);
+    async function saveAppearance() {
+      const data = {
+        currency: document.getElementById('currencyFormat').value,
+        lang: document.getElementById('langSelect').value
+      };
+      localStorage.setItem('cocacoy_currency', data.currency);
+      localStorage.setItem('cocacoy_lang', data.lang);
+      
+      try {
+        const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
+        if (auth.currentUser) {
+          await updateDoc(userDoc(auth.currentUser.uid), { appearance: data });
+          showToast('Appearance synced to cloud!', 'success');
+        }
+      } catch (e) { console.error(e); }
+
       flashSaved('appearSaved');
       showToast('Appearance settings saved!', 'success');
     }
@@ -897,16 +910,30 @@
       localStorage.setItem('cocacoy_low_stock_threshold', v);
     }
 
-    function saveInventory() {
-      localStorage.setItem('cocacoy_low_stock_threshold', document.getElementById('lowStockSlider').value);
-      localStorage.setItem('cocacoy_auto_stock', document.getElementById('autoStock').checked);
-      localStorage.setItem('cocacoy_weekly_report', document.getElementById('weeklyReport').checked);
+    async function saveInventory() {
+      const data = {
+        lowStockThreshold: document.getElementById('lowStockSlider').value,
+        autoStock: document.getElementById('autoStock').checked,
+        weeklyReport: document.getElementById('weeklyReport').checked
+      };
+      localStorage.setItem('cocacoy_low_stock_threshold', data.lowStockThreshold);
+      localStorage.setItem('cocacoy_auto_stock', data.autoStock);
+      localStorage.setItem('cocacoy_weekly_report', data.weeklyReport);
+
+      try {
+        const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
+        if (auth.currentUser) {
+          await updateDoc(userDoc(auth.currentUser.uid), { inventoryPrefs: data });
+          showToast('Inventory synced to cloud!', 'success');
+        }
+      } catch (e) { console.error(e); }
+
       flashSaved('inventSaved');
       showToast('Inventory settings saved!', 'success');
     }
 
     /* ── Notifications ── */
-    function saveNotifications() {
+    async function saveNotifications() {
       const prefs = {
         lowStock: document.getElementById('notifLowStock').checked,
         critical: document.getElementById('notifCritical').checked,
@@ -915,6 +942,15 @@
         daily: document.getElementById('notifDaily').checked,
       };
       localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(prefs));
+
+      try {
+        const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
+        if (auth.currentUser) {
+          await updateDoc(userDoc(auth.currentUser.uid), { notificationPrefs: prefs });
+          showToast('Preferences synced to cloud!', 'success');
+        }
+      } catch (e) { console.error(e); }
+
       flashSaved('notifSaved');
       showToast('Notification preferences saved!', 'success');
     }
@@ -961,29 +997,124 @@
     }
     function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('open'); }
 
-    function confirmClearHistory() {
-      openConfirmModal('Clear History', 'All transaction history will be permanently deleted. This action cannot be undone.', () => {
+    async function confirmClearHistory() {
+      openConfirmModal('Clear History', 'All transaction history will be permanently deleted from this device and the cloud. Continue?', async () => {
         localStorage.removeItem('cocacoy_history');
+        try {
+          const { auth, userCol, getDocs, writeBatch, deleteDoc, db } = await import('./js/firebase.js');
+          if (auth.currentUser) {
+             const q = userCol(auth.currentUser.uid, 'history');
+             const snap = await getDocs(q);
+             const batch = writeBatch(db);
+             snap.forEach(d => batch.delete(d.ref));
+             await batch.commit();
+             showToast('Cloud history cleared!', 'success');
+          }
+        } catch (e) { console.error(e); }
         showToast('History cleared successfully', 'success');
       });
     }
-    function confirmResetSettings() {
-      openConfirmModal('Reset Settings', 'All settings will be restored to their default values. Continue?', () => {
+    async function confirmResetSettings() {
+      openConfirmModal('Reset Settings', 'All settings will be restored to their default values. Continue?', async () => {
         ['cocacoy_profile', 'cocacoy_currency', 'cocacoy_lang', 'cocacoy_notif_prefs',
           'cocacoy_low_stock_threshold', 'cocacoy_auto_stock', 'cocacoy_weekly_report'].forEach(k => localStorage.removeItem(k));
+        
+        try {
+          const { auth, userDoc, updateDoc, deleteField } = await import('./js/firebase.js');
+          if (auth.currentUser) {
+            await updateDoc(userDoc(auth.currentUser.uid), {
+              appearance: deleteField(),
+              inventoryPrefs: deleteField(),
+              notificationPrefs: deleteField()
+            });
+          }
+        } catch (e) { }
+        
         showToast('Settings reset to default', 'info');
         setTimeout(() => location.reload(), 800);
       });
     }
-    function confirmDeleteAccount() {
-      openConfirmModal('Delete Account', 'Your account and all data will be permanently deleted. This action CANNOT be undone!', () => {
-        showToast('This feature requires email confirmation', 'warning');
+    async function confirmDeleteAccount() {
+      openConfirmModal('Delete Account', 'DANGER: Your account and all cloud data will be permanently deleted. This CANNOT be undone!', async () => {
+        try {
+          const { auth, deleteUser, userDoc, deleteDoc, db } = await import('./js/firebase.js');
+          if (auth.currentUser) {
+            const user = auth.currentUser;
+            // 1. Delete Firestore doc
+            await deleteDoc(userDoc(user.uid));
+            // 2. Delete Auth user
+            await deleteUser(user);
+            showToast('Account deleted. Goodbye.', 'info');
+            setTimeout(() => window.location.href = 'login.html', 1500);
+          }
+        } catch (e) {
+          console.error(e);
+          if (e.code === 'auth/requires-recent-login') {
+            showToast('Please logout and login again to verify ownership before deletion.', 'error');
+          } else {
+            showToast('Failed to delete account.', 'error');
+          }
+        }
       });
     }
 
     /* ── Load saved settings ── */
-    (function loadSettings() {
+    async function loadSettingsFromCloud() {
+      try {
+        const { auth, userDoc, getDoc } = await import('./js/firebase.js');
+        if (auth.currentUser) {
+          const snap = await getDoc(userDoc(auth.currentUser.uid));
+          if (snap.exists()) {
+            const data = snap.data();
+            
+            // Appearance
+            if (data.appearance) {
+              const app = data.appearance;
+              if (app.currency) {
+                document.getElementById('currencyFormat').value = app.currency;
+                localStorage.setItem('cocacoy_currency', app.currency);
+                updateCurrencyPreview();
+              }
+              if (app.lang) {
+                document.getElementById('langSelect').value = app.lang;
+                localStorage.setItem('cocacoy_lang', app.lang);
+              }
+            }
 
+            // Inventory
+            if (data.inventoryPrefs) {
+              const inv = data.inventoryPrefs;
+              if (inv.lowStockThreshold) {
+                document.getElementById('lowStockSlider').value = inv.lowStockThreshold;
+                updateThresholdVal(inv.lowStockThreshold);
+                localStorage.setItem('cocacoy_low_stock_threshold', inv.lowStockThreshold);
+              }
+              if (inv.autoStock !== undefined) {
+                document.getElementById('autoStock').checked = inv.autoStock;
+                localStorage.setItem('cocacoy_auto_stock', inv.autoStock);
+              }
+              if (inv.weeklyReport !== undefined) {
+                document.getElementById('weeklyReport').checked = inv.weeklyReport;
+                localStorage.setItem('cocacoy_weekly_report', inv.weeklyReport);
+              }
+            }
+
+            // Notifications
+            if (data.notificationPrefs) {
+              const np = data.notificationPrefs;
+              if (np.lowStock !== undefined) document.getElementById('notifLowStock').checked = np.lowStock;
+              if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
+              if (np.success !== undefined) document.getElementById('notifSuccess').checked = np.success;
+              if (np.delete !== undefined) document.getElementById('notifDelete').checked = np.delete;
+              if (np.daily !== undefined) document.getElementById('notifDaily').checked = np.daily;
+              localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(np));
+            }
+          }
+        }
+      } catch (e) { console.error("Cloud load failed:", e); }
+    }
+
+    (function loadSettings() {
       const theme = localStorage.getItem('cocacoy_theme') || 'dark';
       document.getElementById('darkModeToggle').checked = (theme === 'dark');
 
@@ -1005,6 +1136,8 @@
         if (np.daily !== undefined) document.getElementById('notifDaily').checked = np.daily;
       } catch (e) { }
     })();
+
+    document.addEventListener('userReady', loadSettingsFromCloud);
 
     /* ── Flash saved ── */
     function flashSaved(id) {
