@@ -1773,3 +1773,144 @@ input::-webkit-credentials-auto-fill-button {
     width: 90%;
   }
 }
+
+/* ========================================================================
+   TIMELINE (HISTORY) COMPONENT
+======================================================================== */
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.timeline-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeline-group-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.timeline-item:hover {
+  border-color: rgba(200,149,108,0.4);
+  transform: translateY(-1px);
+}
+
+.timeline-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeline-product {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.timeline-body {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.timeline-time {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Priority Styles */
+.tl-sold .timeline-icon {
+  background: rgba(34, 201, 151, 0.15);
+  color: var(--green);
+}
+.tl-sold .timeline-badge {
+  background: rgba(34, 201, 151, 0.15);
+  color: var(--green);
+}
+
+.tl-restock .timeline-icon {
+  background: rgba(34, 201, 151, 0.15);
+  color: var(--green);
+}
+.tl-restock .timeline-badge {
+  background: rgba(34, 201, 151, 0.15);
+  color: var(--green);
+}
+
+.tl-deleted .timeline-icon {
+  background: rgba(247, 95, 95, 0.15);
+  color: var(--red);
+}
+.tl-deleted .timeline-badge {
+  background: rgba(247, 95, 95, 0.15);
+  color: var(--red);
+}
+
+.tl-edited .timeline-icon {
+  background: rgba(245, 166, 35, 0.15);
+  color: var(--yellow);
+}
+.tl-edited .timeline-badge {
+  background: rgba(245, 166, 35, 0.15);
+  color: var(--yellow);
+}
+
+.tl-added .timeline-icon {
+  background: rgba(91, 156, 246, 0.15);
+  color: var(--blue);
+}
+.tl-added .timeline-badge {
+  background: rgba(91, 156, 246, 0.15);
+  color: var(--blue);
+}
+
+.timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
