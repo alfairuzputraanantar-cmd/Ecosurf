@@ -154,25 +154,57 @@ function renderHistory() {
     return;
   }
 
-  // 4. Group by Time
-  const groups = {};
+  // 4. Group by Time & Transactions
+  const groupedRows = [];
+  const processedTx = new Set();
+
   actionFiltered.forEach(r => {
-    const gl = getGroupLabel(getCreatedAt(r));
+    if (r.action === 'Sold') {
+      const txId = r.transactionId || getCreatedAt(r);
+      if (processedTx.has(txId)) return;
+      
+      // Find all items in this transaction
+      const txItems = actionFiltered.filter(item => (item.transactionId || getCreatedAt(item)) === txId && item.action === 'Sold');
+      
+      // Calculate total for this transaction
+      let total = 0;
+      txItems.forEach(item => {
+        // Parse subtotal from details "Subtotal: Rp 15.000"
+        const match = (item.details || '').match(/Rp\s*([\d.]+)/);
+        if (match) total += parseInt(match[1].replace(/\./g, '')) || 0;
+      });
+
+      groupedRows.push({
+        isGroup: true,
+        action: 'Sold',
+        transactionId: txId,
+        createdAt: getCreatedAt(r),
+        items: txItems,
+        total: total
+      });
+      processedTx.add(txId);
+    } else {
+      groupedRows.push({ ...r, isGroup: false });
+    }
+  });
+
+  const groups = {};
+  groupedRows.forEach(r => {
+    const gl = getGroupLabel(r.createdAt);
     if (!groups[gl]) groups[gl] = [];
     groups[gl].push(r);
   });
 
   // 5. Render Timeline
   let html = '';
-  const groupOrder = ['Today', 'Yesterday', 'Earlier This Week', 'Earlier This Month']; // Ensure order
+  const groupOrder = ['Today', 'Yesterday', 'Earlier This Week', 'Earlier This Month'];
   const allGroupLabels = Object.keys(groups).sort((a, b) => {
     const idxA = groupOrder.indexOf(a);
     const idxB = groupOrder.indexOf(b);
     if (idxA !== -1 && idxB !== -1) return idxA - idxB;
     if (idxA !== -1) return -1;
     if (idxB !== -1) return 1;
-    // For months, sort backwards, but they are already sorted implicitly because rows are sorted descending
-    return 0; 
+    return 0;
   });
 
   allGroupLabels.forEach(gl => {
@@ -180,26 +212,59 @@ function renderHistory() {
       <div class="timeline-group-header">${gl}</div>`;
     
     groups[gl].forEach(r => {
-      const isDeleted = r.action === 'Deleted';
-      const isEdited  = r.action === 'Edited';
-      const isSold    = r.action === 'Sold';
-      const isRestock = r.action === 'Restock';
-      
-      const emoji   = isDeleted ? '<i class="fas fa-trash"></i>' : isEdited ? '<i class="fas fa-pen"></i>' : isSold ? '<i class="fas fa-cart-shopping"></i>' : isRestock ? '<i class="fas fa-truck"></i>' : '<i class="fas fa-plus"></i>';
-      const actionCls = isDeleted ? 'tl-deleted' : isEdited ? 'tl-edited' : isSold ? 'tl-sold' : isRestock ? 'tl-restock' : 'tl-added';
-      
-      html += `
-        <div class="timeline-item ${actionCls}">
-          <div class="timeline-icon">${emoji}</div>
-          <div class="timeline-content">
-            <div class="timeline-header">
-              <span class="timeline-badge">${r.action || 'Added'}</span>
-              <span class="timeline-product">${r.productName || '-'}</span>
+      if (r.isGroup) {
+        // Render Grouped Transaction
+        const itemNames = r.items.map(it => it.productName).join(', ');
+        const subItemsHtml = r.items.map(it => {
+          const qtyMatch = (it.details || '').match(/Sold:\s*(\d+)/);
+          const qty = qtyMatch ? qtyMatch[1] : '1';
+          const subMatch = (it.details || '').match(/Subtotal:\s*Rp\s*([\d.]+)/);
+          const sub = subMatch ? subMatch[1] : '0';
+          return `<div class="timeline-sub-item">
+            <span><span class="qty">${qty}x</span> ${it.productName}</span>
+            <span>Rp ${sub}</span>
+          </div>`;
+        }).join('');
+
+        html += `
+          <div class="timeline-item tl-sold">
+            <div class="timeline-icon"><i class="fas fa-cart-shopping"></i></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="timeline-badge">Transaction</span>
+                <span class="timeline-product">${r.items.length} Items Sold</span>
+              </div>
+              <div class="timeline-body">
+                <div class="timeline-sub-list">${subItemsHtml}</div>
+              </div>
+              <div class="timeline-footer">
+                <div class="timeline-total">Total: Rp ${r.total.toLocaleString('id-ID')}</div>
+              </div>
+              <div class="timeline-time">${getRelativeTime(r.createdAt)}</div>
             </div>
-            <div class="timeline-body">${r.details || ''}</div>
-            <div class="timeline-time">${getRelativeTime(getCreatedAt(r))}</div>
-          </div>
-        </div>`;
+          </div>`;
+      } else {
+        // Render Individual Action (Added, Edited, Deleted, Restock)
+        const isDeleted = r.action === 'Deleted';
+        const isEdited  = r.action === 'Edited';
+        const isRestock = r.action === 'Restock';
+        
+        const emoji   = isDeleted ? '<i class="fas fa-trash"></i>' : isEdited ? '<i class="fas fa-pen"></i>' : isRestock ? '<i class="fas fa-truck"></i>' : '<i class="fas fa-plus"></i>';
+        const actionCls = isDeleted ? 'tl-deleted' : isEdited ? 'tl-edited' : isRestock ? 'tl-restock' : 'tl-added';
+        
+        html += `
+          <div class="timeline-item ${actionCls}">
+            <div class="timeline-icon">${emoji}</div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="timeline-badge">${r.action || 'Added'}</span>
+                <span class="timeline-product">${r.productName || '-'}</span>
+              </div>
+              <div class="timeline-body">${r.details || ''}</div>
+              <div class="timeline-time">${getRelativeTime(getCreatedAt(r))}</div>
+            </div>
+          </div>`;
+      }
     });
     html += `</div>`;
   });

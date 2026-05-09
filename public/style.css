@@ -1914,3 +1914,46 @@ input::-webkit-credentials-auto-fill-button {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Grouped Transaction Specifics */
+.timeline-sub-list {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeline-sub-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.timeline-sub-item .qty {
+  color: var(--muted);
+  margin-right: 6px;
+  font-weight: 600;
+}
+
+.timeline-footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.timeline-total {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(34, 201, 151, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.stat-val#statSales {
+  color: var(--green);
+}
