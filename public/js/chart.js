@@ -8,7 +8,7 @@ import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-f
 
 const PALETTE = ['#c8956c','#a0714f','#7a9aaa','#22c997','#f5a623','#5b9cf6','#f75f5f','#e8c9b0'];
 
-let _stockChart = null, _catChart = null, _histChart = null, _salesChart = null;
+let _stockChart = null, _catChart = null, _histChart = null, _salesChart = null, _profitChart = null, _topProfitChart = null;
 let products = [];
 let history  = [];
 let transactions = [];
@@ -47,6 +47,8 @@ function renderAll() {
   renderCategoryChart();
   renderHistoryChart();
   renderSalesChart();
+  renderProfitChart();
+  renderTopProfitChart();
   renderLowStockTable();
 }
 
@@ -324,6 +326,140 @@ function renderSalesChart() {
             callback: (val) => 'Rp ' + val.toLocaleString('id-ID')
           }
         }
+      }
+    }
+  });
+}
+
+/* ================================================================
+   PROFIT CHART — daily profit (last 7 days)
+================================================================ */
+function renderProfitChart() {
+  const canvas = document.getElementById('profitChart');
+  const empty  = document.getElementById('emptyProfit');
+  if (!canvas) return;
+
+  const dayMap = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dayMap[d.toISOString().slice(0,10)] = 0;
+  }
+
+  transactions.forEach(t => {
+    const dateKey = (t.createdAt || '').slice(0,10);
+    if (dateKey && dayMap[dateKey] !== undefined) {
+      let profit = t.totalProfit;
+      if (profit === undefined) {
+        profit = (t.items || []).reduce((sum, item) => {
+          const prod = products.find(p => p.id === item.productId);
+          const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
+          return sum + (item.price - buyPrice) * item.qty;
+        }, 0);
+      }
+      dayMap[dateKey] += profit;
+    }
+  });
+
+  const labels = Object.keys(dayMap).map(k => { const [y,m,d] = k.split('-'); return `${d}/${m}`; });
+  const data   = Object.values(dayMap);
+
+  if (data.every(v => v === 0)) {
+    canvas.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  canvas.style.display = '';
+  if (empty) empty.style.display = 'none';
+
+  if (_profitChart) _profitChart.destroy();
+  _profitChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Profit',
+        data,
+        borderColor: '#5b9cf6',
+        backgroundColor: 'rgba(91,156,246,.12)',
+        fill: true, tension: 0.4,
+        pointBackgroundColor: '#5b9cf6',
+        pointBorderColor: '#13161f',
+        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { 
+          grid: { color: 'rgba(255,255,255,0.05)' }, 
+          beginAtZero: true,
+          ticks: { callback: (val) => 'Rp ' + val.toLocaleString('id-ID') }
+        }
+      }
+    }
+  });
+}
+
+/* ================================================================
+   TOP PROFITABLE PRODUCTS
+================================================================ */
+function renderTopProfitChart() {
+  const canvas = document.getElementById('topProfitChart');
+  const empty  = document.getElementById('emptyTopProfit');
+  if (!canvas) return;
+
+  const profMap = {};
+  transactions.forEach(t => {
+    (t.items || []).forEach(item => {
+      const prod = products.find(p => p.id === item.productId);
+      const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
+      const profit = (item.price - buyPrice) * item.qty;
+      profMap[item.name] = (profMap[item.name] || 0) + profit;
+    });
+  });
+
+  const sorted = Object.entries(profMap)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 10);
+
+  if (sorted.length === 0) {
+    canvas.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  canvas.style.display = '';
+  if (empty) empty.style.display = 'none';
+
+  const labels = sorted.map(e => e[0]);
+  const data   = sorted.map(e => e[1]);
+
+  if (_topProfitChart) _topProfitChart.destroy();
+  _topProfitChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Total Profit',
+        data,
+        backgroundColor: labels.map((_,i) => PALETTE[i % PALETTE.length] + 'CC'),
+        borderColor:     labels.map((_,i) => PALETTE[i % PALETTE.length]),
+        borderWidth: 2, borderRadius: 8, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'y', // horizontal bar
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { 
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          beginAtZero: true,
+          ticks: { callback: (val) => 'Rp ' + val.toLocaleString('id-ID') }
+        },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' } }
       }
     }
   });

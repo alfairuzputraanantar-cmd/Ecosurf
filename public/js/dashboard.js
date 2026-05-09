@@ -25,18 +25,80 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
     renderDashboard();
   });
 
-  /* ── Listen transactions → today's sales ── */
+  /* ── Listen transactions → Analytics Grid ── */
   onSnapshot(userCol(uid, 'transactions'), snap => {
-    const todayStr = new Date().toISOString().slice(0, 10);
-    let revenue = 0;
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    
+    const yest = new Date(now); yest.setDate(yest.getDate() - 1);
+    const yesterdayStr = yest.toISOString().slice(0, 10);
+
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    const startOfWeekStr = startOfWeek.toISOString().slice(0, 10);
+
+    const startOfLastWeek = new Date(startOfWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const startOfLastWeekStr = startOfLastWeek.toISOString().slice(0, 10);
+
+    const thisMonthStr = now.toISOString().slice(0, 7);
+
+    let revToday = 0, revYest = 0, revWeek = 0, revLastWeek = 0;
+    let profToday = 0, profYest = 0, profMonth = 0;
+    let salesMonthCount = 0;
+
     snap.forEach(d => {
       const data = d.data();
-      if ((data.createdAt || '').startsWith(todayStr)) revenue += data.total || 0;
+      const dateStr = (data.createdAt || '').slice(0, 10);
+      const monthStr = (data.createdAt || '').slice(0, 7);
+      const total = data.total || 0;
+
+      // Calculate profit dynamically if not stored
+      let profit = data.totalProfit;
+      if (profit === undefined) {
+        profit = (data.items || []).reduce((sum, item) => {
+          const prod = products.find(p => p.id === item.productId);
+          const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
+          return sum + (item.price - buyPrice) * item.qty;
+        }, 0);
+      }
+
+      if (dateStr === todayStr) { revToday += total; profToday += profit; }
+      else if (dateStr === yesterdayStr) { revYest += total; profYest += profit; }
+
+      if (dateStr >= startOfWeekStr) { revWeek += total; }
+      else if (dateStr >= startOfLastWeekStr && dateStr < startOfWeekStr) { revLastWeek += total; }
+
+      if (monthStr === thisMonthStr) { profMonth += profit; salesMonthCount++; }
     });
-    const el = document.getElementById('todaySales');
-    if (el) el.textContent = 'Rp ' + revenue.toLocaleString('id-ID');
+
+    setText('todaySales', 'Rp ' + revToday.toLocaleString('id-ID'));
+    setText('weekSales', 'Rp ' + revWeek.toLocaleString('id-ID'));
+    setText('todayProfit', 'Rp ' + profToday.toLocaleString('id-ID'));
+    setText('monthProfit', 'Rp ' + profMonth.toLocaleString('id-ID'));
+    setText('totalSalesCount', salesMonthCount);
+
+    setTrend('todaySalesTrend', revToday, revYest);
+    setTrend('weekSalesTrend', revWeek, revLastWeek);
+    setTrend('todayProfitTrend', profToday, profYest);
   });
 });
+
+function setTrend(id, current, previous) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (previous === 0) {
+    if (current > 0) el.innerHTML = `<span style="color:var(--green);"><i class="fas fa-arrow-trend-up"></i> 100%</span>`;
+    else el.innerHTML = '';
+    return;
+  }
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct >= 0) {
+    el.innerHTML = `<span style="color:var(--green);"><i class="fas fa-arrow-trend-up"></i> ${pct}%</span>`;
+  } else {
+    el.innerHTML = `<span style="color:var(--red);"><i class="fas fa-arrow-trend-down"></i> ${Math.abs(pct)}%</span>`;
+  }
+}
 
 
 /* ================================================================

@@ -355,17 +355,30 @@ window.processCheckout = async () => {
     // 2. Add transaction document
     const totalRevenue = items.reduce((s, [, v]) => s + v.qty * v.price, 0);
     const totalItems   = items.reduce((s, [, v]) => s + v.qty, 0);
+    const totalProfit  = items.reduce((s, [id, v]) => {
+      const prod = _products.find(p => p.id === id);
+      const buyPrice = parseInt(prod?.BuyPrice) || 0;
+      return s + (v.price - buyPrice) * v.qty;
+    }, 0);
+
     const txRef = doc(userCol(_uid, 'transactions'));
     batch.set(txRef, {
-      items: items.map(([id, item]) => ({
-        productId: id,
-        name: item.name,
-        qty: item.qty,
-        price: item.price,
-        unit: item.unit,
-        subtotal: item.qty * item.price
-      })),
+      items: items.map(([id, item]) => {
+        const prod = _products.find(p => p.id === id);
+        const buyPrice = parseInt(prod?.BuyPrice) || 0;
+        return {
+          productId: id,
+          name: item.name,
+          qty: item.qty,
+          price: item.price,
+          buyPrice: buyPrice,
+          profit: (item.price - buyPrice) * item.qty,
+          unit: item.unit,
+          subtotal: item.qty * item.price
+        };
+      }),
       total: totalRevenue,
+      totalProfit: totalProfit,
       itemCount: totalItems,
       createdAt: now.toISOString(),
       timestamp: now.toLocaleString('id-ID')

@@ -269,6 +269,37 @@
         </div>
       </div>
 
+      <!-- CHARTS ROW 3: Profit and Top Profitable -->
+      <div class="chart-grid grid-auto">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-coins" style="color:var(--brand-1);"></i> Daily Profit – Last 7 Days</div>
+          </div>
+          <div class="chart-card-body">
+            <div class="chart-wrapper">
+              <canvas id="profitChart"></canvas>
+            </div>
+            <div class="chart-empty" id="emptyProfit" style="display:none;">
+              <i class="fas fa-wallet"></i><span>No profit data yet</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--yellow);"></i> Top Profitable Products</div>
+          </div>
+          <div class="chart-card-body">
+            <div class="chart-wrapper">
+              <canvas id="topProfitChart"></canvas>
+            </div>
+            <div class="chart-empty" id="emptyTopProfit" style="display:none;">
+              <i class="fas fa-box-open"></i><span>No sales data yet</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- LOW STOCK TABLE -->
       <div class="card">
         <div class="card-header">
