@@ -240,7 +240,17 @@ a {
   padding: 10px 12px;
   overflow: hidden;
   min-width: 0;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  border: 1px solid transparent;
 }
+
+.user-pill:hover {
+  background: var(--border);
+  border-color: rgba(200, 149, 108, .3);
+}
+
 
 .user-avatar {
   width: 34px;

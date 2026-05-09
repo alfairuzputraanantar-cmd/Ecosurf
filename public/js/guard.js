@@ -24,6 +24,13 @@ onAuthStateChanged(auth, (user) => {
   const avatarEl = document.getElementById("sidebarAvatar");
   const nameEl   = document.getElementById("sidebarName");
   const roleEl   = document.getElementById("sidebarRole");
+  const emailEl  = document.getElementById("profileEmail");
+  const joinEl   = document.getElementById("profileJoinDate");
+
+  if (emailEl) emailEl.textContent = user.email;
+  if (joinEl && user.metadata.creationTime) {
+    joinEl.textContent = new Date(user.metadata.creationTime).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  }
 
   // Profile Sync
   import("./firebase.js").then(({ userDoc }) => {

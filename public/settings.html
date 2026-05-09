@@ -404,13 +404,13 @@
       <a class="nav-link" href="help"><i class="fas fa-circle-question"></i> Help</a>
     </div>
     <div class="sidebar-footer">
-      <div class="user-pill">
+      <a href="profile" class="user-pill">
         <div class="user-avatar" id="sidebarAvatar">U</div>
         <div class="user-info">
           <div class="user-name" id="sidebarName">Owner</div>
           <div class="user-role" id="sidebarRole">UMKM Admin</div>
         </div>
-      </div>
+      </a>
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
     </div>
     <script>
@@ -469,10 +469,7 @@
 
         <!-- ── Left Nav ── -->
         <nav class="settings-nav">
-          <div class="settings-nav-item active" data-panel="profile" onclick="switchPanel('profile')">
-            <i class="fas fa-store"></i> Store Profile
-          </div>
-          <div class="settings-nav-item" data-panel="appearance" onclick="switchPanel('appearance')">
+          <div class="settings-nav-item active" data-panel="appearance" onclick="switchPanel('appearance')">
             <i class="fas fa-palette"></i> Appearance
           </div>
           <div class="settings-nav-item" data-panel="inventory" onclick="switchPanel('inventory')">
@@ -489,76 +486,9 @@
         <!-- ── Right Content ── -->
         <div class="settings-right">
 
-          <!-- STORE PROFILE -->
-          <div class="settings-panel active" id="panel-profile">
-            <div class="settings-section">
-              <div class="settings-section-header">
-                <div class="settings-section-icon copper"><i class="fas fa-store"></i></div>
-                <div>
-                  <div class="settings-section-title">Store Profile</div>
-                  <div class="settings-section-sub">Basic information about your business</div>
-                </div>
-              </div>
-              <div class="settings-section-body">
-                <div class="avatar-upload-wrap">
-                  <div class="avatar-upload-img" id="avatarPreview">C</div>
-                  <div class="avatar-upload-info">
-                    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('avatarInput').click()">
-                      <i class="fas fa-upload"></i> Upload Logo
-                    </button>
-                    <input type="file" id="avatarInput" accept="image/*" style="display:none;"
-                      onchange="previewAvatar(event)" />
-                    <p>JPG, PNG, SVG · Max. 1 MB</p>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Store Name</label>
-                    <input class="form-control" id="storeName" type="text" placeholder="e.g. CocaCoy" value="CocaCoy" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Owner Name</label>
-                    <input class="form-control" id="ownerName" type="text" placeholder="Business owner's name" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Short Description</label>
-                  <textarea class="form-control" id="storeDesc" rows="3"
-                    placeholder="Tell us a bit about your business..." style="resize:vertical;"></textarea>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">WhatsApp Number</label>
-                    <input class="form-control" id="storePhone" type="tel" placeholder="+62 8xx-xxxx-xxxx" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Business Role</label>
-                    <input class="form-control" id="userRole" type="text" placeholder="e.g. Owner, Admin, Manager" value="UMKM Admin" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Business Category</label>
-                  <select class="form-control" id="storeCategory">
-                    <option value="food">Food & Beverage</option>
-                    <option value="retail">Retail / Shop</option>
-                    <option value="fashion">Fashion & Clothing</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="beauty">Beauty & Cosmetics</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
-                  <button class="btn btn-primary" onclick="saveProfile()">
-                    <i class="fas fa-floppy-disk"></i> Save Profile
-                  </button>
-                  <span class="saved-badge" id="profileSaved"><i class="fas fa-circle-check"></i> Saved</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- APPEARANCE -->
-          <div class="settings-panel" id="panel-appearance">
+          <div class="settings-panel active" id="panel-appearance">
             <div class="settings-section">
               <div class="settings-section-header">
                 <div class="settings-section-icon blue"><i class="fas fa-palette"></i></div>
@@ -938,92 +868,6 @@
       if (last) switchPanel(last);
     })();
 
-    /* ── Profile ── */
-    function previewAvatar(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 1048576) { showToast('File too large (max 1 MB)', 'error'); return; }
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const dataURL = ev.target.result;
-        // Update both previews
-        const prev = document.getElementById('avatarPreview');
-        if (prev) prev.innerHTML = `<img src="${dataURL}" alt="Logo"/>`;
-        
-        const sideAv = document.getElementById('sidebarAvatar');
-        if (sideAv) sideAv.innerHTML = `<img src="${dataURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
-        
-        localStorage.setItem('cocacoy_store_logo', dataURL);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function saveProfile() {
-      const btn = document.querySelector('button[onclick="saveProfile()"]');
-      const originalBtnHtml = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Saving...';
-
-      const data = {
-        storeName: document.getElementById('storeName').value.trim(),
-        ownerName: document.getElementById('ownerName').value.trim(),
-        role:      document.getElementById('userRole').value.trim(),
-        storeDesc: document.getElementById('storeDesc').value.trim(),
-        storePhone: document.getElementById('storePhone').value.trim(),
-        storeCategory: document.getElementById('storeCategory').value,
-      };
-
-      // 1. Update UI and LocalStorage (Instant)
-      localStorage.setItem('cocacoy_profile', JSON.stringify(data));
-      if (data.ownerName) {
-        if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = data.ownerName;
-        if (!localStorage.getItem('cocacoy_store_logo') && document.getElementById('sidebarAvatar')) {
-           document.getElementById('sidebarAvatar').textContent = data.ownerName.charAt(0).toUpperCase();
-        }
-      }
-      if (data.role && document.getElementById('sidebarRole')) {
-        document.getElementById('sidebarRole').textContent = data.role;
-      }
-
-      // 2. Sync to Firestore & Storage (Permanent)
-      try {
-        const { auth, userDoc, storage, ref, uploadBytes, getDownloadURL } = await import('./js/firebase.js');
-        const { updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-        
-        if (auth.currentUser) {
-          const updateData = {
-            ownerName: data.ownerName,
-            role: data.role,
-            storeName: data.storeName,
-            storeDesc: data.storeDesc,
-            storePhone: data.storePhone,
-            storeCategory: data.storeCategory,
-            updatedAt: new Date().toISOString()
-          };
-
-          // Handle Photo Upload
-          const avatarInput = document.getElementById('avatarInput');
-          if (avatarInput.files && avatarInput.files[0]) {
-            const file = avatarInput.files[0];
-            const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.png`);
-            const snapshot = await uploadBytes(storageRef, file);
-            const photoURL = await getDownloadURL(snapshot.ref);
-            updateData.photoURL = photoURL;
-            localStorage.setItem('cocacoy_store_logo', photoURL);
-          }
-
-          await updateDoc(userDoc(auth.currentUser.uid), updateData);
-          showToast('Profile synced to cloud!', 'success');
-          flashSaved('profileSaved');
-        }
-      } catch (e) {
-        console.error("Firestore sync error:", e);
-        showToast('Cloud sync failed, but saved locally.', 'warning');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalBtnHtml;
-      }
-    }
 
     /* ── Appearance ── */
     function toggleThemeFromSwitch(checkbox) {
@@ -1139,21 +983,6 @@
 
     /* ── Load saved settings ── */
     (function loadSettings() {
-      try {
-        const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-        if (p.storeName) document.getElementById('storeName').value = p.storeName;
-        if (p.ownerName) document.getElementById('ownerName').value = p.ownerName;
-        if (p.role)      document.getElementById('userRole').value = p.role;
-        if (p.storeDesc) document.getElementById('storeDesc').value = p.storeDesc;
-        if (p.storePhone) document.getElementById('storePhone').value = p.storePhone;
-        if (p.storeCategory) document.getElementById('storeCategory').value = p.storeCategory;
-      } catch (e) { }
-
-      const logo = localStorage.getItem('cocacoy_store_logo');
-      if (logo) {
-        if (document.getElementById('avatarPreview')) document.getElementById('avatarPreview').innerHTML = `<img src="${logo}" alt="Logo"/>`;
-        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
-      }
 
       const theme = localStorage.getItem('cocacoy_theme') || 'dark';
       document.getElementById('darkModeToggle').checked = (theme === 'dark');
