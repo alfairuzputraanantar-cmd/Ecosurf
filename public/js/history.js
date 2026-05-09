@@ -107,38 +107,26 @@ function renderHistory() {
   });
 
   // 2. Compute Analytics Summary
-  let totalSales = 0;
   let totalRestocks = 0;
-  let movements = timeFiltered.length;
-  let productCounts = {};
   const uniqueSales = new Set();
+  const otherMovements = [];
 
   timeFiltered.forEach(r => {
     if (r.action === 'Sold') {
-      // Use transactionId if available, fallback to createdAt (items from same TX have same ISO string)
       uniqueSales.add(r.transactionId || getCreatedAt(r));
+    } else {
+      if (r.action === 'Restock') totalRestocks++;
+      otherMovements.push(r.id);
     }
-    if (r.action === 'Restock') totalRestocks++;
-    const pName = r.productName || 'Unknown';
-    productCounts[pName] = (productCounts[pName] || 0) + 1;
   });
 
-  totalSales = uniqueSales.size;
-
-  let topProduct = '-';
-  let maxCount = 0;
-  for (const [pName, count] of Object.entries(productCounts)) {
-    if (count > maxCount && pName !== 'Unknown') {
-      maxCount = count;
-      topProduct = pName;
-    }
-  }
+  const totalSales = uniqueSales.size;
+  const movements = totalSales + otherMovements.length;
 
   const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   setText('statSales', totalSales);
   setText('statRestocks', totalRestocks);
   setText('statMovements', movements);
-  setText('statTopProduct', topProduct);
 
   // 3. Filter by Action Tab and Search
   const searchQ = (document.getElementById('historySearch')?.value || '').toLowerCase();
