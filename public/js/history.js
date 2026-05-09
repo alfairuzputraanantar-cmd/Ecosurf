@@ -108,6 +108,9 @@ function renderHistory() {
 
   // 2. Compute Analytics Summary
   let totalRestocks = 0;
+  let totalAdded = 0;
+  let totalEdited = 0;
+  let totalDeleted = 0;
   const uniqueSales = new Set();
   const otherMovements = [];
 
@@ -116,6 +119,10 @@ function renderHistory() {
       uniqueSales.add(r.transactionId || getCreatedAt(r));
     } else {
       if (r.action === 'Restock') totalRestocks++;
+      else if (r.action === 'Added') totalAdded++;
+      else if (r.action === 'Edited') totalEdited++;
+      else if (r.action === 'Deleted') totalDeleted++;
+      
       otherMovements.push(r.id);
     }
   });
@@ -127,6 +134,9 @@ function renderHistory() {
   setText('statSales', totalSales);
   setText('statRestocks', totalRestocks);
   setText('statMovements', movements);
+  setText('statAdded', totalAdded);
+  setText('statEdited', totalEdited);
+  setText('statDeleted', totalDeleted);
 
   // 3. Filter by Action Tab and Search
   const searchQ = (document.getElementById('historySearch')?.value || '').toLowerCase();

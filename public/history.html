@@ -112,26 +112,47 @@
     <div class="content">
 
       <!-- Analytics Summary -->
-      <div class="stats-grid grid-auto" style="margin-bottom: 18px;">
+      <div class="stats-grid grid-auto" style="margin-bottom: 18px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
         <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
           <div class="stat-icon si-green"><i class="fas fa-receipt"></i></div>
           <div>
-            <div class="stat-val" id="statSales" style="font-size:16px;">0</div>
-            <div class="stat-label">Total Transactions</div>
+            <div class="stat-val" id="statSales">0</div>
+            <div class="stat-label">Transactions</div>
           </div>
         </div>
         <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
           <div class="stat-icon si-blue"><i class="fas fa-truck"></i></div>
           <div>
-            <div class="stat-val" id="statRestocks" style="font-size:16px;">0</div>
-            <div class="stat-label">Total Restocks</div>
+            <div class="stat-val" id="statRestocks">0</div>
+            <div class="stat-label">Restocks</div>
           </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="border-color:rgba(160,113,79,.3);">
           <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
           <div>
-            <div class="stat-val" id="statMovements" style="font-size:16px;">0</div>
-            <div class="stat-label">Inventory Movements</div>
+            <div class="stat-val" id="statMovements">0</div>
+            <div class="stat-label">Movements</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(52,152,219,.3);">
+          <div class="stat-icon si-blue" style="background:rgba(52,152,219,.15);color:#3498db;"><i class="fas fa-plus-circle"></i></div>
+          <div>
+            <div class="stat-val" id="statAdded" style="color:#3498db;">0</div>
+            <div class="stat-label">Added</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(241,196,15,.3);">
+          <div class="stat-icon si-yellow" style="background:rgba(241,196,15,.15);color:#f1c40f;"><i class="fas fa-pen-to-square"></i></div>
+          <div>
+            <div class="stat-val" id="statEdited" style="color:#f1c40f;">0</div>
+            <div class="stat-label">Edited</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(231,76,60,.3);">
+          <div class="stat-icon si-red" style="background:rgba(231,76,60,.15);color:#e74c3c;"><i class="fas fa-trash-can"></i></div>
+          <div>
+            <div class="stat-val" id="statDeleted" style="color:#e74c3c;">0</div>
+            <div class="stat-label">Deleted</div>
           </div>
         </div>
       </div>
