@@ -130,6 +130,12 @@ window.openAddModal = () => {
           </div>`).join('')}
       </div>`;
   }
+  
+  // ✅ Pre-fill Low Stock Threshold from Global Settings
+  const globalThreshold = localStorage.getItem('cocacoy_low_stock_threshold') || '10';
+  const threshEl = document.getElementById('core-threshold');
+  if (threshEl) threshEl.value = globalThreshold;
+
   document.getElementById('addModal').classList.add('open');
 };
 
