@@ -144,50 +144,51 @@
         </div>
       </div>
 
-      <!-- ANALYTICS GRID -->
-      <div class="stats-grid grid-auto" style="margin-top:18px;">
+      <!-- SALES ANALYTICS SECTION -->
+      <div style="margin-top:24px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-main);"><i class="fas fa-chart-line" style="color:var(--brand-1); margin-right: 8px;"></i> Sales Analytics</div>
+        <div class="time-filters" style="display: flex; gap: 8px; background: var(--surface2); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+          <button class="btn btn-ghost btn-sm active" style="border-radius: 6px; padding: 6px 12px;" onclick="setDashboardTimeFilter('today', this)">Today</button>
+          <button class="btn btn-ghost btn-sm" style="border-radius: 6px; padding: 6px 12px;" onclick="setDashboardTimeFilter('7d', this)">7 Days</button>
+          <button class="btn btn-ghost btn-sm" style="border-radius: 6px; padding: 6px 12px;" onclick="setDashboardTimeFilter('30d', this)">30 Days</button>
+          <button class="btn btn-ghost btn-sm" style="border-radius: 6px; padding: 6px 12px;" onclick="setDashboardTimeFilter('1y', this)">1 Year</button>
+        </div>
+      </div>
+
+      <div class="stats-grid grid-auto">
+        <div class="stat-card" style="border-color:rgba(160,113,79,.3);">
+          <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
+          <div>
+            <div class="stat-val" id="saProductsSold" style="font-size:16px;">0</div>
+            <div class="stat-label">Products Sold</div>
+          </div>
+        </div>
         <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
           <div class="stat-icon si-green"><i class="fas fa-money-bill-wave"></i></div>
           <div>
-            <div class="stat-val" id="todaySales" style="font-size:16px;">Rp 0</div>
-            <div class="stat-label" style="display:flex;align-items:center;gap:6px;">
-              Revenue Today
-              <span id="todaySalesTrend" style="font-size:11px;font-weight:600;"></span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon si-copper"><i class="fas fa-calendar-week"></i></div>
-          <div>
-            <div class="stat-val" id="weekSales" style="font-size:16px;">Rp 0</div>
-            <div class="stat-label" style="display:flex;align-items:center;gap:6px;">
-              Revenue This Week
-              <span id="weekSalesTrend" style="font-size:11px;font-weight:600;"></span>
-            </div>
+            <div class="stat-val" id="saRevenue" style="font-size:16px;">Rp 0</div>
+            <div class="stat-label">Revenue</div>
           </div>
         </div>
         <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
           <div class="stat-icon si-blue"><i class="fas fa-coins"></i></div>
           <div>
-            <div class="stat-val" id="todayProfit" style="font-size:16px;">Rp 0</div>
-            <div class="stat-label" style="display:flex;align-items:center;gap:6px;">
-              Est. Profit Today
-              <span id="todayProfitTrend" style="font-size:11px;font-weight:600;"></span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon si-blue"><i class="fas fa-wallet"></i></div>
-          <div>
-            <div class="stat-val" id="monthProfit" style="font-size:16px;">Rp 0</div>
-            <div class="stat-label">Est. Profit This Month</div>
+            <div class="stat-val" id="saProfit" style="font-size:16px;">Rp 0</div>
+            <div class="stat-label">Estimated Profit</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon si-yellow"><i class="fas fa-receipt"></i></div>
           <div>
-            <div class="stat-val" id="totalSalesCount" style="font-size:16px;">0</div>
-            <div class="stat-label">Total Sales (This Month)</div>
+            <div class="stat-val" id="saTransactions" style="font-size:16px;">0</div>
+            <div class="stat-label">Transactions</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-copper"><i class="fas fa-star"></i></div>
+          <div>
+            <div class="stat-val" id="saBestSeller" style="font-size:14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">–</div>
+            <div class="stat-label">Best Seller</div>
           </div>
         </div>
       </div>

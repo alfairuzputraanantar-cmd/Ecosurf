@@ -24,6 +24,12 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
     allRows.sort((a, b) => getCreatedAt(b).localeCompare(getCreatedAt(a)));
     renderHistory();
   });
+
+  onSnapshot(userCol(uid, 'transactions'), (snapshot) => {
+    window._allTransactions = [];
+    snapshot.forEach(d => window._allTransactions.push({ id: d.id, ...d.data() }));
+    if (window.renderSalesTimeline) window.renderSalesTimeline();
+  });
 });
 
 /* ── Utilities ── */
@@ -299,4 +305,136 @@ window.switchTimeScope = function(scope) {
 /* ── Search ── */
 window.filterHistory = function() {
   renderHistory();
+};
+
+/* ================================================================
+   SALES TIMELINE TAB LOGIC
+================================================================ */
+let activeSalesTimeScope = 'today';
+
+window.switchSalesTimeScope = function(scope) {
+  activeSalesTimeScope = scope;
+  document.querySelectorAll('.hist-sales-tab').forEach(btn => {
+    const active = btn.dataset.time === scope;
+    btn.style.background  = active ? 'var(--brand-grd)' : 'var(--surface2)';
+    btn.style.color       = active ? '#fff'             : 'var(--muted)';
+    btn.style.borderColor = active ? 'transparent'      : 'var(--border)';
+  });
+  window.renderSalesTimeline();
+};
+
+window.renderSalesTimeline = function() {
+  const listEl = document.getElementById('salesTimelineList');
+  if (!listEl) return;
+
+  const txs = window._allTransactions || [];
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  
+  let timeLimit = null;
+  if (activeSalesTimeScope === 'today') {
+    timeLimit = todayStart;
+  } else if (activeSalesTimeScope === '7days') {
+    timeLimit = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+  } else if (activeSalesTimeScope === '30days') {
+    timeLimit = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+  }
+
+  // 1. Filter Transactions
+  const filteredTxs = txs.filter(tx => {
+    if (!timeLimit) return true;
+    const txTime = new Date(tx.createdAt).getTime();
+    return txTime >= timeLimit;
+  });
+
+  // Sort descending
+  filteredTxs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  // 2. Compute Summary
+  let totalRevenue = 0;
+  let totalProfit = 0;
+  let totalQty = 0;
+
+  filteredTxs.forEach(tx => {
+    totalRevenue += tx.total || 0;
+    totalProfit += tx.totalProfit || 0;
+    (tx.items || []).forEach(item => {
+      totalQty += item.qty || 0;
+    });
+  });
+
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setText('salesTabRevenue', 'Rp ' + totalRevenue.toLocaleString('id-ID'));
+  setText('salesTabProfit', 'Rp ' + totalProfit.toLocaleString('id-ID'));
+  setText('salesTabQty', totalQty);
+
+  if (filteredTxs.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-shopping-cart"></i>
+        <p>No sales found for this period.</p>
+      </div>`;
+    return;
+  }
+
+  // 3. Group by Time
+  const groups = {};
+  filteredTxs.forEach(tx => {
+    const gl = getGroupLabel(tx.createdAt);
+    if (!groups[gl]) groups[gl] = [];
+    groups[gl].push(tx);
+  });
+
+  // 4. Render
+  let html = '';
+  const groupOrder = ['Today', 'Yesterday', 'Earlier This Week', 'Earlier This Month'];
+  const allGroupLabels = Object.keys(groups).sort((a, b) => {
+    const idxA = groupOrder.indexOf(a);
+    const idxB = groupOrder.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return 0;
+  });
+
+  allGroupLabels.forEach(gl => {
+    html += `<div class="timeline-group">
+      <div class="timeline-group-header">${gl}</div>`;
+    
+    groups[gl].forEach(tx => {
+      const subItemsHtml = (tx.items || []).map(it => {
+        return `<div class="timeline-sub-item">
+          <span><span class="qty">${it.qty}x</span> ${it.name}</span>
+          <span style="color:var(--text); font-weight:600;">Rp ${(it.price * it.qty).toLocaleString('id-ID')} <br>
+          <span style="font-size:10px; color:var(--muted); font-weight:400; display:block; text-align:right;">Profit: Rp ${(it.profit || 0).toLocaleString('id-ID')}</span></span>
+        </div>`;
+      }).join('');
+
+      const isQris = tx.paymentMethod === 'QRIS' || tx.paymentMethod === 'GoPay / QRIS';
+      const methodBadge = tx.paymentMethod 
+        ? `<span style="font-size:10px; padding: 2px 6px; border-radius: 4px; background: ${isQris ? 'rgba(34,201,151,.1)' : 'rgba(160,113,79,.1)'}; color: ${isQris ? 'var(--green)' : 'var(--brand-1)'}; font-weight: 600; margin-left: 6px;">${tx.paymentMethod}</span>` 
+        : '';
+
+      html += `
+        <div class="timeline-item tl-sold">
+          <div class="timeline-icon"><i class="fas fa-cart-shopping"></i></div>
+          <div class="timeline-content">
+            <div class="timeline-header" style="justify-content: flex-start; align-items: center;">
+              <span class="timeline-badge" style="background: rgba(34,201,151,.1); color: var(--green); border-color: rgba(34,201,151,.2);">Sale</span>
+              ${methodBadge}
+            </div>
+            <div class="timeline-body">
+              <div class="timeline-sub-list">${subItemsHtml}</div>
+            </div>
+            <div class="timeline-footer" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="timeline-time" style="margin-top:0;">${getRelativeTime(tx.createdAt)}</div>
+              <div class="timeline-total" style="color: var(--brand-1);">Total: Rp ${(tx.total || 0).toLocaleString('id-ID')}</div>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+
+  listEl.innerHTML = html;
 };

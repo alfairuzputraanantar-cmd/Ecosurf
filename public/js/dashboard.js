@@ -27,85 +27,77 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
 
   /* ── Listen transactions → Analytics Grid ── */
   onSnapshot(userCol(uid, 'transactions'), snap => {
-    const now = new Date();
-    const todayStr = now.toLocaleDateString('en-CA');
-    
-    const yest = new Date(now); yest.setDate(yest.getDate() - 1);
-    const yesterdayStr = yest.toLocaleDateString('en-CA');
-
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    startOfWeek.setHours(0,0,0,0);
-    const startOfWeekTime = startOfWeek.getTime();
-
-    const startOfLastWeek = new Date(startOfWeek);
-    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-    const startOfLastWeekTime = startOfLastWeek.getTime();
-
-    const thisMonthStr = now.toLocaleDateString('en-CA').slice(0, 7);
-
-    let revToday = 0, revYest = 0, revWeek = 0, revLastWeek = 0;
-    let profToday = 0, profYest = 0, profMonth = 0;
-    let salesMonthCount = 0;
-
-    snap.forEach(d => {
-      const data = d.data();
-      const createdAt = data.createdAt || '';
-      if (!createdAt) return;
-      
-      const itemDate = new Date(createdAt);
-      const itemDateStr = itemDate.toLocaleDateString('en-CA');
-      const itemMonthStr = itemDateStr.slice(0, 7);
-      const itemTime = itemDate.getTime();
-      const total = data.total || 0;
-
-      // Calculate profit dynamically if not stored
-      let profit = data.totalProfit;
-      if (profit === undefined) {
-        profit = (data.items || []).reduce((sum, item) => {
-          const prod = products.find(p => p.id === item.productId);
-          const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
-          return sum + (item.price - buyPrice) * item.qty;
-        }, 0);
-      }
-
-      if (itemDateStr === todayStr) { revToday += total; profToday += profit; }
-      else if (itemDateStr === yesterdayStr) { revYest += total; profYest += profit; }
-
-      if (itemTime >= startOfWeekTime) { revWeek += total; }
-      else if (itemTime >= startOfLastWeekTime && itemTime < startOfWeekTime) { revLastWeek += total; }
-
-      if (itemMonthStr === thisMonthStr) { profMonth += profit; salesMonthCount++; }
-    });
-
-    setText('todaySales', 'Rp ' + revToday.toLocaleString('id-ID'));
-    setText('weekSales', 'Rp ' + revWeek.toLocaleString('id-ID'));
-    setText('todayProfit', 'Rp ' + profToday.toLocaleString('id-ID'));
-    setText('monthProfit', 'Rp ' + profMonth.toLocaleString('id-ID'));
-    setText('totalSalesCount', salesMonthCount);
-
-    setTrend('todaySalesTrend', revToday, revYest);
-    setTrend('weekSalesTrend', revWeek, revLastWeek);
-    setTrend('todayProfitTrend', profToday, profYest);
+    window._allTransactions = [];
+    snap.forEach(d => window._allTransactions.push(d.data()));
+    updateSalesAnalytics(); // default filter is "today" initially
   });
 });
 
-function setTrend(id, current, previous) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (previous === 0) {
-    if (current > 0) el.innerHTML = `<span style="color:var(--green);"><i class="fas fa-arrow-trend-up"></i> 100%</span>`;
-    else el.innerHTML = '';
-    return;
-  }
-  const pct = Math.round(((current - previous) / previous) * 100);
-  if (pct >= 0) {
-    el.innerHTML = `<span style="color:var(--green);"><i class="fas fa-arrow-trend-up"></i> ${pct}%</span>`;
-  } else {
-    el.innerHTML = `<span style="color:var(--red);"><i class="fas fa-arrow-trend-down"></i> ${Math.abs(pct)}%</span>`;
-  }
-}
+let currentDashboardFilter = 'today';
+window.setDashboardTimeFilter = (filter, btn) => {
+  currentDashboardFilter = filter;
+  // Update button active states
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  updateSalesAnalytics();
+};
 
+function updateSalesAnalytics() {
+  const txs = window._allTransactions || [];
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  
+  let cutoff = 0;
+  if (currentDashboardFilter === 'today') {
+    cutoff = todayStart;
+  } else if (currentDashboardFilter === '7d') {
+    cutoff = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+  } else if (currentDashboardFilter === '30d') {
+    cutoff = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+  } else if (currentDashboardFilter === '1y') {
+    cutoff = now.getTime() - (365 * 24 * 60 * 60 * 1000);
+  }
+
+  let totalProductsSold = 0;
+  let totalRevenue = 0;
+  let totalProfit = 0;
+  let totalTransactions = 0;
+  const productSalesMap = {};
+
+  txs.forEach(tx => {
+    const txTime = new Date(tx.createdAt).getTime();
+    if (txTime >= cutoff) {
+      totalTransactions++;
+      totalRevenue += tx.total || 0;
+      totalProfit += tx.totalProfit || 0;
+      
+      (tx.items || []).forEach(item => {
+        totalProductsSold += item.qty || 0;
+        if (!productSalesMap[item.name]) {
+          productSalesMap[item.name] = 0;
+        }
+        productSalesMap[item.name] += item.qty || 0;
+      });
+    }
+  });
+
+  let bestSeller = '–';
+  let maxSold = 0;
+  for (const [name, qty] of Object.entries(productSalesMap)) {
+    if (qty > maxSold) {
+      maxSold = qty;
+      bestSeller = name;
+    }
+  }
+
+  setText('saProductsSold', totalProductsSold.toLocaleString('id-ID'));
+  setText('saRevenue', 'Rp ' + totalRevenue.toLocaleString('id-ID'));
+  setText('saProfit', 'Rp ' + totalProfit.toLocaleString('id-ID'));
+  setText('saTransactions', totalTransactions.toLocaleString('id-ID'));
+  setText('saBestSeller', bestSeller);
+}
 
 /* ================================================================
    MAIN RENDER

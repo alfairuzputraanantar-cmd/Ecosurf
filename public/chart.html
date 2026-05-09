@@ -211,39 +211,55 @@
 
       <!-- SUMMARY CARDS REMOVED AS THEY ARE ACCESSIBLE ON DASHBOARD -->
 
-      <!-- CHARTS ROW 1 -->
+      <!-- CHARTS ROW 1: Trends & Analytics -->
       <div class="chart-grid grid-auto">
-        <div class="chart-card">
+        <div class="chart-card full">
           <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Top Products by Stock</div>
+            <div class="chart-card-title"><i class="fas fa-chart-line" style="color:var(--green);"></i> Revenue & Profit Trend (Last 14 Days)</div>
           </div>
           <div class="chart-card-body">
             <div class="chart-wrapper">
-              <canvas id="stockChart"></canvas>
+              <canvas id="trendChart"></canvas>
             </div>
-            <div class="chart-empty" id="emptyStock" style="display:none;">
-              <i class="fas fa-inbox"></i><span>No product data yet</span>
+            <div class="chart-empty" id="emptyTrend" style="display:none;">
+              <i class="fas fa-money-bill-trend-up"></i><span>No sales data yet</span>
             </div>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-chart-pie"></i> Category Distribution</div>
-          </div>
-          <div class="chart-card-body">
-            <div class="chart-wrapper">
-              <canvas id="categoryChart"></canvas>
-            </div>
-            <div class="chart-empty" id="emptyCategory" style="display:none;">
-              <i class="fas fa-inbox"></i><span>No category data yet</span>
-            </div>
-            <div class="chart-legend" id="categoryLegend"></div>
           </div>
         </div>
       </div>
 
-      <!-- CHARTS ROW 2: Line charts -->
+      <div class="chart-grid grid-auto">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--brand-1);"></i> Top Sold Products</div>
+          </div>
+          <div class="chart-card-body">
+            <div class="chart-wrapper">
+              <canvas id="topSoldChart"></canvas>
+            </div>
+            <div class="chart-empty" id="emptyTopSold" style="display:none;">
+              <i class="fas fa-inbox"></i><span>No sales data yet</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-chart-pie" style="color:var(--blue);"></i> Sales by Category</div>
+          </div>
+          <div class="chart-card-body">
+            <div class="chart-wrapper">
+              <canvas id="salesCategoryChart"></canvas>
+            </div>
+            <div class="chart-empty" id="emptySalesCategory" style="display:none;">
+              <i class="fas fa-inbox"></i><span>No sales data yet</span>
+            </div>
+            <div class="chart-legend" id="salesCategoryLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 3: Inventory Legacy Charts -->
       <div class="chart-grid grid-auto">
         <div class="chart-card">
           <div class="chart-card-header">
