@@ -136,6 +136,9 @@ window.openAddModal = () => {
   const threshEl = document.getElementById('core-threshold');
   if (threshEl) threshEl.value = globalThreshold;
 
+  // ✅ Auto-generate Barcode
+  setTimeout(() => window.regenerateBarcode('add'), 100);
+
   document.getElementById('addModal').classList.add('open');
 };
 
@@ -154,6 +157,7 @@ window.saveProduct = async () => {
   const unit  = v('core-unit') || 'pcs';
   const thresh = v('core-threshold') || '10';
   const notes = v('core-notes');
+  const barcode = v('core-barcode');
 
   if (!name)  { showToast('Product name is required!',   'error'); return; }
   if (!stock) { showToast('Stock quantity is required!', 'error'); return; }
@@ -171,6 +175,7 @@ window.saveProduct = async () => {
       BuyPrice: buyPrice, SellPrice: sellPrice,
       Category: cat, Unit: unit, Notes: notes,
       lowStockThreshold: thresh,
+      barcode: barcode,
       createdAt: now.toISOString()
     };
     extra.forEach(c => {
@@ -248,7 +253,16 @@ function renderTableBody() {
     visibleCols().forEach(col => {
       const td = document.createElement('td');
       td.setAttribute('data-label', col);
-      if (col === 'Price') {
+      if (col === 'Name') {
+        const barcodeHtml = data.barcode ? 
+          `<div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:4px;font-family:monospace;">
+             <i class="fas fa-barcode"></i> ${data.barcode}
+           </div>` : '';
+        td.innerHTML = `
+          <div style="font-weight:600;">${data.Name}</div>
+          ${barcodeHtml}
+        `;
+      } else if (col === 'Price') {
         const sell = parseInt(data.SellPrice || data.Price) || 0;
         const buy  = parseInt(data.BuyPrice) || 0;
         
@@ -406,6 +420,17 @@ window.openEditModal = (id, data) => {
           </div>`).join('')}
       </div>`;
   }
+  
+  // ✅ Handle Barcode for Edit Modal
+  setTimeout(() => {
+    if (data.barcode) {
+      document.getElementById('edit-barcode').value = data.barcode;
+      window.renderBarcodePreview('edit-barcode-svg', data.barcode);
+    } else {
+      window.regenerateBarcode('edit'); // Generate new if legacy product
+    }
+  }, 100);
+
   document.getElementById('editModal').classList.add('open');
 };
 
@@ -421,6 +446,7 @@ window.saveEdit = async () => {
   const unit  = v('edit-unit') || 'pcs';
   const thresh = v('edit-threshold') || '10';
   const notes = v('edit-notes');
+  const barcode = v('edit-barcode');
 
   if (!name)  { showToast('Product name is required!', 'error'); return; }
   if (!stock && stock !== '0') { showToast('Stock quantity is required!', 'error'); return; }
@@ -438,6 +464,7 @@ window.saveEdit = async () => {
       BuyPrice: buyPrice, SellPrice: sellPrice,
       Category: cat, Unit: unit, Notes: notes,
       lowStockThreshold: thresh,
+      barcode: barcode,
       updatedAt: now.toISOString()
     };
     extra.forEach(col => {
@@ -586,5 +613,59 @@ window.processRestock = async function() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = original;
+  }
+};
+
+/* ================================================================
+   BARCODE GENERATION & RENDERING
+================================================================ */
+
+function generateUniqueBarcode() {
+  let newBarcode;
+  let isUnique = false;
+  // Fallback limit to prevent infinite loops (unlikely)
+  let attempts = 0;
+  
+  while (!isUnique && attempts < 100) {
+    // Generate a random 6 digit number
+    const randomNum = Math.floor(100000 + Math.random() * 900000);
+    newBarcode = `CCY-${randomNum}`;
+    
+    // Check against productsCache
+    const exists = productsCache.some(p => p.data.barcode === newBarcode);
+    if (!exists) {
+      isUnique = true;
+    }
+    attempts++;
+  }
+  
+  return newBarcode;
+}
+
+window.renderBarcodePreview = (svgId, value) => {
+  try {
+    JsBarcode(`#${svgId}`, value, {
+      format: "CODE128",
+      lineColor: "#000",
+      width: 2,
+      height: 40,
+      displayValue: false, // We show the value in the input field
+      margin: 0
+    });
+  } catch (e) {
+    console.error("JsBarcode render error:", e);
+  }
+};
+
+window.regenerateBarcode = (mode) => {
+  const newBarcode = generateUniqueBarcode();
+  if (mode === 'add') {
+    const input = document.getElementById('core-barcode');
+    if (input) input.value = newBarcode;
+    window.renderBarcodePreview('add-barcode-svg', newBarcode);
+  } else if (mode === 'edit') {
+    const input = document.getElementById('edit-barcode');
+    if (input) input.value = newBarcode;
+    window.renderBarcodePreview('edit-barcode-svg', newBarcode);
   }
 };
