@@ -247,6 +247,62 @@ async function fetchReportData(uid, dateFilter, customStart, customEnd) {
     return tTime >= limitTime;
   });
 
+  // Fetch History for Timeline
+  const histSnap = await getDocs(userCol(uid, 'history'));
+  const allHist = [];
+  histSnap.forEach(d => { allHist.push({ id: d.id, ...d.data() }); });
+  
+  const filteredHist = allHist.filter(h => {
+    if (dateFilter === 'all') return true;
+    const tTime = parseDate(h.createdAt || h.timestamp).getTime();
+    if (endLimitTime) return tTime >= limitTime && tTime < endLimitTime;
+    return tTime >= limitTime;
+  });
+
+  const timeline = [];
+  
+  filteredTx.forEach(tx => {
+    let pft = tx.totalProfit;
+    if (pft === undefined) {
+      pft = (tx.items || []).reduce((sum, item) => {
+        const prod = products.find(p => p.id === item.productId);
+        const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
+        return sum + (item.price - buyPrice) * item.qty;
+      }, 0);
+    }
+    tx.totalProfit = pft; // cache it
+
+    timeline.push({
+      action: 'Transaction',
+      date: parseDate(tx.createdAt || tx.timestamp),
+      title: 'Checkout Items',
+      items: tx.items,
+      details: (tx.items || []).map(i => `• ${i.name} (x${i.qty})`).join('\n'),
+      qty: tx.itemCount || 0,
+      rev: tx.total || 0,
+      pft: pft,
+      txId: tx.id
+    });
+  });
+
+  filteredHist.forEach(h => {
+    if (h.action === 'Sold') return; // Sold is handled by Transactions above
+    timeline.push({
+      action: h.action, // Added, Edited, Deleted, Restock
+      date: parseDate(h.createdAt || h.timestamp),
+      title: h.productName || h.name || '-',
+      items: [],
+      details: h.details || '-',
+      qty: '-',
+      rev: '-',
+      pft: '-',
+      txId: '-'
+    });
+  });
+
+  // Sort timeline newest first
+  timeline.sort((a, b) => b.date.getTime() - a.date.getTime());
+
   // Calculate Analytics
   let totalRevenue = 0;
   let totalProfit = 0;
@@ -297,6 +353,7 @@ async function fetchReportData(uid, dateFilter, customStart, customEnd) {
   return {
     products,
     transactions: filteredTx,
+    timeline: timeline,
     analytics: {
       revenue: totalRevenue,
       profit: totalProfit,
@@ -379,55 +436,50 @@ async function generatePDF(data, type) {
     startY = doc.lastAutoTable.finalY + 14;
   }
 
-  // Transactions Table
+  // Activity Logs Table (Timeline)
   if (type === 'full' || type === 'transactions') {
     // If we are on a new page, don't draw text off-screen
     if (startY > 270) { doc.addPage(); startY = 20; }
     
     doc.setFontSize(14);
-    doc.text("Transaction History", 14, startY);
+    doc.text("Activity Logs & Transactions", 14, startY);
     doc.setFontSize(10);
     doc.setTextColor(150, 150, 150);
     
     // Limit to 50 for PDF to avoid massive files
-    let txList = [...data.transactions].reverse();
-    const isCapped = txList.length > 50;
+    let logList = [...data.timeline];
+    const isCapped = logList.length > 50;
     if (isCapped && type === 'full') {
-      txList = txList.slice(0, 50);
-      doc.text("(Showing latest 50 transactions)", 65, startY);
+      logList = logList.slice(0, 50);
+      doc.text("(Showing latest 50 activities)", 75, startY);
     }
     startY += 8;
 
-    const txData = [];
-    txList.forEach(tx => {
-      const time = new Date(tx.createdAt || tx.timestamp).toLocaleString('en-GB');
-      const itemsStr = (tx.items || []).map(i => `• ${i.name} (x${i.qty})`).join('\n');
+    const logData = [];
+    logList.forEach(log => {
+      const time = log.date.toLocaleString('en-GB');
       
-      let pft = tx.totalProfit;
-      if (pft === undefined) {
-        pft = (tx.items || []).reduce((sum, item) => {
-          const prod = data.products.find(p => p.id === item.productId);
-          const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
-          return sum + (item.price - buyPrice) * item.qty;
-        }, 0);
+      let itemStr = log.title;
+      if (log.action === 'Transaction') {
+        itemStr = log.details; // bulleted items
       }
 
-      txData.push([
+      logData.push([
         time,
-        itemsStr,
-        formatNum(tx.itemCount || 0),
-        formatCur(tx.total || 0),
-        formatCur(pft)
+        log.action,
+        itemStr,
+        log.rev !== '-' ? formatCur(log.rev) : '-',
+        log.pft !== '-' ? formatCur(log.pft) : '-'
       ]);
     });
 
     doc.autoTable({
       startY: startY,
-      head: [['Date', 'Items', 'Qty', 'Revenue', 'Profit']],
-      body: txData,
+      head: [['Date', 'Action', 'Items / Details', 'Revenue', 'Profit']],
+      body: logData,
       theme: 'striped',
       headStyles: { fillColor: [39, 174, 96] },
-      columnStyles: { 1: { cellWidth: 70 } } // Wrap items column
+      columnStyles: { 2: { cellWidth: 60 } } // Wrap items column
     });
   }
 
@@ -485,37 +537,45 @@ async function generateExcel(data, type) {
     XLSX.utils.book_append_sheet(wb, wsInv, "Inventory");
   }
 
-  // 3. Transactions
+  // 3. Activity Logs & Transactions
   if (type === 'full' || type === 'transactions') {
-    const txData = [];
-    [...data.transactions].reverse().forEach(tx => {
-      let pft = tx.totalProfit;
-      if (pft === undefined) {
-        pft = (tx.items || []).reduce((sum, item) => {
-          const prod = data.products.find(p => p.id === item.productId);
-          const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
-          return sum + (item.price - buyPrice) * item.qty;
-        }, 0);
-      }
-
-      // Flatten items for Excel
-      (tx.items || []).forEach(it => {
-        txData.push({
-          "Date": new Date(tx.createdAt || tx.timestamp).toLocaleString('en-GB'),
-          "Transaction ID": tx.id,
-          "Product": it.name,
-          "Category": it.category || '-',
-          "Qty": it.qty,
-          "Price": it.price,
-          "Subtotal": it.qty * it.price,
-          "Transaction Revenue": tx.total,
-          "Transaction Profit": pft
+    const logData = [];
+    data.timeline.forEach(log => {
+      if (log.action === 'Transaction') {
+        // Flatten checkout items
+        (log.items || []).forEach(it => {
+          logData.push({
+            "Date": log.date.toLocaleString('en-GB'),
+            "Action": "Sold",
+            "Transaction ID": log.txId,
+            "Product / Action": it.name,
+            "Details": `Sold: ${it.qty}`,
+            "Qty": it.qty,
+            "Price/Unit": it.price,
+            "Subtotal Revenue": it.qty * it.price,
+            "Total Tx Revenue": log.rev,
+            "Total Tx Profit": log.pft
+          });
         });
-      });
+      } else {
+        // Added, Edited, Deleted, Restocked
+        logData.push({
+          "Date": log.date.toLocaleString('en-GB'),
+          "Action": log.action,
+          "Transaction ID": "-",
+          "Product / Action": log.title,
+          "Details": log.details,
+          "Qty": "-",
+          "Price/Unit": "-",
+          "Subtotal Revenue": "-",
+          "Total Tx Revenue": "-",
+          "Total Tx Profit": "-"
+        });
+      }
     });
-    const wsTx = XLSX.utils.json_to_sheet(txData);
-    wsTx['!cols'] = [{wch: 22}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 10}, {wch: 15}, {wch: 15}, {wch: 22}, {wch: 22}];
-    XLSX.utils.book_append_sheet(wb, wsTx, "Transactions");
+    const wsLog = XLSX.utils.json_to_sheet(logData);
+    wsLog['!cols'] = [{wch: 22}, {wch: 15}, {wch: 25}, {wch: 30}, {wch: 30}, {wch: 10}, {wch: 15}, {wch: 18}, {wch: 18}, {wch: 18}];
+    XLSX.utils.book_append_sheet(wb, wsLog, "Activity Logs");
   }
 
   XLSX.writeFile(wb, `CocaCoy_Report_${new Date().getTime()}.xlsx`);
