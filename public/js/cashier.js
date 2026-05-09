@@ -435,3 +435,88 @@ function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val;
 }
+
+/* ================================================================
+   BARCODE SCANNER (html5-qrcode)
+================================================================ */
+let _html5Qrcode = null;
+let _lastScannedCode = null;
+let _lastScanTime = 0;
+const SCAN_COOLDOWN_MS = 2000; // 2 seconds cooldown for the same barcode
+
+window.openScanner = () => {
+  const overlay = document.getElementById('scannerOverlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  
+  const statusEl = document.getElementById('scannerStatus');
+  if (statusEl) statusEl.textContent = 'Requesting camera permissions...';
+
+  // Initialize scanner
+  if (!_html5Qrcode) {
+    _html5Qrcode = new Html5Qrcode("reader");
+  }
+
+  const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
+  
+  _html5Qrcode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+    .then(() => {
+      if (statusEl) statusEl.textContent = 'Align barcode within the box';
+    })
+    .catch((err) => {
+      console.error(err);
+      if (statusEl) statusEl.textContent = 'Camera error: ' + (err.message || err);
+      showToast('Failed to access camera', 'error');
+    });
+};
+
+window.closeScanner = () => {
+  const overlay = document.getElementById('scannerOverlay');
+  if (overlay) overlay.classList.remove('open');
+  
+  if (_html5Qrcode && _html5Qrcode.isScanning) {
+    _html5Qrcode.stop().catch(err => console.error("Failed to stop scanner", err));
+  }
+};
+
+function onScanSuccess(decodedText, decodedResult) {
+  const now = Date.now();
+  
+  // Debounce logic: prevent rapid scanning of the exact same barcode
+  if (_lastScannedCode === decodedText && (now - _lastScanTime) < SCAN_COOLDOWN_MS) {
+    return; // Ignore if scanned the same code within cooldown
+  }
+
+  _lastScannedCode = decodedText;
+  _lastScanTime = now;
+
+  // Haptic feedback if supported
+  if (navigator.vibrate) navigator.vibrate([100]);
+
+  // Lookup product
+  const prod = _products.find(p => p.barcode === decodedText);
+  const statusEl = document.getElementById('scannerStatus');
+
+  if (prod) {
+    addToCart(prod.id);
+    const newQty = _cart[prod.id]?.qty || 1;
+    showToast(`Added: ${prod.Name} (x${newQty})`, 'success');
+    if (statusEl) {
+      statusEl.innerHTML = `<span style="color:var(--green);font-weight:700;"><i class="fas fa-check-circle"></i> Added ${prod.Name}</span>`;
+      setTimeout(() => { if (statusEl && statusEl.innerHTML.includes('Added')) statusEl.textContent = 'Ready for next item'; }, 1500);
+    }
+  } else {
+    // Vibrate error pattern
+    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+    showToast(`Unknown barcode: ${decodedText}`, 'error');
+    if (statusEl) {
+      statusEl.innerHTML = `<span style="color:var(--red);font-weight:700;"><i class="fas fa-triangle-exclamation"></i> Unknown: ${decodedText}</span>`;
+      setTimeout(() => { if (statusEl && statusEl.innerHTML.includes('Unknown')) statusEl.textContent = 'Ready for next item'; }, 2000);
+    }
+  }
+}
+
+function onScanFailure(error) {
+  // Html5Qrcode throws errors constantly when it doesn't see a barcode in the frame.
+  // We can safely ignore these.
+}

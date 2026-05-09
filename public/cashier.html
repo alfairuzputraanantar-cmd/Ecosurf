@@ -364,6 +364,42 @@
       0% { transform: scale(0); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    /* ── Scanner Modal ── */
+    .scanner-modal-overlay {
+      position: fixed; inset: 0; z-index: 600;
+      background: rgba(0,0,0,0.8);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .scanner-modal-overlay.open { display: flex; }
+    
+    .scanner-modal {
+      width: 90%; max-width: 400px;
+      background: var(--surface);
+      border-radius: 16px; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+    }
+    .scanner-modal-header {
+      padding: 14px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .scanner-modal-title { font-weight: 700; font-size: 16px; }
+    .scanner-close-btn {
+      background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer;
+    }
+    .scanner-body { position: relative; width: 100%; min-height: 250px; background: #000; display: flex; align-items: center; justify-content: center; }
+    #reader { width: 100%; }
+    
+    .scanner-status {
+      padding: 12px; text-align: center;
+      font-size: 13px; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
@@ -403,9 +439,14 @@
 
   <!-- ── SEARCH ── -->
   <div class="cashier-search-wrap">
-    <div class="cashier-search">
-      <i class="fas fa-magnifying-glass"></i>
-      <input type="text" id="cashierSearch" placeholder="Search products..." oninput="filterProducts(this.value)"/>
+    <div style="display: flex; gap: 8px;">
+      <div class="cashier-search" style="flex: 1;">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="cashierSearch" placeholder="Search products..." oninput="filterProducts(this.value)"/>
+      </div>
+      <button onclick="window.openScanner()" style="width: 44px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--border); color: var(--brand-1); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s;">
+        <i class="fas fa-barcode"></i>
+      </button>
     </div>
   </div>
 
@@ -465,7 +506,23 @@
   <p id="successMsg">Transaction Successful!</p>
 </div>
 
+<!-- ── SCANNER MODAL ── -->
+<div class="scanner-modal-overlay" id="scannerOverlay">
+  <div class="scanner-modal">
+    <div class="scanner-modal-header">
+      <div class="scanner-modal-title"><i class="fas fa-barcode"></i> Scan Barcode</div>
+      <button class="scanner-close-btn" onclick="window.closeScanner()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="scanner-body">
+      <div id="reader"></div>
+    </div>
+    <div class="scanner-status" id="scannerStatus">Initializing camera...</div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <script type="module" src="./js/guard.js"></script>
 <script type="module" src="./js/cashier.js"></script>
