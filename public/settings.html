@@ -527,26 +527,14 @@
                 <div class="currency-preview" id="currencyPreview">
                   Preview: <strong>Rp 250,000</strong> · <strong>Rp 1,500,000</strong>
                 </div>
-                <div class="setting-row" style="margin-top:14px;">
-                  <div class="setting-info">
-                    <div class="setting-label">Interface Language</div>
-                    <div class="setting-desc">Language used throughout the ERP pages</div>
-                  </div>
-                  <div class="setting-control">
-                    <select class="form-control" id="langSelect" style="width:auto;padding:8px 12px;">
-                      <option value="en">🇺🇸 English</option>
-                      <option value="id">🇮🇩 Bahasa Indonesia</option>
-                    </select>
-                  </div>
-                </div>
                 <div class="setting-row">
                   <div class="setting-info">
                     <div class="setting-label">Show Sidebar Labels</div>
-                    <div class="setting-desc">Display text labels on sidebar navigation items</div>
+                    <div class="setting-desc">Display text labels next to navigation icons</div>
                   </div>
                   <div class="setting-control">
                     <label class="switch">
-                      <input type="checkbox" id="sidebarLabels" checked />
+                      <input type="checkbox" id="showSidebarLabels" checked onchange="toggleSidebarLabels(this.checked)" />
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -842,10 +830,10 @@
     async function saveAppearance() {
       const data = {
         currency: document.getElementById('currencyFormat').value,
-        lang: document.getElementById('langSelect').value
+        sidebarLabels: document.getElementById('showSidebarLabels').checked
       };
       localStorage.setItem('cocacoy_currency', data.currency);
-      localStorage.setItem('cocacoy_lang', data.lang);
+      localStorage.setItem('cocacoy_sidebar_labels', data.sidebarLabels);
       
       try {
         const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
@@ -857,6 +845,15 @@
 
       flashSaved('appearSaved');
       showToast('Appearance settings saved!', 'success');
+    }
+
+    function toggleSidebarLabels(visible) {
+      if (visible) {
+        document.body.classList.remove('sidebar-min');
+      } else {
+        document.body.classList.add('sidebar-min');
+      }
+      localStorage.setItem('cocacoy_sidebar_labels', visible);
     }
 
     /* ── Inventory ── */
@@ -1008,9 +1005,10 @@
                 localStorage.setItem('cocacoy_currency', app.currency);
                 updateCurrencyPreview();
               }
-              if (app.lang) {
-                document.getElementById('langSelect').value = app.lang;
-                localStorage.setItem('cocacoy_lang', app.lang);
+              if (app.sidebarLabels !== undefined) {
+                document.getElementById('showSidebarLabels').checked = app.sidebarLabels;
+                localStorage.setItem('cocacoy_sidebar_labels', app.sidebarLabels);
+                toggleSidebarLabels(app.sidebarLabels);
               }
             }
 
@@ -1051,8 +1049,9 @@
       const cur = localStorage.getItem('cocacoy_currency');
       if (cur) { document.getElementById('currencyFormat').value = cur; updateCurrencyPreview(); }
 
-      const lang = localStorage.getItem('cocacoy_lang');
-      if (lang) document.getElementById('langSelect').value = lang;
+      const labels = localStorage.getItem('cocacoy_sidebar_labels') !== 'false';
+      document.getElementById('showSidebarLabels').checked = labels;
+      toggleSidebarLabels(labels);
 
       const th = localStorage.getItem('cocacoy_low_stock_threshold');
       if (th) { document.getElementById('lowStockSlider').value = th; updateThresholdVal(th); }

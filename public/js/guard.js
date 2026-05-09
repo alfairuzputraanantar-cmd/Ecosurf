@@ -99,3 +99,11 @@ if (logoutBtn) {
     window.location.href = "login";
   };
 }
+
+/* ── Sidebar Labels Enforcement ── */
+(function() {
+  const labelsVisible = localStorage.getItem('cocacoy_sidebar_labels') !== 'false';
+  if (!labelsVisible) {
+    document.body.classList.add('sidebar-min');
+  }
+})();

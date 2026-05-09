@@ -308,6 +308,66 @@ a {
 }
 
 /* ================================================================
+   SIDEBAR MINIMALIST MODE
+================================================================ */
+body.sidebar-min {
+  --sidebar-w: 72px;
+}
+
+body.sidebar-min .logo-text-wrap,
+body.sidebar-min .sidebar-label,
+body.sidebar-min .user-info,
+body.sidebar-min .logout-btn span {
+  display: none;
+}
+
+body.sidebar-min .sidebar-logo,
+body.sidebar-min .nav-link,
+body.sidebar-min .user-pill,
+body.sidebar-min .logout-btn {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+body.sidebar-min .nav-link {
+  font-size: 0; /* Hide text nodes */
+}
+
+body.sidebar-min .nav-link i {
+  font-size: 18px;
+  margin: 0;
+}
+
+body.sidebar-min .sidebar-section {
+  padding: 16px 8px 4px;
+}
+
+body.sidebar-min .logout-btn {
+  width: 42px;
+  height: 42px;
+  margin: 10px auto 0;
+  padding: 0;
+}
+
+body.sidebar-min .logout-btn i {
+  font-size: 16px;
+  margin: 0;
+}
+
+body.sidebar-min .user-pill {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto;
+  padding: 0;
+  justify-content: center;
+}
+
+body.sidebar-min .user-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+/* ================================================================
    MAIN WRAP
 ================================================================ */
 .main-wrap {
