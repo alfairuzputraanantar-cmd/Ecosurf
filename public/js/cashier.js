@@ -393,6 +393,7 @@ window.processCheckout = async () => {
         details: `Sold: ${item.qty} ${item.unit} | Subtotal: Rp ${(item.qty * item.price).toLocaleString('id-ID')}`,
         timestamp: now.toLocaleString('en-GB'),
         createdAt: now.toISOString(),
+        transactionId: txRef.id,
         category: item.category
       });
     }

@@ -108,13 +108,19 @@ function renderHistory() {
   let totalRestocks = 0;
   let movements = timeFiltered.length;
   let productCounts = {};
+  const uniqueSales = new Set();
 
   timeFiltered.forEach(r => {
-    if (r.action === 'Sold') totalSales++;
+    if (r.action === 'Sold') {
+      // Use transactionId if available, fallback to createdAt (items from same TX have same ISO string)
+      uniqueSales.add(r.transactionId || getCreatedAt(r));
+    }
     if (r.action === 'Restock') totalRestocks++;
     const pName = r.productName || 'Unknown';
     productCounts[pName] = (productCounts[pName] || 0) + 1;
   });
+
+  totalSales = uniqueSales.size;
 
   let topProduct = '-';
   let maxCount = 0;
