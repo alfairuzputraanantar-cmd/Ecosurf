@@ -654,7 +654,7 @@
                 <div class="setting-row">
                   <div class="setting-info">
                     <div class="setting-label">🔔 Low Stock Alert</div>
-                    <div class="setting-desc">Show bell notification when stock is running low</div>
+                    <div class="setting-desc">Show badge and notifications when stock is running low</div>
                   </div>
                   <div class="setting-control">
                     <label class="switch">
@@ -666,35 +666,11 @@
                 <div class="setting-row">
                   <div class="setting-info">
                     <div class="setting-label">⚠️ Critical Stock Alert</div>
-                    <div class="setting-desc">Special notification when a product's stock reaches 0</div>
+                    <div class="setting-desc">Special visual warning for items with 0 stock</div>
                   </div>
                   <div class="setting-control">
                     <label class="switch">
                       <input type="checkbox" id="notifCritical" checked />
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                </div>
-                <div class="setting-row">
-                  <div class="setting-info">
-                    <div class="setting-label">✅ Action Success Confirmation</div>
-                    <div class="setting-desc">Toast notification when a product is successfully added or edited</div>
-                  </div>
-                  <div class="setting-control">
-                    <label class="switch">
-                      <input type="checkbox" id="notifSuccess" checked />
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                </div>
-                <div class="setting-row">
-                  <div class="setting-info">
-                    <div class="setting-label">🗑️ Delete Confirmation</div>
-                    <div class="setting-desc">Show a confirmation dialog before deleting any data</div>
-                  </div>
-                  <div class="setting-control">
-                    <label class="switch">
-                      <input type="checkbox" id="notifDelete" checked />
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -937,8 +913,6 @@
       const prefs = {
         lowStock: document.getElementById('notifLowStock').checked,
         critical: document.getElementById('notifCritical').checked,
-        success: document.getElementById('notifSuccess').checked,
-        delete: document.getElementById('notifDelete').checked,
         daily: document.getElementById('notifDaily').checked,
       };
       localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(prefs));
@@ -1104,8 +1078,6 @@
               const np = data.notificationPrefs;
               if (np.lowStock !== undefined) document.getElementById('notifLowStock').checked = np.lowStock;
               if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
-              if (np.success !== undefined) document.getElementById('notifSuccess').checked = np.success;
-              if (np.delete !== undefined) document.getElementById('notifDelete').checked = np.delete;
               if (np.daily !== undefined) document.getElementById('notifDaily').checked = np.daily;
               localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(np));
             }
@@ -1131,8 +1103,6 @@
         const np = JSON.parse(localStorage.getItem('cocacoy_notif_prefs') || '{}');
         if (np.lowStock !== undefined) document.getElementById('notifLowStock').checked = np.lowStock;
         if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
-        if (np.success !== undefined) document.getElementById('notifSuccess').checked = np.success;
-        if (np.delete !== undefined) document.getElementById('notifDelete').checked = np.delete;
         if (np.daily !== undefined) document.getElementById('notifDaily').checked = np.daily;
       } catch (e) { }
     })();

@@ -18,7 +18,18 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
       if (!data.Name) return;
       const stock     = parseInt(data.Stock)             || 0;
       const threshold = parseInt(data.lowStockThreshold) || 10;
+      
+      const prefs = JSON.parse(localStorage.getItem('cocacoy_notif_prefs') || '{"lowStock":true,"critical":true}');
+      
       if (stock <= threshold) {
+        // Skip if 0 and critical is off
+        if (stock === 0 && !prefs.critical) {
+           // still show as low if lowStock is on
+           if (!prefs.lowStock) return;
+        } else if (stock > 0 && !prefs.lowStock) {
+           return;
+        }
+
         _lowItems.push({
           id: d.id,
           name: data.Name,
@@ -40,7 +51,10 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
 function renderBadge() {
   const badge = document.getElementById('notifBadge');
   if (!badge) return;
-  if (_lowItems.length === 0) {
+  
+  const prefs = JSON.parse(localStorage.getItem('cocacoy_notif_prefs') || '{"lowStock":true,"critical":true}');
+  
+  if (_lowItems.length === 0 || !prefs.lowStock) {
     badge.style.display = 'none';
   } else {
     badge.style.display = 'flex';
