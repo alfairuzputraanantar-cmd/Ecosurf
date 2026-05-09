@@ -230,9 +230,19 @@ async function fetchReportData(uid, dateFilter, customStart, customEnd) {
     endLimitTime = new Date(customEnd).getTime() + 86400000; // end of day
   }
 
+  // Date Parsing Helper (similar to history.js getCreatedAt)
+  function parseDate(d) {
+    if (!d) return new Date();
+    if (d.toDate) return d.toDate();
+    if (typeof d === 'string' || typeof d === 'number') return new Date(d);
+    return new Date();
+  }
+
   const filteredTx = allTx.filter(tx => {
     if (dateFilter === 'all') return true;
-    const tTime = new Date(tx.createdAt || tx.timestamp).getTime();
+    const d = tx.createdAt || tx.timestamp;
+    const tTime = parseDate(d).getTime();
+    
     if (endLimitTime) return tTime >= limitTime && tTime < endLimitTime;
     return tTime >= limitTime;
   });
@@ -391,7 +401,7 @@ async function generatePDF(data, type) {
     const txData = [];
     txList.forEach(tx => {
       const time = new Date(tx.createdAt || tx.timestamp).toLocaleString('en-GB');
-      const itemsStr = (tx.items || []).map(i => `${i.name} (${i.qty})`).join(', ');
+      const itemsStr = (tx.items || []).map(i => `• ${i.name} (x${i.qty})`).join('\n');
       
       let pft = tx.totalProfit;
       if (pft === undefined) {
@@ -404,7 +414,7 @@ async function generatePDF(data, type) {
 
       txData.push([
         time,
-        itemsStr.length > 40 ? itemsStr.substring(0, 37) + '...' : itemsStr,
+        itemsStr,
         formatNum(tx.itemCount || 0),
         formatCur(tx.total || 0),
         formatCur(pft)
@@ -456,6 +466,7 @@ async function generateExcel(data, type) {
     ["Most Profitable Product", data.analytics.mostProfitable]
   ];
   const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+  wsSummary['!cols'] = [{wch: 25}, {wch: 35}]; // A: 25, B: 35
   XLSX.utils.book_append_sheet(wb, wsSummary, "Analytics");
 
   // 2. Inventory
@@ -470,6 +481,7 @@ async function generateExcel(data, type) {
       "Unit": p.Unit || 'pcs'
     }));
     const wsInv = XLSX.utils.json_to_sheet(invData);
+    wsInv['!cols'] = [{wch: 30}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 20}, {wch: 10}];
     XLSX.utils.book_append_sheet(wb, wsInv, "Inventory");
   }
 
@@ -502,6 +514,7 @@ async function generateExcel(data, type) {
       });
     });
     const wsTx = XLSX.utils.json_to_sheet(txData);
+    wsTx['!cols'] = [{wch: 22}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 10}, {wch: 15}, {wch: 15}, {wch: 22}, {wch: 22}];
     XLSX.utils.book_append_sheet(wb, wsTx, "Transactions");
   }
 
