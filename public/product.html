@@ -12,6 +12,8 @@
     (function () {
       const t = localStorage.getItem('cocacoy_theme');
       if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      const s = localStorage.getItem('cocacoy_sidebar_labels');
+      if (s === 'false') document.documentElement.classList.add('sidebar-min');
     })();
   </script>
 </head>
