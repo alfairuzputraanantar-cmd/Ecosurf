@@ -31,7 +31,8 @@ function getCreatedAt(r) {
   if (r.createdAt) return r.createdAt;
   const t = r.timestamp || '';
   const m = t.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s*(\d{2}):(\d{2})/);
-  if (m) return `${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:00.000Z`;
+  // Remove .000Z to treat as local time if it's from the old timestamp format
+  if (m) return `${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:00`;
   return new Date().toISOString();
 }
 
