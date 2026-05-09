@@ -141,8 +141,8 @@
       <a href="profile" class="user-pill" id="sidebarUserPill">
         <div class="user-avatar" id="sidebarAvatar">U</div>
         <div class="user-info">
-          <div class="user-name" id="sidebarName">Owner</div>
-          <div class="user-role" id="sidebarRole">UMKM Admin</div>
+          <div class="user-name" id="sidebarName"></div>
+          <div class="user-role" id="sidebarRole"></div>
         </div>
       </a>
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> <span>Sign Out</span></button>
@@ -152,25 +152,23 @@
         try {
           const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           const logo = localStorage.getItem('cocacoy_store_logo');
-          
-          // Sidebar Sync
-          if (p.ownerName) document.getElementById('sidebarName').textContent = p.ownerName;
-          if (p.role) document.getElementById('sidebarRole').textContent = p.role;
-          if (logo) {
-            document.getElementById('sidebarAvatar').innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
-          } else if (p.ownerName) {
-            document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
-          }
+          if (p.ownerName) {
+            document.getElementById('sidebarName').textContent = p.ownerName;
+            document.getElementById('sidebarRole').textContent = p.role || "UMKM Admin";
+            const av = document.getElementById('sidebarAvatar');
+            if (logo) av.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+            else av.textContent = p.ownerName.charAt(0).toUpperCase();
 
-          // Top Profile Sync (Profile Page Only)
-          const profName = document.getElementById('profileDisplayName');
-          const profRole = document.getElementById('profileDisplayRole');
-          const profAv = document.getElementById('profileAvatarLarge');
-          if (profName && p.ownerName) profName.textContent = p.ownerName;
-          if (profRole && p.role) profRole.textContent = p.role;
-          if (profAv) {
-            if (logo) profAv.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
-            else if (p.ownerName) profAv.textContent = p.ownerName.charAt(0).toUpperCase();
+            // Profile Page Specific
+            const pn = document.getElementById('profileDisplayName');
+            const pr = document.getElementById('profileDisplayRole');
+            const pa = document.getElementById('profileAvatarLarge');
+            if (pn) pn.textContent = p.ownerName;
+            if (pr) pr.textContent = p.role || "UMKM Admin";
+            if (pa) {
+              if (logo) pa.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
+              else pa.textContent = p.ownerName.charAt(0).toUpperCase();
+            }
           }
         } catch(e) {}
       })();

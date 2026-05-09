@@ -47,15 +47,18 @@ onAuthStateChanged(auth, (user) => {
             storePhone: data.storePhone || "",
             storeCategory: data.storeCategory || "food"
           };
-          // Update UI
+
+          // ✅ UI Update: Only update if changed or elements are empty to prevent flash
           if (nameEl) nameEl.textContent = p.ownerName;
           if (roleEl) roleEl.textContent = p.role;
           if (avatarEl) {
             if (p.photoURL) {
-              avatarEl.innerHTML = `<img src="${p.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+              const imgHtml = `<img src="${p.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+              if (avatarEl.innerHTML !== imgHtml) avatarEl.innerHTML = imgHtml;
               localStorage.setItem('cocacoy_store_logo', p.photoURL);
             } else {
-              avatarEl.textContent = p.ownerName.charAt(0).toUpperCase();
+              const letter = p.ownerName.charAt(0).toUpperCase();
+              if (avatarEl.textContent !== letter) avatarEl.textContent = letter;
             }
           }
           
