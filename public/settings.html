@@ -675,18 +675,6 @@
                     </label>
                   </div>
                 </div>
-                <div class="setting-row">
-                  <div class="setting-info">
-                    <div class="setting-label">📊 Daily Summary</div>
-                    <div class="setting-desc">Show an activity summary badge when opening the dashboard</div>
-                  </div>
-                  <div class="setting-control">
-                    <label class="switch">
-                      <input type="checkbox" id="notifDaily" />
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                </div>
                 <div style="margin-top:18px;">
                   <button class="btn btn-primary" onclick="saveNotifications()">
                     <i class="fas fa-floppy-disk"></i> Save Preferences
@@ -913,7 +901,6 @@
       const prefs = {
         lowStock: document.getElementById('notifLowStock').checked,
         critical: document.getElementById('notifCritical').checked,
-        daily: document.getElementById('notifDaily').checked,
       };
       localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(prefs));
 
@@ -1078,7 +1065,6 @@
               const np = data.notificationPrefs;
               if (np.lowStock !== undefined) document.getElementById('notifLowStock').checked = np.lowStock;
               if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
-              if (np.daily !== undefined) document.getElementById('notifDaily').checked = np.daily;
               localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(np));
             }
           }
@@ -1103,7 +1089,6 @@
         const np = JSON.parse(localStorage.getItem('cocacoy_notif_prefs') || '{}');
         if (np.lowStock !== undefined) document.getElementById('notifLowStock').checked = np.lowStock;
         if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
-        if (np.daily !== undefined) document.getElementById('notifDaily').checked = np.daily;
       } catch (e) { }
     })();
 
