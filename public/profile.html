@@ -250,8 +250,8 @@
   <script type="module">
     import { auth, userDoc, storage, ref, uploadBytes, getDownloadURL } from './js/firebase.js';
     import { setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { uploadString } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
+    // We'll store image directly in Firestore to bypass Storage network issues
+    
     let hasUnsavedChanges = false;
     let pendingLogoData = null;
 
@@ -297,15 +297,29 @@
     window.previewAvatar = function(e) {
       const file = e.target.files[0];
       if (!file) return;
-      if (file.size > 1048576) { showToast('File too large (max 1 MB)', 'error'); return; }
+      
       const reader = new FileReader();
       reader.onload = ev => {
-        pendingLogoData = ev.target.result;
-        // Only update the large preview on the profile page, NOT the sidebar yet
-        document.getElementById('profileAvatarLarge').innerHTML = `<img src="${pendingLogoData}" alt="Preview"/>`;
-        document.getElementById('removePhotoBtn').style.display = 'inline-flex';
-        hasUnsavedChanges = true;
-        showToast('Photo selected. Click "Update Profile" to save.', 'info');
+        const img = new Image();
+        img.onload = () => {
+          // COMPRESS IMAGE to max 400x400
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const max = 400;
+          if (width > height) { if (width > max) { height *= max / width; width = max; } }
+          else { if (height > max) { width *= max / height; height = max; } }
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          pendingLogoData = canvas.toDataURL('image/jpeg', 0.7); // Compress to JPEG
+          document.getElementById('profileAvatarLarge').innerHTML = `<img src="${pendingLogoData}" alt="Preview"/>`;
+          document.getElementById('removePhotoBtn').style.display = 'inline-flex';
+          hasUnsavedChanges = true;
+          showToast('Photo ready. Click "Update Profile" to save.', 'info');
+        };
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     };
@@ -340,14 +354,11 @@
         if (auth.currentUser) {
           const updateData = { ...data, updatedAt: new Date().toISOString() };
           
-          // Only upload if we have pending changes (selected via previewAvatar)
+          // Use direct Base64 storage in Firestore to bypass Storage ERR_FAILED
           if (hasUnsavedChanges && pendingLogoData) {
-            const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.png`);
-            const snapshot = await uploadString(storageRef, pendingLogoData, 'data_url');
-            const photoURL = await getDownloadURL(snapshot.ref);
-            updateData.photoURL = photoURL;
-            localStorage.setItem('cocacoy_store_logo', photoURL);
-            newP.photoURL = photoURL;
+            updateData.photoURL = pendingLogoData;
+            localStorage.setItem('cocacoy_store_logo', pendingLogoData);
+            newP.photoURL = pendingLogoData;
             pendingLogoData = null;
           }
           
