@@ -227,34 +227,34 @@
               <label class="form-label">Business Description</label>
               <textarea class="form-control" id="storeDesc" rows="3" placeholder="A short bio..."></textarea>
           </div>
-          <script>
-            (function() {
-              try {
-                const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-                const logo = localStorage.getItem('cocacoy_store_logo');
-                if (p.ownerName) {
-                  document.getElementById('profileDisplayName').textContent = p.ownerName;
-                  document.getElementById('profileDisplayRole').textContent = p.role || "UMKM Admin";
-                  const pa = document.getElementById('profileAvatarLarge');
-                  if (logo) pa.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
-                  else pa.textContent = p.ownerName.charAt(0).toUpperCase();
-                  
-                  // Pre-fill form
-                  document.getElementById('storeName').value = p.storeName || "";
-                  document.getElementById('ownerName').value = p.ownerName || "";
-                  document.getElementById('userRole').value = p.role || "";
-                  document.getElementById('storeDesc').value = p.storeDesc || "";
-                  document.getElementById('storePhone').value = p.storePhone || "";
-                  document.getElementById('storeCategory').value = p.storeCategory || "food";
-                  if (logo) document.getElementById('removePhotoBtn').style.display = 'inline-flex';
-                }
-              } catch(e) {}
-            })();
-          </script>
         </div>
-          </div>
-          
-          <div style="display:flex;align-items:center;gap:12px;margin-top:20px;">
+
+        <script>
+          (function() {
+            try {
+              const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+              const logo = localStorage.getItem('cocacoy_store_logo');
+              if (p.ownerName) {
+                document.getElementById('profileDisplayName').textContent = p.ownerName;
+                document.getElementById('profileDisplayRole').textContent = p.role || "UMKM Admin";
+                const pa = document.getElementById('profileAvatarLarge');
+                if (logo) pa.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
+                else pa.textContent = p.ownerName.charAt(0).toUpperCase();
+                
+                // Pre-fill form
+                document.getElementById('storeName').value = p.storeName || "";
+                document.getElementById('ownerName').value = p.ownerName || "";
+                document.getElementById('userRole').value = p.role || "";
+                document.getElementById('storeDesc').value = p.storeDesc || "";
+                document.getElementById('storePhone').value = p.storePhone || "";
+                document.getElementById('storeCategory').value = p.storeCategory || "food";
+                if (logo) document.getElementById('removePhotoBtn').style.display = 'inline-flex';
+              }
+            } catch(e) {}
+          })();
+        </script>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-top:20px;">
             <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfile()">
               <i class="fas fa-check-circle"></i> Update Profile
             </button>
