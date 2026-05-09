@@ -1280,16 +1280,6 @@
       });
     })();
 
-    /* ── Sidebar user ── */
-    (function () {
-      try {
-        const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-        if (p.ownerName) {
-          document.getElementById('sidebarName').textContent = p.ownerName;
-          document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
-        }
-      } catch (e) { }
-    })();
 
     /* ── Logout ── */
     document.getElementById('logoutBtn').addEventListener('click', async () => {
