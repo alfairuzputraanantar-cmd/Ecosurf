@@ -782,9 +782,15 @@
               </div>
               <div class="settings-section-body">
                 <div class="form-group">
-                  <label class="form-label">QR Image URL</label>
-                  <input class="form-control" id="qrImageUrl" type="url" placeholder="https://example.com/my-qris.jpg" oninput="updateQRPreview()" />
-                  <div class="setting-desc" style="margin-top:6px;">Paste a direct link to your QR code image (JPG/PNG).</div>
+                  <label class="form-label">QR Image Upload</label>
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRFileSelect(this)" />
+                    <button class="btn btn-ghost" onclick="document.getElementById('qrFileInput').click()">
+                      <i class="fas fa-upload"></i> Choose QR Image
+                    </button>
+                    <div id="qrFileName" style="font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">No file chosen</div>
+                  </div>
+                  <div class="setting-desc" style="margin-top:6px;">Upload your QRIS/GoPay QR image (JPG/PNG).</div>
                 </div>
                 
                 <div class="form-group" style="margin-top:16px;">
@@ -945,8 +951,67 @@
     }
 
     /* ── Payment ── */
+    function handleQRFileSelect(input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      document.getElementById('qrFileName').textContent = file.name;
+      
+      // Local preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.getElementById('qrImagePreview');
+        const empty = document.getElementById('qrImageEmpty');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        empty.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function savePaymentSettings() {
+      const fileInput = document.getElementById('qrFileInput');
+      const file = fileInput.files[0];
+      const btn = document.querySelector('button[onclick="savePaymentSettings()"]');
+      
+      if (!file) {
+        const currentQR = localStorage.getItem('cocacoy_payment_qr');
+        if (!currentQR) {
+            showToast('Please select a QR image first!', 'warning');
+            return;
+        }
+        flashSaved('paySaved');
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...'; }
+
+      try {
+        const { auth, storage, ref, uploadBytes, getDownloadURL, userDoc, updateDoc } = await import('./js/firebase.js');
+        if (auth.currentUser) {
+          const uid = auth.currentUser.uid;
+          const storageRef = ref(storage, `users/${uid}/paymentQR.jpg`);
+          
+          await uploadBytes(storageRef, file);
+          const downloadURL = await getDownloadURL(storageRef);
+          
+          await updateDoc(userDoc(uid), { paymentQR: downloadURL });
+          localStorage.setItem('cocacoy_payment_qr', downloadURL);
+          
+          showToast('QR Code uploaded and synced!', 'success');
+        }
+      } catch (e) { 
+        console.error(e); 
+        showToast('Upload failed: ' + e.message, 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Configuration'; }
+      }
+
+      flashSaved('paySaved');
+    }
+
     function updateQRPreview() {
-      const url = document.getElementById('qrImageUrl').value;
+      const url = localStorage.getItem('cocacoy_payment_qr');
       const img = document.getElementById('qrImagePreview');
       const empty = document.getElementById('qrImageEmpty');
       
@@ -958,22 +1023,6 @@
         img.style.display = 'none';
         empty.style.display = 'block';
       }
-    }
-
-    async function savePaymentSettings() {
-      const qrUrl = document.getElementById('qrImageUrl').value;
-      localStorage.setItem('cocacoy_payment_qr', qrUrl);
-
-      try {
-        const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
-        if (auth.currentUser) {
-          await updateDoc(userDoc(auth.currentUser.uid), { paymentQR: qrUrl });
-          showToast('Payment settings synced to cloud!', 'success');
-        }
-      } catch (e) { console.error(e); }
-
-      flashSaved('paySaved');
-      showToast('Payment QR configured successfully!', 'success');
     }
 
     /* ── Security ── */
@@ -1112,7 +1161,6 @@
 
             // Payment
             if (data.paymentQR) {
-              document.getElementById('qrImageUrl').value = data.paymentQR;
               localStorage.setItem('cocacoy_payment_qr', data.paymentQR);
               updateQRPreview();
             }
@@ -1137,11 +1185,7 @@
 
       const payQR = localStorage.getItem('cocacoy_payment_qr');
       if (payQR) {
-        const el = document.getElementById('qrImageUrl');
-        if (el) {
-          el.value = payQR;
-          updateQRPreview();
-        }
+        updateQRPreview();
       }
 
       try {
