@@ -314,9 +314,9 @@ window.openDetailModal = (id, data) => {
 
   body.innerHTML = `
     <!-- BARCODE DISPLAY -->
-    <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border);">
-      <svg id="detail-barcode-svg" style="max-height: 80px;"></svg>
-      <div style="font-family: monospace; font-size: 13px; color: #333; margin-top: 5px; font-weight: 700;">${data.barcode || 'NO BARCODE'}</div>
+    <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); box-shadow: inset 0 0 15px rgba(0,0,0,0.1);">
+      <svg id="detail-barcode-svg" style="max-height: 150px; width: 100%;"></svg>
+      <div style="font-family: monospace; font-size: 18px; color: #333; margin-top: 12px; font-weight: 800; letter-spacing: 2px;">${data.barcode || 'NO BARCODE'}</div>
     </div>
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -667,9 +667,9 @@ window.renderBarcodePreview = (svgId, value) => {
     JsBarcode(`#${svgId}`, value, {
       format: "CODE128",
       lineColor: "#000",
-      width: 2,
-      height: 40,
-      displayValue: false, // We show the value in the input field
+      width: 3.0,
+      height: 100,
+      displayValue: false,
       margin: 0
     });
   } catch (e) {

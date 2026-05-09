@@ -628,6 +628,17 @@ a {
   background: rgba(245, 166, 35, .22);
 }
 
+.btn-danger {
+  background: rgba(247, 95, 95, .18);
+  color: #ff5c5c;
+  border: 1px solid rgba(247, 95, 95, .35);
+}
+
+.btn-danger:hover {
+  background: rgba(247, 95, 95, .25);
+  transform: translateY(-1px);
+}
+
 .btn-sm {
   padding: 6px 13px;
   font-size: 12px;
@@ -997,6 +1008,21 @@ input::-webkit-credentials-auto-fill-button {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 26px;
+}
+
+.modal-grid-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+  padding: 20px;
+  background: var(--surface2);
+  border-radius: 0 0 16px 16px;
+}
+
+.modal-grid-actions .btn {
+  justify-content: center;
+  padding: 12px;
 }
 
 .col-toggle-list {
