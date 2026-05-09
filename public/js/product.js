@@ -365,6 +365,22 @@ window.openDetailModal = (id, data) => {
         </div>
       </div>
     ` : ''}
+
+    <!-- ACTION BUTTONS (Moved Inside Scroll) -->
+    <div class="modal-grid-actions" style="margin-top: 30px; padding: 0; background: none; border-top: 1px solid var(--border); padding-top: 25px;">
+      <button class="btn btn-info" id="detail-print-btn" style="justify-content: center; padding: 14px;">
+        <i class="fas fa-print"></i> Print Barcode
+      </button>
+      <button class="btn btn-success" id="detail-restock-btn" style="justify-content: center; padding: 14px;">
+        <i class="fas fa-plus-circle"></i> Restock
+      </button>
+      <button class="btn btn-warn" id="detail-edit-btn" style="justify-content: center; padding: 14px;">
+        <i class="fas fa-pen-to-square"></i> Edit
+      </button>
+      <button class="btn btn-danger" id="detail-delete-btn" style="justify-content: center; padding: 14px;">
+        <i class="fas fa-trash"></i> Delete
+      </button>
+    </div>
   `;
 
   // Render Barcode
@@ -372,22 +388,16 @@ window.openDetailModal = (id, data) => {
     setTimeout(() => window.renderBarcodePreview('detail-barcode-svg', data.barcode), 50);
   }
 
-  // Setup actions
-  document.getElementById('detail-print-btn').onclick = () => {
-    window.printBarcode(data);
-  };
-  document.getElementById('detail-restock-btn').onclick = () => {
-    window.closeDetailModal();
-    window.openRestockModal(id, data);
-  };
-  document.getElementById('detail-edit-btn').onclick = () => {
-    window.closeDetailModal();
-    window.openEditModal(id, data);
-  };
-  document.getElementById('detail-delete-btn').onclick = () => {
-    window.closeDetailModal();
-    window.confirmDelete(id, data.Name || '', data.Category || 'Others');
-  };
+  // Setup actions (Now inside the rendered HTML)
+  const btnPrint   = document.getElementById('detail-print-btn');
+  const btnRestock = document.getElementById('detail-restock-btn');
+  const btnEdit    = document.getElementById('detail-edit-btn');
+  const btnDelete  = document.getElementById('detail-delete-btn');
+
+  if (btnPrint)   btnPrint.onclick   = () => window.printBarcode(data);
+  if (btnRestock) btnRestock.onclick = () => { window.closeDetailModal(); window.openRestockModal(id, data); };
+  if (btnEdit)    btnEdit.onclick    = () => { window.closeDetailModal(); window.openEditModal(id, data); };
+  if (btnDelete)  btnDelete.onclick  = () => { window.closeDetailModal(); window.confirmDelete(id, data.Name || '', data.Category || 'Others'); };
 
   document.getElementById('detailModal').classList.add('open');
 };
