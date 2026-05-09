@@ -1014,10 +1014,10 @@ input::-webkit-credentials-auto-fill-button {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-top: 20px;
   padding: 20px;
   background: var(--surface2);
   border-radius: 0 0 16px 16px;
+  border-top: 1px solid var(--border);
 }
 
 .modal-grid-actions .btn {

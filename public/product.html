@@ -421,12 +421,12 @@
        MODAL: PRODUCT DETAIL
   ========================================================= -->
   <div class="modal-overlay" id="detailModal">
-    <div class="modal" style="max-width:520px;">
-      <div class="modal-header">
+    <div class="modal" style="max-width:520px; max-height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div class="modal-header" style="padding: 24px 24px 0 24px; margin-bottom:0;">
         <div class="modal-title" id="detail-title">Product Details</div>
         <button class="modal-close" onclick="closeDetailModal()">✕</button>
       </div>
-      <div class="modal-body" id="detail-body" style="padding:20px;">
+      <div class="modal-body" id="detail-body" style="padding:20px; overflow-y:auto; flex:1;">
         <!-- Injected by JS -->
       </div>
       <div class="modal-grid-actions">
