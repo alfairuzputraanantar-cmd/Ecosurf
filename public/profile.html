@@ -12,6 +12,12 @@
       if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
       const s = localStorage.getItem('cocacoy_sidebar_labels');
       if (s === 'false') document.documentElement.classList.add('sidebar-min');
+      
+      // ✅ Instantly load profile from localStorage to prevent flash
+      try {
+        const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+        window._initialProfile = p; // Store for form pre-fill
+      } catch(e) {}
     })();
   </script>
   <style>
@@ -144,15 +150,27 @@
     <script>
       (function() {
         try {
-          const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          const logo = localStorage.getItem('cocacoy_store_logo');
+          
+          // Sidebar Sync
           if (p.ownerName) document.getElementById('sidebarName').textContent = p.ownerName;
           if (p.role) document.getElementById('sidebarRole').textContent = p.role;
-          const logo = localStorage.getItem('cocacoy_store_logo');
           if (logo) {
-            const html = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
-            document.getElementById('sidebarAvatar').innerHTML = html;
+            document.getElementById('sidebarAvatar').innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
           } else if (p.ownerName) {
             document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+          }
+
+          // Top Profile Sync (Profile Page Only)
+          const profName = document.getElementById('profileDisplayName');
+          const profRole = document.getElementById('profileDisplayRole');
+          const profAv = document.getElementById('profileAvatarLarge');
+          if (profName && p.ownerName) profName.textContent = p.ownerName;
+          if (profRole && p.role) profRole.textContent = p.role;
+          if (profAv) {
+            if (logo) profAv.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
+            else if (p.ownerName) profAv.textContent = p.ownerName.charAt(0).toUpperCase();
           }
         } catch(e) {}
       })();
