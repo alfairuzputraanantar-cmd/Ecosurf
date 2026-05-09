@@ -179,7 +179,10 @@
             <h2 id="profileDisplayName">Owner Name</h2>
             <p id="profileDisplayRole">UMKM Admin</p>
             <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="document.getElementById('avatarInput').click()">
-              <i class="fas fa-camera"></i> Change Photo
+              <i class="fas fa-camera"></i> Change
+            </button>
+            <button class="btn btn-warn btn-sm" id="removePhotoBtn" style="margin-top:12px; margin-left:4px; display:none;" onclick="removePhoto()">
+              <i class="fas fa-trash"></i> Remove
             </button>
             <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(event)" />
           </div>
@@ -251,22 +254,23 @@
     async function loadProfile() {
       try {
         const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-        document.getElementById('storeName').value = p.storeName || '';
-        document.getElementById('ownerName').value = p.ownerName || '';
-        document.getElementById('userRole').value = p.role || '';
-        document.getElementById('storeDesc').value = p.storeDesc || '';
-        document.getElementById('storePhone').value = p.storePhone || '';
-        document.getElementById('storeCategory').value = p.storeCategory || 'food';
+        if (p.storeName) document.getElementById('storeName').value = p.storeName;
+        if (p.ownerName) document.getElementById('ownerName').value = p.ownerName;
+        if (p.role)      document.getElementById('userRole').value = p.role;
+        if (p.storeDesc) document.getElementById('storeDesc').value = p.storeDesc;
+        if (p.storePhone) document.getElementById('storePhone').value = p.storePhone;
+        if (p.storeCategory) document.getElementById('storeCategory').value = p.storeCategory;
         
-        document.getElementById('profileDisplayName').textContent = p.ownerName || 'Owner';
-        document.getElementById('profileDisplayRole').textContent = p.role || 'UMKM Admin';
+        if (p.ownerName) document.getElementById('profileDisplayName').textContent = p.ownerName;
+        if (p.role)      document.getElementById('profileDisplayRole').textContent = p.role;
 
         const logo = localStorage.getItem('cocacoy_store_logo');
         if (logo) {
-          const img = `<img src="${logo}" alt="Avatar"/>`;
-          document.getElementById('profileAvatarLarge').innerHTML = img;
+          document.getElementById('profileAvatarLarge').innerHTML = `<img src="${logo}" alt="Avatar"/>`;
+          document.getElementById('removePhotoBtn').style.display = 'inline-flex';
         } else if (p.ownerName) {
           document.getElementById('profileAvatarLarge').textContent = p.ownerName.charAt(0).toUpperCase();
+          document.getElementById('removePhotoBtn').style.display = 'none';
         }
       } catch (e) {}
     }
@@ -280,6 +284,7 @@
         const dataURL = ev.target.result;
         document.getElementById('profileAvatarLarge').innerHTML = `<img src="${dataURL}" alt="Avatar"/>`;
         document.getElementById('sidebarAvatar').innerHTML = `<img src="${dataURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+        document.getElementById('removePhotoBtn').style.display = 'inline-flex';
         localStorage.setItem('cocacoy_store_logo', dataURL);
       };
       reader.readAsDataURL(file);
@@ -314,7 +319,11 @@
           }
           await setDoc(userDoc(auth.currentUser.uid), updateData, { merge: true });
           
-          localStorage.setItem('cocacoy_profile', JSON.stringify({ ...data, role: data.role }));
+          // Preserve photoURL in localStorage profile object
+          const currentP = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          const newP = { ...data, photoURL: updateData.photoURL || currentP.photoURL || "" };
+          localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
+          
           document.getElementById('profileDisplayName').textContent = data.ownerName;
           document.getElementById('profileDisplayRole').textContent = data.role;
           
@@ -332,7 +341,33 @@
       }
     };
 
+    window.removePhoto = async function() {
+      if (!confirm('Remove profile photo?')) return;
+      const btn = document.getElementById('removePhotoBtn');
+      btn.disabled = true;
+      try {
+        if (auth.currentUser) {
+          const { deleteField } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+          await setDoc(userDoc(auth.currentUser.uid), { photoURL: deleteField() }, { merge: true });
+          localStorage.removeItem('cocacoy_store_logo');
+          
+          const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+          p.photoURL = "";
+          localStorage.setItem('cocacoy_profile', JSON.stringify(p));
+          
+          loadProfile();
+          showToast('Photo removed', 'success');
+        }
+      } catch(e) {
+        showToast('Failed to remove photo', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
     document.addEventListener('userReady', loadProfile);
+    // Listen for Firestore sync from guard.js
+    document.addEventListener('profileUpdated', loadProfile);
     
     // Theme toggle logic
     (function() {

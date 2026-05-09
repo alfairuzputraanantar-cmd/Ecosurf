@@ -41,7 +41,11 @@ onAuthStateChanged(auth, (user) => {
           const p = {
             ownerName: data.ownerName || user.displayName || user.email || "Owner",
             role: data.role || "UMKM Admin",
-            photoURL: data.photoURL || ""
+            photoURL: data.photoURL || "",
+            storeName: data.storeName || "",
+            storeDesc: data.storeDesc || "",
+            storePhone: data.storePhone || "",
+            storeCategory: data.storeCategory || "food"
           };
           // Update UI
           if (nameEl) nameEl.textContent = p.ownerName;
@@ -56,6 +60,7 @@ onAuthStateChanged(auth, (user) => {
           }
           
           localStorage.setItem('cocacoy_profile', JSON.stringify(p));
+          document.dispatchEvent(new CustomEvent("profileUpdated", { detail: p }));
         }
       });
     });
