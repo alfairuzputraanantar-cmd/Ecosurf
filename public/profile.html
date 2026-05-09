@@ -223,7 +223,7 @@
           </div>
           
           <div style="display:flex;align-items:center;gap:12px;margin-top:20px;">
-            <button class="btn btn-primary" onclick="saveProfile()">
+            <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfile()">
               <i class="fas fa-check-circle"></i> Update Profile
             </button>
             <span class="saved-badge" id="profileSaved"><i class="fas fa-circle-check"></i> Changes saved</span>
@@ -250,6 +250,7 @@
   <script type="module">
     import { auth, userDoc, storage, ref, uploadBytes, getDownloadURL } from './js/firebase.js';
     import { setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { uploadString } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     async function loadProfile() {
       try {
@@ -306,7 +307,11 @@
     };
 
     window.saveProfile = async function() {
-      const btn = document.querySelector('button[onclick="saveProfile()"]');
+      if (location.protocol === 'http:' && location.hostname !== 'localhost' && !location.hostname.startsWith('127.')) {
+        showToast('Storage requires HTTPS on most devices.', 'warning');
+      }
+
+      const btn = document.getElementById('saveProfileBtn');
       const originalBtnHtml = btn.innerHTML;
       
       const data = {
@@ -322,7 +327,7 @@
       const currentP = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
       const newP = { ...data, photoURL: currentP.photoURL || "" };
       localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
-      loadProfile(); // Update all avatars and text instantly
+      loadProfile(); 
       
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Saving...';
@@ -330,31 +335,36 @@
       try {
         if (auth.currentUser) {
           const updateData = { ...data, updatedAt: new Date().toISOString() };
-          const avatarInput = document.getElementById('avatarInput');
+          const logoData = localStorage.getItem('cocacoy_store_logo');
           
-          if (avatarInput.files && avatarInput.files[0]) {
-            const file = avatarInput.files[0];
+          // Only upload if it's a new dataURL (starts with data:image)
+          if (logoData && logoData.startsWith('data:image')) {
             const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.png`);
-            const snapshot = await uploadBytes(storageRef, file);
+            // Use uploadString for better mobile compatibility
+            const snapshot = await uploadString(storageRef, logoData, 'data_url');
             const photoURL = await getDownloadURL(snapshot.ref);
             updateData.photoURL = photoURL;
             localStorage.setItem('cocacoy_store_logo', photoURL);
             newP.photoURL = photoURL;
             localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
-            avatarInput.value = ""; // Clear input after successful upload
-            loadProfile(); 
           }
           
           await setDoc(userDoc(auth.currentUser.uid), updateData, { merge: true });
           
           showToast('Profile updated!', 'success');
           const badge = document.getElementById('profileSaved');
-          badge.classList.add('show');
-          setTimeout(() => badge.classList.remove('show'), 2500);
+          if (badge) {
+            badge.classList.add('show');
+            setTimeout(() => badge.classList.remove('show'), 2500);
+          }
+          loadProfile();
         }
       } catch (e) {
-        console.error(e);
-        showToast('Sync failed.', 'error');
+        console.error("Profile sync error:", e);
+        let msg = 'Sync failed.';
+        if (e.code === 'storage/unauthorized') msg = 'Permission denied (Storage Rules).';
+        else if (e.message && e.message.includes('network')) msg = 'Network error. Try HTTPS.';
+        showToast(msg, 'error');
       } finally {
         btn.disabled = false;
         btn.innerHTML = originalBtnHtml;
