@@ -313,6 +313,12 @@ window.openDetailModal = (id, data) => {
   const marginPct = sell > 0 ? Math.round((margin / sell) * 100) : 0;
 
   body.innerHTML = `
+    <!-- BARCODE DISPLAY -->
+    <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border);">
+      <svg id="detail-barcode-svg" style="max-height: 80px;"></svg>
+      <div style="font-family: monospace; font-size: 13px; color: #333; margin-top: 5px; font-weight: 700;">${data.barcode || 'NO BARCODE'}</div>
+    </div>
+
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       <div>
         <div class="stat-label" style="font-size:11px; margin-bottom:4px;">CATEGORY</div>
@@ -361,7 +367,15 @@ window.openDetailModal = (id, data) => {
     ` : ''}
   `;
 
+  // Render Barcode
+  if (data.barcode) {
+    setTimeout(() => window.renderBarcodePreview('detail-barcode-svg', data.barcode), 50);
+  }
+
   // Setup actions
+  document.getElementById('detail-print-btn').onclick = () => {
+    window.printBarcode(data);
+  };
   document.getElementById('detail-restock-btn').onclick = () => {
     window.closeDetailModal();
     window.openRestockModal(id, data);
@@ -674,4 +688,65 @@ window.regenerateBarcode = (mode) => {
     if (input) input.value = newBarcode;
     window.renderBarcodePreview('edit-barcode-svg', newBarcode);
   }
+};
+
+window.printBarcode = (data) => {
+  if (!data.barcode) {
+    showToast("This product doesn't have a barcode yet.", "error");
+    return;
+  }
+
+  const printWindow = window.open('', '_blank', 'width=600,height=400');
+  const sellPrice = parseInt(data.SellPrice || data.Price || 0);
+
+  // Generate SVG in a temporary hidden element to get the path/source
+  const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  tempSvg.id = "temp-print-svg";
+  tempSvg.style.display = "none";
+  document.body.appendChild(tempSvg);
+  
+  JsBarcode(tempSvg, data.barcode, {
+    format: "CODE128",
+    width: 2,
+    height: 60,
+    displayValue: true,
+    fontSize: 16,
+    fontOptions: "bold",
+    margin: 10
+  });
+
+  const svgHtml = tempSvg.outerHTML;
+  document.body.removeChild(tempSvg);
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Barcode - ${data.Name}</title>
+        <style>
+          @page { margin: 0; size: 50mm 30mm; }
+          body { 
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 50mm; height: 30mm; overflow: hidden;
+          }
+          .name { font-size: 10px; font-weight: 800; text-align: center; margin-bottom: 2px; text-transform: uppercase; max-width: 90%; overflow: hidden; white-space: nowrap; }
+          .price { font-size: 12px; font-weight: 900; margin-top: 2px; }
+          .barcode-container { transform: scale(0.85); transform-origin: center; }
+        </style>
+      </head>
+      <body>
+        <div class="name">${data.Name}</div>
+        <div class="barcode-container">${svgHtml}</div>
+        <div class="price">Rp ${sellPrice.toLocaleString('id-ID')}</div>
+        <script>
+          window.onload = () => {
+            window.print();
+            setTimeout(() => window.close(), 500);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
 };
