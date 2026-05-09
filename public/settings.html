@@ -951,58 +951,74 @@
     }
 
     /* ── Payment ── */
+    let pendingQRData = null;
+
     function handleQRFileSelect(input) {
       const file = input.files[0];
       if (!file) return;
       
       document.getElementById('qrFileName').textContent = file.name;
       
-      // Local preview
+      // Local preview & compression
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = document.getElementById('qrImagePreview');
-        const empty = document.getElementById('qrImageEmpty');
-        img.src = e.target.result;
-        img.style.display = 'block';
-        empty.style.display = 'none';
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          // COMPRESS IMAGE to max 400x400 for efficiency
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const max = 400;
+          if (width > height) { if (width > max) { height *= max / width; width = max; } }
+          else { if (height > max) { width *= max / height; height = max; } }
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          pendingQRData = canvas.toDataURL('image/jpeg', 0.8);
+          
+          const previewImg = document.getElementById('qrImagePreview');
+          const empty = document.getElementById('qrImageEmpty');
+          previewImg.src = pendingQRData;
+          previewImg.style.display = 'block';
+          empty.style.display = 'none';
+        };
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     }
 
     async function savePaymentSettings() {
-      const fileInput = document.getElementById('qrFileInput');
-      const file = fileInput.files[0];
       const btn = document.querySelector('button[onclick="savePaymentSettings()"]');
       
-      if (!file) {
+      if (!pendingQRData) {
         const currentQR = localStorage.getItem('cocacoy_payment_qr');
         if (!currentQR) {
             showToast('Please select a QR image first!', 'warning');
             return;
         }
+        showToast('Settings saved (no changes)!', 'info');
         flashSaved('paySaved');
         return;
       }
 
-      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...'; }
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...'; }
 
       try {
-        const { auth, storage, ref, uploadBytes, getDownloadURL, userDoc, updateDoc } = await import('./js/firebase.js');
+        const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
         if (auth.currentUser) {
           const uid = auth.currentUser.uid;
-          const storageRef = ref(storage, `users/${uid}/paymentQR.jpg`);
           
-          await uploadBytes(storageRef, file);
-          const downloadURL = await getDownloadURL(storageRef);
+          // Save Base64 directly to Firestore to bypass Storage ERR_FAILED
+          await updateDoc(userDoc(uid), { paymentQR: pendingQRData });
+          localStorage.setItem('cocacoy_payment_qr', pendingQRData);
           
-          await updateDoc(userDoc(uid), { paymentQR: downloadURL });
-          localStorage.setItem('cocacoy_payment_qr', downloadURL);
-          
-          showToast('QR Code uploaded and synced!', 'success');
+          pendingQRData = null; // Clear pending state
+          showToast('QR Code saved and synced!', 'success');
         }
       } catch (e) { 
         console.error(e); 
-        showToast('Upload failed: ' + e.message, 'error');
+        showToast('Save failed: ' + e.message, 'error');
       } finally {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Configuration'; }
       }
