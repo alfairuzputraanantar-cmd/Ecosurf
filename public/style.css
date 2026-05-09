@@ -571,6 +571,7 @@ a {
   font-weight: 600;
   font-family: var(--font);
   transition: all .2s;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -593,16 +594,18 @@ a {
 
 .btn-ghost:hover {
   color: var(--text);
+  background: var(--border);
 }
 
-.btn-danger {
-  background: rgba(247, 95, 95, .12);
-  color: var(--red);
-  border: 1px solid rgba(247, 95, 95, .25);
+.btn-info {
+  background: rgba(91, 156, 246, .12);
+  color: var(--blue);
+  border: 1px solid rgba(91, 156, 246, .2);
 }
 
-.btn-danger:hover {
-  background: rgba(247, 95, 95, .22);
+.btn-info:hover {
+  background: rgba(91, 156, 246, .2);
+  transform: translateY(-1px);
 }
 
 .btn-success {
