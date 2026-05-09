@@ -14,9 +14,9 @@
       if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
       const s = localStorage.getItem('cocacoy_sidebar_labels');
       if (s === 'false') document.documentElement.classList.add('sidebar-min');
-      
+
       // ✅ Instantly load profile from localStorage
-      try { window._initialProfile = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}'); } catch(e) {}
+      try { window._initialProfile = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}'); } catch (e) { }
     })();
   </script>
 </head>
@@ -55,7 +55,7 @@
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> <span>Sign Out</span></button>
     </div>
     <script>
-      (function() {
+      (function () {
         try {
           const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           const logo = localStorage.getItem('cocacoy_store_logo');
@@ -66,7 +66,7 @@
             if (logo) av.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
             else av.textContent = p.ownerName.charAt(0).toUpperCase();
           }
-        } catch(e) {}
+        } catch (e) { }
       })();
     </script>
   </aside>
@@ -116,139 +116,114 @@
     </div>
     <div class="content">
 
-      <!-- TOP TAB NAVIGATION -->
-      <div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-        <button class="hist-main-tab active" data-target="tabActivity" style="background:none; border:none; font-size:16px; font-weight:700; color:var(--brand-1); border-bottom: 2px solid var(--brand-1); padding-bottom: 5px; cursor:pointer;" onclick="switchMainTab('tabActivity')">Activity Log</button>
-        <button class="hist-main-tab" data-target="tabSales" style="background:none; border:none; font-size:16px; font-weight:600; color:var(--muted); padding-bottom: 5px; cursor:pointer;" onclick="switchMainTab('tabSales')">Sales Timeline</button>
+      <!-- Analytics Summary Row 1: Main Metrics -->
+      <div class="stats-grid grid-auto"
+        style="margin-bottom: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
+          <div class="stat-icon si-green"><i class="fas fa-receipt"></i></div>
+          <div>
+            <div class="stat-val" id="statSales">0</div>
+            <div class="stat-label">Transactions</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
+          <div class="stat-icon si-blue"><i class="fas fa-truck"></i></div>
+          <div>
+            <div class="stat-val" id="statRestocks">0</div>
+            <div class="stat-label">Restocks</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(160,113,79,.3);">
+          <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
+          <div>
+            <div class="stat-val" id="statMovements">0</div>
+            <div class="stat-label">Movements</div>
+          </div>
+        </div>
       </div>
 
-      <!-- ================= TAB 1: ACTIVITY LOG (Old Content) ================= -->
-      <div id="tabActivity" class="hist-tab-content">
-        <!-- Analytics Summary Row 1: Main Metrics -->
-        <div class="stats-grid grid-auto" style="margin-bottom: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-          <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
-            <div class="stat-icon si-green"><i class="fas fa-receipt"></i></div>
-            <div>
-              <div class="stat-val" id="statSales">0</div>
-              <div class="stat-label">Transactions</div>
-            </div>
-          </div>
-          <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
-            <div class="stat-icon si-blue"><i class="fas fa-truck"></i></div>
-            <div>
-              <div class="stat-val" id="statRestocks">0</div>
-              <div class="stat-label">Restocks</div>
-            </div>
-          </div>
-          <div class="stat-card" style="border-color:rgba(160,113,79,.3);">
-            <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
-            <div>
-              <div class="stat-val" id="statMovements">0</div>
-              <div class="stat-label">Movements</div>
-            </div>
+      <!-- Analytics Summary Row 2: Management Metrics -->
+      <div class="stats-grid grid-auto"
+        style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+        <div class="stat-card" style="border-color:rgba(52,152,219,.3);">
+          <div class="stat-icon si-blue" style="background:rgba(52,152,219,.15);color:#3498db;"><i
+              class="fas fa-plus-circle"></i></div>
+          <div>
+            <div class="stat-val" id="statAdded" style="color:#3498db;font-size:16px;">0</div>
+            <div class="stat-label">Added</div>
           </div>
         </div>
-
-        <!-- Analytics Summary Row 2: Management Metrics -->
-        <div class="stats-grid grid-auto" style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
-          <div class="stat-card" style="border-color:rgba(52,152,219,.3);">
-            <div class="stat-icon si-blue" style="background:rgba(52,152,219,.15);color:#3498db;"><i class="fas fa-plus-circle"></i></div>
-            <div>
-              <div class="stat-val" id="statAdded" style="color:#3498db;font-size:16px;">0</div>
-              <div class="stat-label">Added</div>
-            </div>
-          </div>
-          <div class="stat-card" style="border-color:rgba(241,196,15,.3);">
-            <div class="stat-icon si-yellow" style="background:rgba(241,196,15,.15);color:#f1c40f;"><i class="fas fa-pen-to-square"></i></div>
-            <div>
-              <div class="stat-val" id="statEdited" style="color:#f1c40f;font-size:16px;">0</div>
-              <div class="stat-label">Edited</div>
-            </div>
-          </div>
-          <div class="stat-card" style="border-color:rgba(231,76,60,.3);">
-            <div class="stat-icon si-red" style="background:rgba(231,76,60,.15);color:#e74c3c;"><i class="fas fa-trash-can"></i></div>
-            <div>
-              <div class="stat-val" id="statDeleted" style="color:#e74c3c;font-size:16px;">0</div>
-              <div class="stat-label">Deleted</div>
-            </div>
+        <div class="stat-card" style="border-color:rgba(241,196,15,.3);">
+          <div class="stat-icon si-yellow" style="background:rgba(241,196,15,.15);color:#f1c40f;"><i
+              class="fas fa-pen-to-square"></i></div>
+          <div>
+            <div class="stat-val" id="statEdited" style="color:#f1c40f;font-size:16px;">0</div>
+            <div class="stat-label">Edited</div>
           </div>
         </div>
-
-        <!-- Time & Action Filters -->
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
-          <!-- Time Scope -->
-          <div class="scroll-tabs" id="timeFilters">
-            <button class="hist-time-tab btn btn-sm active" data-time="today" onclick="switchTimeScope('today')" style="background:var(--brand-grd);color:#fff;border:1px solid transparent;">Today</button>
-            <button class="hist-time-tab btn btn-sm" data-time="7days" onclick="switchTimeScope('7days')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">7 Days</button>
-            <button class="hist-time-tab btn btn-sm" data-time="30days" onclick="switchTimeScope('30days')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">30 Days</button>
-            <button class="hist-time-tab btn btn-sm" data-time="all" onclick="switchTimeScope('all')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">All Time</button>
+        <div class="stat-card" style="border-color:rgba(231,76,60,.3);">
+          <div class="stat-icon si-red" style="background:rgba(231,76,60,.15);color:#e74c3c;"><i
+              class="fas fa-trash-can"></i></div>
+          <div>
+            <div class="stat-val" id="statDeleted" style="color:#e74c3c;font-size:16px;">0</div>
+            <div class="stat-label">Deleted</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Time & Action Filters -->
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        <!-- Time Scope -->
+        <div class="scroll-tabs" id="timeFilters">
+          <button class="hist-time-tab btn btn-sm active" data-time="today" onclick="switchTimeScope('today')"
+            style="background:var(--brand-grd);color:#fff;border:1px solid transparent;">Today</button>
+          <button class="hist-time-tab btn btn-sm" data-time="7days" onclick="switchTimeScope('7days')"
+            style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">7 Days</button>
+          <button class="hist-time-tab btn btn-sm" data-time="30days" onclick="switchTimeScope('30days')"
+            style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">30 Days</button>
+          <button class="hist-time-tab btn btn-sm" data-time="all" onclick="switchTimeScope('all')"
+            style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">All Time</button>
+        </div>
 
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div class="search-box" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 14px;flex:1;min-width:180px;">
+          <div class="search-box"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 14px;flex:1;min-width:180px;">
             <i class="fas fa-magnifying-glass" style="color:var(--muted);font-size:13px;"></i>
-            <input type="text" id="historySearch" placeholder="Search history..." oninput="filterHistory()" style="background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:var(--font);width:100%;" />
+            <input type="text" id="historySearch" placeholder="Search history..." oninput="filterHistory()"
+              style="background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:var(--font);width:100%;" />
           </div>
           <!-- Action Tab buttons -->
           <div class="scroll-tabs">
-            <button class="hist-tab btn btn-sm" data-tab="all" onclick="switchHistoryTab('all')" style="background:var(--brand-grd);color:#fff;border:1px solid transparent;"><i class="fas fa-list"></i> All</button>
-            <button class="hist-tab btn btn-sm" data-tab="Added" onclick="switchHistoryTab('Added')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i class="fas fa-plus-circle"></i> Added</button>
-            <button class="hist-tab btn btn-sm" data-tab="Edited" onclick="switchHistoryTab('Edited')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i class="fas fa-pen-to-square"></i> Edited</button>
-            <button class="hist-tab btn btn-sm" data-tab="Deleted" onclick="switchHistoryTab('Deleted')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i class="fas fa-trash"></i> Deleted</button>
-            <button class="hist-tab btn btn-sm" data-tab="Sold" onclick="switchHistoryTab('Sold')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i class="fas fa-shopping-cart"></i> Sold</button>
-            <button class="hist-tab btn btn-sm" data-tab="Restock" onclick="switchHistoryTab('Restock')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i class="fas fa-truck"></i> Restock</button>
+            <button class="hist-tab btn btn-sm" data-tab="all" onclick="switchHistoryTab('all')"
+              style="background:var(--brand-grd);color:#fff;border:1px solid transparent;"><i class="fas fa-list"></i>
+              All</button>
+            <button class="hist-tab btn btn-sm" data-tab="Added" onclick="switchHistoryTab('Added')"
+              style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i
+                class="fas fa-plus-circle"></i> Added</button>
+            <button class="hist-tab btn btn-sm" data-tab="Edited" onclick="switchHistoryTab('Edited')"
+              style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i
+                class="fas fa-pen-to-square"></i> Edited</button>
+            <button class="hist-tab btn btn-sm" data-tab="Deleted" onclick="switchHistoryTab('Deleted')"
+              style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i
+                class="fas fa-trash"></i> Deleted</button>
+            <button class="hist-tab btn btn-sm" data-tab="Sold" onclick="switchHistoryTab('Sold')"
+              style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i
+                class="fas fa-shopping-cart"></i> Sold</button>
+            <button class="hist-tab btn btn-sm" data-tab="Restock" onclick="switchHistoryTab('Restock')"
+              style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);"><i
+                class="fas fa-truck"></i> Restock</button>
           </div>
         </div>
       </div>
 
       <div class="timeline-container" id="historyList">
-        <div class="empty-state"><i class="fas fa-clock-rotate-left"></i><p>No transaction history yet.</p></div>
+        <div class="empty-state"><i class="fas fa-clock-rotate-left"></i>
+          <p>No transaction history yet.</p>
+        </div>
       </div>
       <table style="display:none;">
         <tbody id="historyTable"></tbody>
       </table>
-      </div> <!-- End tabActivity -->
-
-      <!-- ================= TAB 2: SALES TIMELINE (New Content) ================= -->
-      <div id="tabSales" class="hist-tab-content" style="display:none;">
-        <!-- Time Scope for Sales Timeline -->
-        <div class="scroll-tabs" id="salesTimeFilters" style="margin-bottom: 24px;">
-          <button class="hist-sales-tab btn btn-sm active" data-time="today" onclick="switchSalesTimeScope('today')" style="background:var(--brand-grd);color:#fff;border:1px solid transparent;">Today</button>
-          <button class="hist-sales-tab btn btn-sm" data-time="7days" onclick="switchSalesTimeScope('7days')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">7 Days</button>
-          <button class="hist-sales-tab btn btn-sm" data-time="30days" onclick="switchSalesTimeScope('30days')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">30 Days</button>
-          <button class="hist-sales-tab btn btn-sm" data-time="all" onclick="switchSalesTimeScope('all')" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">All Time</button>
-        </div>
-
-        <!-- Revenue & Profit Summary Row -->
-        <div class="stats-grid grid-auto" style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-          <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
-            <div class="stat-icon si-green"><i class="fas fa-money-bill-wave"></i></div>
-            <div>
-              <div class="stat-val" id="salesTabRevenue">Rp 0</div>
-              <div class="stat-label">Total Revenue</div>
-            </div>
-          </div>
-          <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
-            <div class="stat-icon si-blue"><i class="fas fa-coins"></i></div>
-            <div>
-              <div class="stat-val" id="salesTabProfit">Rp 0</div>
-              <div class="stat-label">Est. Profit</div>
-            </div>
-          </div>
-          <div class="stat-card" style="border-color:rgba(160,113,79,.3);">
-            <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
-            <div>
-              <div class="stat-val" id="salesTabQty">0</div>
-              <div class="stat-label">Items Sold</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="timeline-container" id="salesTimelineList">
-          <div class="empty-state"><i class="fas fa-shopping-cart"></i><p>No sales found for this period.</p></div>
-        </div>
-      </div> <!-- End tabSales -->
-
     </div>
   </div>
 
@@ -259,28 +234,6 @@
   <script type="module" src="./js/notifications.js"></script>
   <script type="module" src="./js/export.js"></script>
   <script>
-    window.switchMainTab = function(targetId) {
-      document.querySelectorAll('.hist-main-tab').forEach(btn => {
-        if (btn.dataset.target === targetId) {
-          btn.classList.add('active');
-          btn.style.color = 'var(--brand-1)';
-          btn.style.borderBottom = '2px solid var(--brand-1)';
-          btn.style.fontWeight = '700';
-        } else {
-          btn.classList.remove('active');
-          btn.style.color = 'var(--muted)';
-          btn.style.borderBottom = 'none';
-          btn.style.fontWeight = '600';
-        }
-      });
-      document.querySelectorAll('.hist-tab-content').forEach(content => {
-        content.style.display = content.id === targetId ? 'block' : 'none';
-      });
-      if (targetId === 'tabSales' && window.renderSalesTimeline) {
-        window.renderSalesTimeline();
-      }
-    };
-
     window.renderHistoryCards = function (rows) {
       const list = document.getElementById('historyList');
       if (!rows || rows.length === 0) { list.innerHTML = '<div class="empty-state"><i class="fas fa-clock-rotate-left"></i><p>No transaction history yet.</p></div>'; return; }

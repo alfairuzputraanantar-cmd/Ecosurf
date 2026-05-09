@@ -8,7 +8,7 @@ import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-f
 ================================================================ */
 
 let products = [];
-let history  = [];
+let history = [];
 
 document.addEventListener('userReady', ({ detail: { uid } }) => {
   /* ── Listen products ── */
@@ -27,77 +27,85 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
 
   /* ── Listen transactions → Analytics Grid ── */
   onSnapshot(userCol(uid, 'transactions'), snap => {
-    window._allTransactions = [];
-    snap.forEach(d => window._allTransactions.push(d.data()));
-    updateSalesAnalytics(); // default filter is "today" initially
+    const now = new Date();
+    const todayStr = now.toLocaleDateString('en-CA');
+
+    const yest = new Date(now); yest.setDate(yest.getDate() - 1);
+    const yesterdayStr = yest.toLocaleDateString('en-CA');
+
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfWeekTime = startOfWeek.getTime();
+
+    const startOfLastWeek = new Date(startOfWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const startOfLastWeekTime = startOfLastWeek.getTime();
+
+    const thisMonthStr = now.toLocaleDateString('en-CA').slice(0, 7);
+
+    let revToday = 0, revYest = 0, revWeek = 0, revLastWeek = 0;
+    let profToday = 0, profYest = 0, profMonth = 0;
+    let salesMonthCount = 0;
+
+    snap.forEach(d => {
+      const data = d.data();
+      const createdAt = data.createdAt || '';
+      if (!createdAt) return;
+
+      const itemDate = new Date(createdAt);
+      const itemDateStr = itemDate.toLocaleDateString('en-CA');
+      const itemMonthStr = itemDateStr.slice(0, 7);
+      const itemTime = itemDate.getTime();
+      const total = data.total || 0;
+
+      // Calculate profit dynamically if not stored
+      let profit = data.totalProfit;
+      if (profit === undefined) {
+        profit = (data.items || []).reduce((sum, item) => {
+          const prod = products.find(p => p.id === item.productId);
+          const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
+          return sum + (item.price - buyPrice) * item.qty;
+        }, 0);
+      }
+
+      if (itemDateStr === todayStr) { revToday += total; profToday += profit; }
+      else if (itemDateStr === yesterdayStr) { revYest += total; profYest += profit; }
+
+      if (itemTime >= startOfWeekTime) { revWeek += total; }
+      else if (itemTime >= startOfLastWeekTime && itemTime < startOfWeekTime) { revLastWeek += total; }
+
+      if (itemMonthStr === thisMonthStr) { profMonth += profit; salesMonthCount++; }
+    });
+
+    setText('todaySales', 'Rp ' + revToday.toLocaleString('id-ID'));
+    setText('weekSales', 'Rp ' + revWeek.toLocaleString('id-ID'));
+    setText('todayProfit', 'Rp ' + profToday.toLocaleString('id-ID'));
+    setText('monthProfit', 'Rp ' + profMonth.toLocaleString('id-ID'));
+    setText('totalSalesCount', salesMonthCount);
+
+    setTrend('todaySalesTrend', revToday, revYest);
+    setTrend('weekSalesTrend', revWeek, revLastWeek);
+    setTrend('todayProfitTrend', profToday, profYest);
   });
 });
 
-let currentDashboardFilter = 'today';
-window.setDashboardTimeFilter = (filter, btn) => {
-  currentDashboardFilter = filter;
-  // Update button active states
-  const parent = btn.parentElement;
-  parent.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  updateSalesAnalytics();
-};
-
-function updateSalesAnalytics() {
-  const txs = window._allTransactions || [];
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  
-  let cutoff = 0;
-  if (currentDashboardFilter === 'today') {
-    cutoff = todayStart;
-  } else if (currentDashboardFilter === '7d') {
-    cutoff = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-  } else if (currentDashboardFilter === '30d') {
-    cutoff = now.getTime() - (30 * 24 * 60 * 60 * 1000);
-  } else if (currentDashboardFilter === '1y') {
-    cutoff = now.getTime() - (365 * 24 * 60 * 60 * 1000);
+function setTrend(id, current, previous) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (previous === 0) {
+    if (current > 0) el.innerHTML = `<span style="color:var(--green);"><i class="fas fa-arrow-trend-up"></i> 100%</span>`;
+    else el.innerHTML = '';
+    return;
   }
-
-  let totalProductsSold = 0;
-  let totalRevenue = 0;
-  let totalProfit = 0;
-  let totalTransactions = 0;
-  const productSalesMap = {};
-
-  txs.forEach(tx => {
-    const txTime = new Date(tx.createdAt).getTime();
-    if (txTime >= cutoff) {
-      totalTransactions++;
-      totalRevenue += tx.total || 0;
-      totalProfit += tx.totalProfit || 0;
-      
-      (tx.items || []).forEach(item => {
-        totalProductsSold += item.qty || 0;
-        if (!productSalesMap[item.name]) {
-          productSalesMap[item.name] = 0;
-        }
-        productSalesMap[item.name] += item.qty || 0;
-      });
-    }
-  });
-
-  let bestSeller = '–';
-  let maxSold = 0;
-  for (const [name, qty] of Object.entries(productSalesMap)) {
-    if (qty > maxSold) {
-      maxSold = qty;
-      bestSeller = name;
-    }
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct >= 0) {
+    el.innerHTML = `<span style="color:var(--green);"><i class="fas fa-arrow-trend-up"></i> ${pct}%</span>`;
+  } else {
+    el.innerHTML = `<span style="color:var(--red);"><i class="fas fa-arrow-trend-down"></i> ${Math.abs(pct)}%</span>`;
   }
-
-  setText('saProductsSold', totalProductsSold.toLocaleString('id-ID'));
-  setText('saRevenue', 'Rp ' + totalRevenue.toLocaleString('id-ID'));
-  setText('saProfit', 'Rp ' + totalProfit.toLocaleString('id-ID'));
-  setText('saTransactions', totalTransactions.toLocaleString('id-ID'));
-  setText('saBestSeller', bestSeller);
 }
+
 
 /* ================================================================
    MAIN RENDER
@@ -113,15 +121,15 @@ function renderDashboard() {
    STAT CARDS
 ================================================================ */
 function renderStats() {
-  const totalValue = products.reduce((s, p) => s + ((parseInt(p.Stock)||0) * (parseInt(p.Price)||0)), 0);
-  const lowStock   = products.filter(p => {
-    const stock  = parseInt(p.Stock)             || 0;
+  const totalValue = products.reduce((s, p) => s + ((parseInt(p.Stock) || 0) * (parseInt(p.Price) || 0)), 0);
+  const lowStock = products.filter(p => {
+    const stock = parseInt(p.Stock) || 0;
     const thresh = parseInt(p.lowStockThreshold) || 10;
     return stock <= thresh;
   }).length;
   const totalProds = products.length;
-  setText('totalValue',    'Rp ' + totalValue.toLocaleString('id-ID'));
-  setText('lowStock',      lowStock);
+  setText('totalValue', 'Rp ' + totalValue.toLocaleString('id-ID'));
+  setText('lowStock', lowStock);
   setText('totalProducts', totalProds);
 }
 
@@ -140,7 +148,7 @@ function renderMiniChart() {
     catMap[cat] = (catMap[cat] || 0) + (parseInt(p.Stock) || 0);
   });
 
-  const entries = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0, 7);
+  const entries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 7);
 
   if (entries.length === 0) {
     canvas.style.display = 'none';
@@ -154,8 +162,8 @@ function renderMiniChart() {
   if (empty) empty.style.display = 'none';
 
   const labels = entries.map(e => e[0]);
-  const data   = entries.map(e => e[1]);
-  const colors = ['#c8956c','#a0714f','#7a9aaa','#22c997','#f5a623','#5b9cf6','#f75f5f'];
+  const data = entries.map(e => e[1]);
+  const colors = ['#c8956c', '#a0714f', '#7a9aaa', '#22c997', '#f5a623', '#5b9cf6', '#f75f5f'];
 
   if (_dashBarChart) _dashBarChart.destroy();
   _dashBarChart = new Chart(canvas, {
@@ -164,8 +172,8 @@ function renderMiniChart() {
       labels,
       datasets: [{
         data,
-        backgroundColor: colors.map((c,i) => colors[i % colors.length] + 'CC'),
-        borderColor:     colors.map((c,i) => colors[i % colors.length]),
+        backgroundColor: colors.map((c, i) => colors[i % colors.length] + 'CC'),
+        borderColor: colors.map((c, i) => colors[i % colors.length]),
         borderWidth: 2, borderRadius: 8, borderSkipped: false
       }]
     },
@@ -193,18 +201,18 @@ function renderRecentProducts() {
   }
 
   const sorted = [...products]
-    .sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''))
+    .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
     .slice(0, 5);
 
   el.innerHTML = sorted.map(p => {
-    const stock    = parseInt(p.Stock) || 0;
-    const price    = parseInt(p.Price) || 0;
+    const stock = parseInt(p.Stock) || 0;
+    const price = parseInt(p.Price) || 0;
     const stockCls = stock <= 5 ? 'tag-red' : stock <= 20 ? 'tag-yellow' : 'tag-green';
     return `
       <div class="recent-item">
         <div>
           <div class="recent-item-name">${p.Name}</div>
-          <div class="recent-item-sub">${p.Category||'—'} · <span class="tag ${stockCls}" style="font-size:10px;">${stock} ${p.Unit||'pcs'}</span></div>
+          <div class="recent-item-sub">${p.Category || '—'} · <span class="tag ${stockCls}" style="font-size:10px;">${stock} ${p.Unit || 'pcs'}</span></div>
         </div>
         <div class="recent-item-val">Rp ${price.toLocaleString('id-ID')}</div>
       </div>`;
@@ -220,11 +228,11 @@ function renderLowStockAlert() {
 
   const low = products
     .filter(p => {
-      const stock  = parseInt(p.Stock)             || 0;
+      const stock = parseInt(p.Stock) || 0;
       const thresh = parseInt(p.lowStockThreshold) || 10;
       return stock <= thresh;
     })
-    .sort((a,b) => (parseInt(a.Stock)||0) - (parseInt(b.Stock)||0))
+    .sort((a, b) => (parseInt(a.Stock) || 0) - (parseInt(b.Stock) || 0))
     .slice(0, 6);
 
   if (low.length === 0) {
@@ -237,15 +245,15 @@ function renderLowStockAlert() {
   }
 
   el.innerHTML = low.map(p => {
-    const stock  = parseInt(p.Stock)             || 0;
+    const stock = parseInt(p.Stock) || 0;
     const thresh = parseInt(p.lowStockThreshold) || 10;
-    const pct    = Math.min(100, Math.round((stock / thresh) * 100));
-    const color  = stock <= Math.ceil(thresh * 0.3) ? 'var(--red)' : 'var(--yellow)';
+    const pct = Math.min(100, Math.round((stock / thresh) * 100));
+    const color = stock <= Math.ceil(thresh * 0.3) ? 'var(--red)' : 'var(--yellow)';
     return `
       <div style="margin-bottom:14px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
           <span style="font-size:13px;font-weight:600;">${p.Name}</span>
-          <span style="font-size:12px;color:${color};font-weight:700;">${stock} / ${thresh} ${p.Unit||'pcs'}</span>
+          <span style="font-size:12px;color:${color};font-weight:700;">${stock} / ${thresh} ${p.Unit || 'pcs'}</span>
         </div>
         <div style="background:var(--surface2);border-radius:6px;height:6px;overflow:hidden;">
           <div style="width:${pct}%;height:100%;background:${color};border-radius:6px;transition:width .4s;"></div>

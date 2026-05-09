@@ -148,7 +148,7 @@
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> <span>Sign Out</span></button>
     </div>
     <script>
-      (function() {
+      (function () {
         try {
           const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           const logo = localStorage.getItem('cocacoy_store_logo');
@@ -159,7 +159,7 @@
             if (logo) av.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
             else av.textContent = p.ownerName.charAt(0).toUpperCase();
           }
-        } catch(e) {}
+        } catch (e) { }
       })();
     </script>
   </aside>
@@ -211,55 +211,39 @@
 
       <!-- SUMMARY CARDS REMOVED AS THEY ARE ACCESSIBLE ON DASHBOARD -->
 
-      <!-- CHARTS ROW 1: Trends & Analytics -->
-      <div class="chart-grid grid-auto">
-        <div class="chart-card full">
-          <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-chart-line" style="color:var(--green);"></i> Revenue & Profit Trend (Last 14 Days)</div>
-          </div>
-          <div class="chart-card-body">
-            <div class="chart-wrapper">
-              <canvas id="trendChart"></canvas>
-            </div>
-            <div class="chart-empty" id="emptyTrend" style="display:none;">
-              <i class="fas fa-money-bill-trend-up"></i><span>No sales data yet</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <!-- CHARTS ROW 1 -->
       <div class="chart-grid grid-auto">
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--brand-1);"></i> Top Sold Products</div>
+            <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Top Products by Stock</div>
           </div>
           <div class="chart-card-body">
             <div class="chart-wrapper">
-              <canvas id="topSoldChart"></canvas>
+              <canvas id="stockChart"></canvas>
             </div>
-            <div class="chart-empty" id="emptyTopSold" style="display:none;">
-              <i class="fas fa-inbox"></i><span>No sales data yet</span>
+            <div class="chart-empty" id="emptyStock" style="display:none;">
+              <i class="fas fa-inbox"></i><span>No product data yet</span>
             </div>
           </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-chart-pie" style="color:var(--blue);"></i> Sales by Category</div>
+            <div class="chart-card-title"><i class="fas fa-chart-pie"></i> Category Distribution</div>
           </div>
           <div class="chart-card-body">
             <div class="chart-wrapper">
-              <canvas id="salesCategoryChart"></canvas>
+              <canvas id="categoryChart"></canvas>
             </div>
-            <div class="chart-empty" id="emptySalesCategory" style="display:none;">
-              <i class="fas fa-inbox"></i><span>No sales data yet</span>
+            <div class="chart-empty" id="emptyCategory" style="display:none;">
+              <i class="fas fa-inbox"></i><span>No category data yet</span>
             </div>
-            <div class="chart-legend" id="salesCategoryLegend"></div>
+            <div class="chart-legend" id="categoryLegend"></div>
           </div>
         </div>
       </div>
 
-      <!-- CHARTS ROW 3: Inventory Legacy Charts -->
+      <!-- CHARTS ROW 2: Line charts -->
       <div class="chart-grid grid-auto">
         <div class="chart-card">
           <div class="chart-card-header">
@@ -294,7 +278,8 @@
       <div class="chart-grid grid-auto">
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-coins" style="color:var(--brand-1);"></i> Daily Profit – Last 7 Days</div>
+            <div class="chart-card-title"><i class="fas fa-coins" style="color:var(--brand-1);"></i> Daily Profit – Last
+              7 Days</div>
           </div>
           <div class="chart-card-body">
             <div class="chart-wrapper">
@@ -308,7 +293,8 @@
 
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--yellow);"></i> Top Profitable Products</div>
+            <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--yellow);"></i> Top Profitable
+              Products</div>
           </div>
           <div class="chart-card-body">
             <div class="chart-wrapper">
