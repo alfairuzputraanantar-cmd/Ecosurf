@@ -483,6 +483,9 @@
           <div class="settings-nav-item" data-panel="security" onclick="switchPanel('security')">
             <i class="fas fa-shield-halved"></i> Security
           </div>
+          <div class="settings-nav-item" data-panel="payment" onclick="switchPanel('payment')">
+            <i class="fas fa-wallet"></i> Payment
+          </div>
         </nav>
 
         <!-- ── Right Content ── -->
@@ -766,6 +769,41 @@
               </div>
             </div>
           </div>
+          
+          <!-- PAYMENT -->
+          <div class="settings-panel" id="panel-payment">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div class="settings-section-icon green"><i class="fas fa-qrcode"></i></div>
+                <div>
+                  <div class="settings-section-title">QRIS / GoPay Payment</div>
+                  <div class="settings-section-sub">Configure your QR code for cashier simulation</div>
+                </div>
+              </div>
+              <div class="settings-section-body">
+                <div class="form-group">
+                  <label class="form-label">QR Image URL</label>
+                  <input class="form-control" id="qrImageUrl" type="url" placeholder="https://example.com/my-qris.jpg" oninput="updateQRPreview()" />
+                  <div class="setting-desc" style="margin-top:6px;">Paste a direct link to your QR code image (JPG/PNG).</div>
+                </div>
+                
+                <div class="form-group" style="margin-top:16px;">
+                  <label class="form-label">QR Preview</label>
+                  <div style="background: white; padding: 10px; border-radius: 12px; border: 1px solid var(--border); display: inline-block; width: 200px; height: 200px; display: grid; place-items: center; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
+                    <img id="qrImagePreview" src="" alt="QR Preview" style="max-width: 100%; max-height: 100%; display: none;" />
+                    <span id="qrImageEmpty" style="color: #aaa; font-size: 13px; text-align: center;"><i class="fas fa-image" style="font-size:24px; margin-bottom:8px; display:block;"></i>No Image</span>
+                  </div>
+                </div>
+
+                <div style="margin-top:18px;">
+                  <button class="btn btn-primary" onclick="savePaymentSettings()">
+                    <i class="fas fa-floppy-disk"></i> Save Configuration
+                  </button>
+                  <span class="saved-badge" id="paySaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i> Saved</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div><!-- end .settings-right -->
       </div>
@@ -906,6 +944,38 @@
       showToast('Notification preferences saved!', 'success');
     }
 
+    /* ── Payment ── */
+    function updateQRPreview() {
+      const url = document.getElementById('qrImageUrl').value;
+      const img = document.getElementById('qrImagePreview');
+      const empty = document.getElementById('qrImageEmpty');
+      
+      if (url) {
+        img.src = url;
+        img.style.display = 'block';
+        empty.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        empty.style.display = 'block';
+      }
+    }
+
+    async function savePaymentSettings() {
+      const qrUrl = document.getElementById('qrImageUrl').value;
+      localStorage.setItem('cocacoy_payment_qr', qrUrl);
+
+      try {
+        const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
+        if (auth.currentUser) {
+          await updateDoc(userDoc(auth.currentUser.uid), { paymentQR: qrUrl });
+          showToast('Payment settings synced to cloud!', 'success');
+        }
+      } catch (e) { console.error(e); }
+
+      flashSaved('paySaved');
+      showToast('Payment QR configured successfully!', 'success');
+    }
+
     /* ── Security ── */
     function changePassword() {
         const curr = document.getElementById('currentPass').value;
@@ -1039,6 +1109,13 @@
               if (np.critical !== undefined) document.getElementById('notifCritical').checked = np.critical;
               localStorage.setItem('cocacoy_notif_prefs', JSON.stringify(np));
             }
+
+            // Payment
+            if (data.paymentQR) {
+              document.getElementById('qrImageUrl').value = data.paymentQR;
+              localStorage.setItem('cocacoy_payment_qr', data.paymentQR);
+              updateQRPreview();
+            }
           }
         }
       } catch (e) { console.error("Cloud load failed:", e); }
@@ -1057,6 +1134,15 @@
 
       const th = localStorage.getItem('cocacoy_low_stock_threshold');
       if (th) { document.getElementById('lowStockSlider').value = th; updateThresholdVal(th); }
+
+      const payQR = localStorage.getItem('cocacoy_payment_qr');
+      if (payQR) {
+        const el = document.getElementById('qrImageUrl');
+        if (el) {
+          el.value = payQR;
+          updateQRPreview();
+        }
+      }
 
       try {
         const np = JSON.parse(localStorage.getItem('cocacoy_notif_prefs') || '{}');

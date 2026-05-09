@@ -330,12 +330,51 @@ function renderCartSheet() {
 }
 
 /* ================================================================
-   PROCESS CHECKOUT — Atomic Firestore batch write
+   PROCESS CHECKOUT
 ================================================================ */
 window.processCheckout = async () => {
   const items = Object.entries(_cart);
   if (!_uid || items.length === 0) return;
 
+  const methodInput = document.querySelector('input[name="paymentMethod"]:checked');
+  const paymentMethod = methodInput ? methodInput.value : 'Cash';
+
+  if (paymentMethod === 'QRIS') {
+    const totalRevenue = items.reduce((s, [, v]) => s + v.qty * v.price, 0);
+    document.getElementById('qrPaymentAmount').textContent = 'Rp ' + totalRevenue.toLocaleString('id-ID');
+    
+    // Load QR from localStorage
+    const qrUrl = localStorage.getItem('cocacoy_payment_qr');
+    const qrImg = document.getElementById('qrPaymentImage');
+    if (qrUrl) {
+      qrImg.src = qrUrl;
+    }
+    
+    document.getElementById('qrPaymentOverlay').classList.add('open');
+    closeCartSheet(); // Close cart sheet while paying
+  } else {
+    // Proceed directly for Cash
+    await window.executeCheckoutTransaction('Cash');
+  }
+};
+
+window.closeQRPaymentModal = () => {
+  document.getElementById('qrPaymentOverlay').classList.remove('open');
+};
+
+window.confirmQRPayment = async () => {
+  document.getElementById('qrPaymentOverlay').classList.remove('open');
+  await window.executeCheckoutTransaction('GoPay / QRIS');
+};
+
+/* ================================================================
+   EXECUTE CHECKOUT — Atomic Firestore batch write
+================================================================ */
+window.executeCheckoutTransaction = async (paymentMethod = 'Cash') => {
+  const items = Object.entries(_cart);
+  if (!_uid || items.length === 0) return;
+
+  // Let's show a global processing if not from cart sheet
   const btn = document.getElementById('checkoutBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Processing...'; btn.disabled = true; }
 
@@ -369,11 +408,11 @@ window.processCheckout = async () => {
     const txRef = doc(userCol(_uid, 'transactions'));
     batch.set(txRef, {
       items: items.map(([id, item]) => {
-        const prod = _products.find(p => p.id === id);
-        const buyPrice = parseInt(prod?.BuyPrice) || 0;
+        const buyPrice = parseInt(_products.find(p => p.id === id)?.BuyPrice) || 0;
         return {
           productId: id,
           name: item.name,
+          category: item.category,
           qty: item.qty,
           price: item.price,
           buyPrice: buyPrice,
@@ -385,6 +424,7 @@ window.processCheckout = async () => {
       total: totalRevenue,
       totalProfit: totalProfit,
       itemCount: totalItems,
+      paymentMethod: paymentMethod,
       createdAt: now.toISOString(),
       timestamp: now.toLocaleString('id-ID')
     });
@@ -395,7 +435,7 @@ window.processCheckout = async () => {
       batch.set(histRef, {
         productName: item.name,
         action: 'Sold',
-        details: `Sold: ${item.qty} ${item.unit} | Subtotal: Rp ${(item.qty * item.price).toLocaleString('id-ID')}`,
+        details: `Sold: ${item.qty} ${item.unit} | Method: ${paymentMethod} | Subtotal: Rp ${(item.qty * item.price).toLocaleString('id-ID')}`,
         timestamp: now.toLocaleString('en-GB'),
         createdAt: now.toISOString(),
         transactionId: txRef.id,
