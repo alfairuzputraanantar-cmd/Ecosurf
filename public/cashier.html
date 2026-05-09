@@ -8,9 +8,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <!-- FOUC prevention -->
   <script>
-    (function(){
+    (function () {
       const t = localStorage.getItem('cocacoy_theme');
-      if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      const s = localStorage.getItem('cocacoy_sidebar_labels');
+      if (s === 'false') document.documentElement.classList.add('sidebar-min');
+      
+      // ✅ Instantly load profile from localStorage
+      try { window._initialProfile = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}'); } catch(e) {}
     })();
   </script>
   <style>
