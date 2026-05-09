@@ -44,17 +44,17 @@ function getRelativeTime(isoString) {
   const diffMin = Math.floor(diffMs / 60000);
   const diffHr = Math.floor(diffMin / 60);
 
-  const todayStr = now.toISOString().slice(0, 10);
-  const yest = new Date(now); yest.setDate(yest.getDate() - 1);
-  const yestStr = yest.toISOString().slice(0, 10);
+  const todayStr = now.toLocaleDateString('en-CA');
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  const yesterdayStr = yesterday.toLocaleDateString('en-CA');
   
-  const targetStr = isoString.slice(0, 10);
-  const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const targetStr = date.toLocaleDateString('en-CA');
+  const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   if (diffMin < 1) return 'Just now';
   if (diffMin < 60) return `${diffMin} mins ago`;
-  if (diffHr < 24 && targetStr === todayStr) return `Today • ${timeStr}`;
-  if (targetStr === yestStr) return `Yesterday • ${timeStr}`;
+  if (targetStr === todayStr) return `Today • ${timeStr}`;
+  if (targetStr === yesterdayStr) return `Yesterday • ${timeStr}`;
   
   return date.toLocaleDateString('en-GB') + ' • ' + timeStr;
 }
@@ -64,16 +64,18 @@ function getGroupLabel(isoString) {
   
   const date = new Date(isoString);
   const now = new Date();
-  const targetStr = isoString.slice(0, 10);
+  const targetStr = date.toLocaleDateString('en-CA');
   
-  const todayStr = now.toISOString().slice(0, 10);
+  const todayStr = now.toLocaleDateString('en-CA');
   if (targetStr === todayStr) return 'Today';
   
-  const yest = new Date(now); yest.setDate(yest.getDate() - 1);
-  if (targetStr === yest.toISOString().slice(0, 10)) return 'Yesterday';
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  const yesterdayStr = yesterday.toLocaleDateString('en-CA');
+  if (targetStr === yesterdayStr) return 'Yesterday';
 
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0,0,0,0);
   if (date >= startOfWeek) return 'Earlier This Week';
 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
