@@ -766,15 +766,6 @@
                 </div>
                 <div class="setting-row">
                   <div class="setting-info">
-                    <div class="setting-label">Reset Settings</div>
-                    <div class="setting-desc">Restore all settings to their default values</div>
-                  </div>
-                  <button class="btn btn-warn btn-sm" onclick="confirmResetSettings()">
-                    <i class="fas fa-rotate-left"></i> Reset to Default
-                  </button>
-                </div>
-                <div class="setting-row">
-                  <div class="setting-info">
                     <div class="setting-label">Permanently Delete Account</div>
                     <div class="setting-desc">Delete your account and all associated data permanently</div>
                   </div>
@@ -975,26 +966,7 @@
         showToast('History cleared successfully', 'success');
       });
     }
-    async function confirmResetSettings() {
-      openConfirmModal('Reset Settings', 'All settings will be restored to their default values. Continue?', async () => {
-        ['cocacoy_profile', 'cocacoy_currency', 'cocacoy_lang', 'cocacoy_notif_prefs',
-          'cocacoy_low_stock_threshold', 'cocacoy_auto_stock', 'cocacoy_weekly_report'].forEach(k => localStorage.removeItem(k));
-        
-        try {
-          const { auth, userDoc, updateDoc, deleteField } = await import('./js/firebase.js');
-          if (auth.currentUser) {
-            await updateDoc(userDoc(auth.currentUser.uid), {
-              appearance: deleteField(),
-              inventoryPrefs: deleteField(),
-              notificationPrefs: deleteField()
-            });
-          }
-        } catch (e) { }
-        
-        showToast('Settings reset to default', 'info');
-        setTimeout(() => location.reload(), 800);
-      });
-    }
+
     async function confirmDeleteAccount() {
       openConfirmModal('Delete Account', 'DANGER: Your account and all cloud data will be permanently deleted. This CANNOT be undone!', async () => {
         try {
