@@ -28,20 +28,21 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
   /* ── Listen transactions → Analytics Grid ── */
   onSnapshot(userCol(uid, 'transactions'), snap => {
     const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
+    const todayStr = now.toLocaleDateString('en-CA');
     
     const yest = new Date(now); yest.setDate(yest.getDate() - 1);
-    const yesterdayStr = yest.toISOString().slice(0, 10);
+    const yesterdayStr = yest.toLocaleDateString('en-CA');
 
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    const startOfWeekStr = startOfWeek.toISOString().slice(0, 10);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0,0,0,0);
+    const startOfWeekTime = startOfWeek.getTime();
 
     const startOfLastWeek = new Date(startOfWeek);
     startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-    const startOfLastWeekStr = startOfLastWeek.toISOString().slice(0, 10);
+    const startOfLastWeekTime = startOfLastWeek.getTime();
 
-    const thisMonthStr = now.toISOString().slice(0, 7);
+    const thisMonthStr = now.toLocaleDateString('en-CA').slice(0, 7);
 
     let revToday = 0, revYest = 0, revWeek = 0, revLastWeek = 0;
     let profToday = 0, profYest = 0, profMonth = 0;
@@ -49,8 +50,13 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
 
     snap.forEach(d => {
       const data = d.data();
-      const dateStr = (data.createdAt || '').slice(0, 10);
-      const monthStr = (data.createdAt || '').slice(0, 7);
+      const createdAt = data.createdAt || '';
+      if (!createdAt) return;
+      
+      const itemDate = new Date(createdAt);
+      const itemDateStr = itemDate.toLocaleDateString('en-CA');
+      const itemMonthStr = itemDateStr.slice(0, 7);
+      const itemTime = itemDate.getTime();
       const total = data.total || 0;
 
       // Calculate profit dynamically if not stored
@@ -63,13 +69,13 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
         }, 0);
       }
 
-      if (dateStr === todayStr) { revToday += total; profToday += profit; }
-      else if (dateStr === yesterdayStr) { revYest += total; profYest += profit; }
+      if (itemDateStr === todayStr) { revToday += total; profToday += profit; }
+      else if (itemDateStr === yesterdayStr) { revYest += total; profYest += profit; }
 
-      if (dateStr >= startOfWeekStr) { revWeek += total; }
-      else if (dateStr >= startOfLastWeekStr && dateStr < startOfWeekStr) { revLastWeek += total; }
+      if (itemTime >= startOfWeekTime) { revWeek += total; }
+      else if (itemTime >= startOfLastWeekTime && itemTime < startOfWeekTime) { revLastWeek += total; }
 
-      if (monthStr === thisMonthStr) { profMonth += profit; salesMonthCount++; }
+      if (itemMonthStr === thisMonthStr) { profMonth += profit; salesMonthCount++; }
     });
 
     setText('todaySales', 'Rp ' + revToday.toLocaleString('id-ID'));

@@ -48,11 +48,16 @@ function startProductListener(uid) {
 ================================================================ */
 function startTransactionListener(uid) {
   onSnapshot(userCol(uid, 'transactions'), snap => {
-    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const now = new Date();
+    const todayStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD Local
     let revenue = 0, txCount = 0, itemCount = 0;
     snap.forEach(d => {
       const data = d.data();
-      if ((data.createdAt || '').startsWith(todayStr)) {
+      const createdAt = data.createdAt || '';
+      // Convert stored ISO string to local date string for comparison
+      const itemDateStr = createdAt ? new Date(createdAt).toLocaleDateString('en-CA') : '';
+      
+      if (itemDateStr === todayStr) {
         txCount++;
         revenue   += data.total     || 0;
         itemCount += data.itemCount || 0;
