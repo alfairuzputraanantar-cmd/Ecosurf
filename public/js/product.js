@@ -139,7 +139,10 @@ window.openAddModal = () => {
   // ✅ Auto-generate Barcode
   setTimeout(() => window.regenerateBarcode('add'), 100);
 
-  document.getElementById('addModal').classList.add('open');
+  const modalEl = document.getElementById('addModal');
+  modalEl.classList.add('open');
+  const modalInner = modalEl.querySelector('.modal');
+  if (modalInner) modalInner.scrollTop = 0;
 };
 
 /* ================================================================
@@ -431,7 +434,10 @@ window.openEditModal = (id, data) => {
     }
   }, 100);
 
-  document.getElementById('editModal').classList.add('open');
+  const modalEl = document.getElementById('editModal');
+  modalEl.classList.add('open');
+  const modalInner = modalEl.querySelector('.modal');
+  if (modalInner) modalInner.scrollTop = 0;
 };
 
 window.saveEdit = async () => {
