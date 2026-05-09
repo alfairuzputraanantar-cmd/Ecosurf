@@ -347,6 +347,13 @@ a {
   height: 42px;
   margin: 10px auto 0;
   padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-min .logout-btn span {
+  display: none !important;
 }
 
 .sidebar-min .logout-btn i {
