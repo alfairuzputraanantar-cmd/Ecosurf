@@ -254,6 +254,8 @@
     async function loadProfile() {
       try {
         const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+        const logo = localStorage.getItem('cocacoy_store_logo');
+
         if (p.storeName) document.getElementById('storeName').value = p.storeName;
         if (p.ownerName) document.getElementById('ownerName').value = p.ownerName;
         if (p.role)      document.getElementById('userRole').value = p.role;
@@ -264,13 +266,26 @@
         if (p.ownerName) document.getElementById('profileDisplayName').textContent = p.ownerName;
         if (p.role)      document.getElementById('profileDisplayRole').textContent = p.role;
 
-        const logo = localStorage.getItem('cocacoy_store_logo');
+        // Sync Avatar (Profile Page)
+        const profileAv = document.getElementById('profileAvatarLarge');
+        const removeBtn = document.getElementById('removePhotoBtn');
         if (logo) {
-          document.getElementById('profileAvatarLarge').innerHTML = `<img src="${logo}" alt="Avatar"/>`;
-          document.getElementById('removePhotoBtn').style.display = 'inline-flex';
+          profileAv.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
+          removeBtn.style.display = 'inline-flex';
         } else if (p.ownerName) {
-          document.getElementById('profileAvatarLarge').textContent = p.ownerName.charAt(0).toUpperCase();
-          document.getElementById('removePhotoBtn').style.display = 'none';
+          profileAv.textContent = p.ownerName.charAt(0).toUpperCase();
+          profileAv.innerHTML = p.ownerName.charAt(0).toUpperCase(); // Ensure text only
+          removeBtn.style.display = 'none';
+        }
+
+        // Sync Avatar (Sidebar)
+        const sideAv = document.getElementById('sidebarAvatar');
+        if (sideAv) {
+          if (logo) {
+            sideAv.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+          } else if (p.ownerName) {
+            sideAv.innerHTML = p.ownerName.charAt(0).toUpperCase();
+          }
         }
       } catch (e) {}
     }
@@ -293,9 +308,7 @@
     window.saveProfile = async function() {
       const btn = document.querySelector('button[onclick="saveProfile()"]');
       const originalBtnHtml = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Saving...';
-
+      
       const data = {
         storeName: document.getElementById('storeName').value.trim(),
         ownerName: document.getElementById('ownerName').value.trim(),
@@ -305,10 +318,20 @@
         storeCategory: document.getElementById('storeCategory').value,
       };
 
+      // 1. INSTANT UI UPDATE
+      const currentP = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+      const newP = { ...data, photoURL: currentP.photoURL || "" };
+      localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
+      loadProfile(); // Update all avatars and text instantly
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+
       try {
         if (auth.currentUser) {
           const updateData = { ...data, updatedAt: new Date().toISOString() };
           const avatarInput = document.getElementById('avatarInput');
+          
           if (avatarInput.files && avatarInput.files[0]) {
             const file = avatarInput.files[0];
             const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.png`);
@@ -316,16 +339,12 @@
             const photoURL = await getDownloadURL(snapshot.ref);
             updateData.photoURL = photoURL;
             localStorage.setItem('cocacoy_store_logo', photoURL);
+            newP.photoURL = photoURL;
+            localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
+            loadProfile(); // Refresh with the real cloud URL
           }
+          
           await setDoc(userDoc(auth.currentUser.uid), updateData, { merge: true });
-          
-          // Preserve photoURL in localStorage profile object
-          const currentP = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-          const newP = { ...data, photoURL: updateData.photoURL || currentP.photoURL || "" };
-          localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
-          
-          document.getElementById('profileDisplayName').textContent = data.ownerName;
-          document.getElementById('profileDisplayRole').textContent = data.role;
           
           showToast('Profile updated!', 'success');
           const badge = document.getElementById('profileSaved');
@@ -345,21 +364,22 @@
       if (!confirm('Remove profile photo?')) return;
       const btn = document.getElementById('removePhotoBtn');
       btn.disabled = true;
+      
+      // 1. INSTANT UI UPDATE
+      localStorage.removeItem('cocacoy_store_logo');
+      const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+      p.photoURL = "";
+      localStorage.setItem('cocacoy_profile', JSON.stringify(p));
+      loadProfile(); 
+
       try {
         if (auth.currentUser) {
           const { deleteField } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
           await setDoc(userDoc(auth.currentUser.uid), { photoURL: deleteField() }, { merge: true });
-          localStorage.removeItem('cocacoy_store_logo');
-          
-          const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-          p.photoURL = "";
-          localStorage.setItem('cocacoy_profile', JSON.stringify(p));
-          
-          loadProfile();
           showToast('Photo removed', 'success');
         }
       } catch(e) {
-        showToast('Failed to remove photo', 'error');
+        showToast('Cloud sync failed.', 'warning');
       } finally {
         btn.disabled = false;
       }
