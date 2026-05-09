@@ -136,18 +136,22 @@ function loadExportLibraries() {
       document.head.appendChild(s);
     });
 
-    // We load jsPDF, jsPDF-AutoTable, and SheetJS (xlsx)
-    Promise.all([
-      loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
-      loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js'),
-      loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')
-    ]).then(() => {
-      scriptsLoaded = true;
-      resolve();
-    }).catch(err => {
-      console.error("Failed to load export libraries", err);
-      reject(err);
-    });
+    // We must load jsPDF first, before autoTable
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+      .then(() => {
+        return Promise.all([
+          loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js'),
+          loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')
+        ]);
+      })
+      .then(() => {
+        scriptsLoaded = true;
+        resolve();
+      })
+      .catch(err => {
+        console.error("Failed to load export libraries", err);
+        reject(err);
+      });
   });
 }
 
