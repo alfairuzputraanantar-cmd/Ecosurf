@@ -940,14 +940,25 @@
       if (file.size > 1048576) { showToast('File too large (max 1 MB)', 'error'); return; }
       const reader = new FileReader();
       reader.onload = ev => {
+        const dataURL = ev.target.result;
+        // Update both previews
         const prev = document.getElementById('avatarPreview');
-        prev.innerHTML = `<img src="${ev.target.result}" alt="Logo"/>`;
-        localStorage.setItem('cocacoy_store_logo', ev.target.result);
+        if (prev) prev.innerHTML = `<img src="${dataURL}" alt="Logo"/>`;
+        
+        const sideAv = document.getElementById('sidebarAvatar');
+        if (sideAv) sideAv.innerHTML = `<img src="${dataURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+        
+        localStorage.setItem('cocacoy_store_logo', dataURL);
       };
       reader.readAsDataURL(file);
     }
 
     async function saveProfile() {
+      const btn = document.querySelector('button[onclick="saveProfile()"]');
+      const originalBtnHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+
       const data = {
         storeName: document.getElementById('storeName').value.trim(),
         ownerName: document.getElementById('ownerName').value.trim(),
@@ -961,21 +972,21 @@
       localStorage.setItem('cocacoy_profile', JSON.stringify(data));
       if (data.ownerName) {
         if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = data.ownerName;
-        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = data.ownerName.charAt(0).toUpperCase();
+        if (!localStorage.getItem('cocacoy_store_logo') && document.getElementById('sidebarAvatar')) {
+           document.getElementById('sidebarAvatar').textContent = data.ownerName.charAt(0).toUpperCase();
+        }
       }
       if (data.role && document.getElementById('sidebarRole')) {
         document.getElementById('sidebarRole').textContent = data.role;
       }
 
-      flashSaved('profileSaved');
-      showToast('Store profile saved locally!', 'success');
-
-      // 2. Sync to Firestore (Permanent)
+      // 2. Sync to Firestore & Storage (Permanent)
       try {
-        const { auth, userDoc } = await import('./js/firebase.js');
+        const { auth, userDoc, storage, ref, uploadBytes, getDownloadURL } = await import('./js/firebase.js');
         const { updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        
         if (auth.currentUser) {
-          await updateDoc(userDoc(auth.currentUser.uid), {
+          const updateData = {
             ownerName: data.ownerName,
             role: data.role,
             storeName: data.storeName,
@@ -983,12 +994,29 @@
             storePhone: data.storePhone,
             storeCategory: data.storeCategory,
             updatedAt: new Date().toISOString()
-          });
+          };
+
+          // Handle Photo Upload
+          const avatarInput = document.getElementById('avatarInput');
+          if (avatarInput.files && avatarInput.files[0]) {
+            const file = avatarInput.files[0];
+            const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.png`);
+            const snapshot = await uploadBytes(storageRef, file);
+            const photoURL = await getDownloadURL(snapshot.ref);
+            updateData.photoURL = photoURL;
+            localStorage.setItem('cocacoy_store_logo', photoURL);
+          }
+
+          await updateDoc(userDoc(auth.currentUser.uid), updateData);
           showToast('Profile synced to cloud!', 'success');
+          flashSaved('profileSaved');
         }
       } catch (e) {
         console.error("Firestore sync error:", e);
         showToast('Cloud sync failed, but saved locally.', 'warning');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
       }
     }
 
@@ -1117,7 +1145,10 @@
       } catch (e) { }
 
       const logo = localStorage.getItem('cocacoy_store_logo');
-      if (logo) document.getElementById('avatarPreview').innerHTML = `<img src="${logo}" alt="Logo"/>`;
+      if (logo) {
+        if (document.getElementById('avatarPreview')) document.getElementById('avatarPreview').innerHTML = `<img src="${logo}" alt="Logo"/>`;
+        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+      }
 
       const theme = localStorage.getItem('cocacoy_theme') || 'dark';
       document.getElementById('darkModeToggle').checked = (theme === 'dark');

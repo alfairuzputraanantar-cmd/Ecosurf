@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD2bLhAr5yag_eW6mS4d2gRRAmsnQfLjwU",
@@ -14,11 +15,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const db   = getFirestore(app);
+export const auth    = getAuth(app);
+export const db      = getFirestore(app);
+export const storage = getStorage(app);
 
 /**
- * Returns a Firestore collection reference scoped to the authenticated user.
+ * Returns a Firestore collection reference.
  * Usage: userCol(uid, 'products') → users/{uid}/products
  */
 export function userCol(uid, name) {
@@ -26,9 +28,14 @@ export function userCol(uid, name) {
 }
 
 /**
- * Returns a Firestore document reference scoped to the authenticated user.
- * Usage: userDoc(uid, 'products', productId)
+ * Returns a Firestore document reference.
+ * Usage: 
+ *   userDoc(uid) → users/{uid}
+ *   userDoc(uid, 'products', id) → users/{uid}/products/{id}
  */
 export function userDoc(uid, name, id) {
+  if (!name) return doc(db, 'users', uid);
   return doc(db, 'users', uid, name, id);
 }
+
+export { ref, uploadBytes, getDownloadURL };

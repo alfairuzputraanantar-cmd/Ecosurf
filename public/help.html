@@ -605,7 +605,12 @@
           const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           if (p.ownerName) document.getElementById('sidebarName').textContent = p.ownerName;
           if (p.role) document.getElementById('sidebarRole').textContent = p.role;
-          if (p.ownerName) document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+          const logo = localStorage.getItem('cocacoy_store_logo');
+          if (logo) {
+            document.getElementById('sidebarAvatar').innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+          } else if (p.ownerName) {
+            document.getElementById('sidebarAvatar').textContent = p.ownerName.charAt(0).toUpperCase();
+          }
         } catch(e) {}
       })();
     </script>

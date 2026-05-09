@@ -33,12 +33,20 @@ onAuthStateChanged(auth, (user) => {
           const data = doc.data();
           const p = {
             ownerName: data.ownerName || user.displayName || user.email || "Owner",
-            role: data.role || "UMKM Admin"
+            role: data.role || "UMKM Admin",
+            photoURL: data.photoURL || ""
           };
           // Update UI
           if (nameEl) nameEl.textContent = p.ownerName;
           if (roleEl) roleEl.textContent = p.role;
-          if (avatarEl) avatarEl.textContent = p.ownerName.charAt(0).toUpperCase();
+          if (avatarEl) {
+            if (p.photoURL) {
+              avatarEl.innerHTML = `<img src="${p.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
+              localStorage.setItem('cocacoy_store_logo', p.photoURL);
+            } else {
+              avatarEl.textContent = p.ownerName.charAt(0).toUpperCase();
+            }
+          }
           
           localStorage.setItem('cocacoy_profile', JSON.stringify(p));
         }
