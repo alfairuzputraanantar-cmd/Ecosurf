@@ -13,6 +13,14 @@ let isExporting = false;
 const formatCur = (num) => 'Rp ' + (num || 0).toLocaleString('id-ID');
 const formatNum = (num) => (num || 0).toLocaleString('id-ID');
 
+// Date Parsing Helper (similar to history.js getCreatedAt)
+function parseDate(d) {
+  if (!d) return new Date();
+  if (d.toDate) return d.toDate();
+  if (typeof d === 'string' || typeof d === 'number') return new Date(d);
+  return new Date();
+}
+
 // Initialize Modal
 function initExportModal() {
   if (document.getElementById('exportModalOverlay')) return;
@@ -228,14 +236,6 @@ async function fetchReportData(uid, dateFilter, customStart, customEnd) {
   } else if (dateFilter === 'custom') {
     limitTime = new Date(customStart).getTime();
     endLimitTime = new Date(customEnd).getTime() + 86400000; // end of day
-  }
-
-  // Date Parsing Helper (similar to history.js getCreatedAt)
-  function parseDate(d) {
-    if (!d) return new Date();
-    if (d.toDate) return d.toDate();
-    if (typeof d === 'string' || typeof d === 'number') return new Date(d);
-    return new Date();
   }
 
   const filteredTx = allTx.filter(tx => {
