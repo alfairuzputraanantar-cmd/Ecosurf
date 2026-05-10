@@ -174,7 +174,7 @@ function renderCategoryChart() {
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      aspectRatio: 1.5, // slightly wider but keeps shape
+      aspectRatio: 1, // Perfect circle
       cutout: '65%',
       plugins: { legend: { display: false } }
     }
