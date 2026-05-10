@@ -660,23 +660,26 @@
       <!-- ── Hero ── -->
       <div class="help-hero">
         <div>
-          <div class="help-hero-title">CocaCoy ERP Help Center</div>
-          <div class="help-hero-sub">Find comprehensive guides, usage tips, and answers to frequently asked questions
-            about your ERP system.</div>
+          <div class="help-hero-title">Welcome to CocaCoy ERP</div>
+          <div class="help-hero-sub">CocaCoy helps UMKM, warungs, and small businesses manage stock, sales, cashier operations, and analytics — all in real-time powered by Firebase & AI.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;">
+            <span style="background:rgba(200,149,108,.12);border:1px solid rgba(200,149,108,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--brand-1);">📦 Real-time Inventory</span>
+            <span style="background:rgba(200,149,108,.12);border:1px solid rgba(200,149,108,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--brand-1);">💰 Smart Cashier</span>
+            <span style="background:rgba(200,149,108,.12);border:1px solid rgba(200,149,108,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--brand-1);">📱 QRIS Simulation</span>
+            <span style="background:rgba(91,156,246,.12);border:1px solid rgba(91,156,246,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--blue);">🔍 Barcode Scanner</span>
+            <span style="background:rgba(91,156,246,.12);border:1px solid rgba(91,156,246,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--blue);">🧠 AI Insights</span>
+            <span style="background:rgba(34,201,151,.12);border:1px solid rgba(34,201,151,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--green);">📊 Analytics & Reports</span>
+          </div>
         </div>
-        <div class="help-hero-icon">
-          <i class="fas fa-circle-question"></i>
-        </div>
+        <div class="help-hero-icon"><i class="fas fa-circle-question"></i></div>
       </div>
 
       <!-- ── Search ── -->
       <div class="help-search-wrap">
         <div class="help-search">
           <i class="fas fa-magnifying-glass"></i>
-          <input type="text" id="helpSearchInput" placeholder="Search for guides, features, or questions..."
-            oninput="searchHelp(this.value)" />
-          <button class="help-search-clear" id="clearSearch" onclick="clearHelpSearch()"><i
-              class="fas fa-xmark"></i></button>
+          <input type="text" id="helpSearchInput" placeholder="Search for guides, features, or questions..." oninput="searchHelp(this.value)" />
+          <button class="help-search-clear" id="clearSearch" onclick="clearHelpSearch()"><i class="fas fa-xmark"></i></button>
         </div>
       </div>
 
@@ -684,23 +687,23 @@
       <div class="quick-links grid-auto" id="quickLinks">
         <div class="quick-link-card" onclick="scrollToFaq('getting-started')">
           <div class="quick-link-icon si-copper"><i class="fas fa-rocket"></i></div>
-          <div class="quick-link-label">Getting Started</div>
-          <div class="quick-link-sub">Initial setup guide</div>
+          <div class="quick-link-label">Quick Start</div>
+          <div class="quick-link-sub">New user guide</div>
+        </div>
+        <div class="quick-link-card" onclick="scrollToFaq('cashier')">
+          <div class="quick-link-icon si-green"><i class="fas fa-cash-register"></i></div>
+          <div class="quick-link-label">Cashier & POS</div>
+          <div class="quick-link-sub">Cart, receipts, QRIS</div>
         </div>
         <div class="quick-link-card" onclick="scrollToFaq('products')">
           <div class="quick-link-icon si-blue"><i class="fas fa-boxes-stacked"></i></div>
-          <div class="quick-link-label">Product Management</div>
-          <div class="quick-link-sub">Add, edit, delete</div>
+          <div class="quick-link-label">Inventory</div>
+          <div class="quick-link-sub">Add, edit, restock</div>
         </div>
-        <div class="quick-link-card" onclick="scrollToFaq('reports')">
-          <div class="quick-link-icon si-green"><i class="fas fa-chart-line"></i></div>
-          <div class="quick-link-label">Reports & Charts</div>
-          <div class="quick-link-sub">Inventory analysis</div>
-        </div>
-        <div class="quick-link-card" onclick="scrollToFaq('account')">
-          <div class="quick-link-icon si-yellow"><i class="fas fa-user-gear"></i></div>
-          <div class="quick-link-label">Account & Security</div>
-          <div class="quick-link-sub">Login, password, profile</div>
+        <div class="quick-link-card" onclick="scrollToFaq('ai')">
+          <div class="quick-link-icon si-yellow"><i class="fas fa-brain"></i></div>
+          <div class="quick-link-label">AI Insights</div>
+          <div class="quick-link-sub">Smart recommendations</div>
         </div>
       </div>
 
@@ -715,9 +718,9 @@
 
           <!-- Section: Getting Started -->
           <div class="faq-section" id="section-getting-started">
-            <div class="faq-section-title"><i class="fas fa-rocket"></i> Getting Started</div>
+            <div class="faq-section-title"><i class="fas fa-rocket"></i> Quick Start Guide</div>
 
-            <div class="faq-item" data-search="start setup login register account create begin">
+            <div class="faq-item" data-search="start setup login register account create begin workflow">
               <div class="faq-question" onclick="toggleFaq(this)">
                 <div class="faq-q-left">
                   <div class="faq-q-icon"><i class="fas fa-play"></i></div>
@@ -727,69 +730,175 @@
               </div>
               <div class="faq-answer">
                 <div class="faq-answer-inner">
-                  <strong>Follow these steps to get started:</strong>
-                  <div class="step">
-                    <div class="step-num">1</div>
-                    <div>Open the <strong>Register</strong> page and create a new account with your email and password.
-                    </div>
-                  </div>
-                  <div class="step">
-                    <div class="step-num">2</div>
-                    <div>Login using your newly created account.</div>
-                  </div>
-                  <div class="step">
-                    <div class="step-num">3</div>
-                    <div>Go to <strong>Settings → Store Profile</strong> and complete your business information.</div>
-                  </div>
-                  <div class="step">
-                    <div class="step-num">4</div>
-                    <div>Add your first product on the <strong>Products</strong> page.</div>
-                  </div>
-                  <div class="step">
-                    <div class="step-num">5</div>
-                    <div>The dashboard will automatically display real-time statistics of your data.</div>
-                  </div>
+                  <strong>Follow this 5-step workflow:</strong>
+                  <div class="step"><div class="step-num">1</div><div><strong>Add Products</strong> — Go to <strong>Products</strong> page, click <strong>+ Add Product</strong>. Fill in name, category, buy/sell price, stock, and unit. A barcode is generated automatically.</div></div>
+                  <div class="step"><div class="step-num">2</div><div><strong>Manage Inventory</strong> — Edit stock anytime. Use <strong>Restock</strong> for incoming goods. Low-stock alerts appear automatically on the Dashboard.</div></div>
+                  <div class="step"><div class="step-num">3</div><div><strong>Use the Cashier</strong> — Go to <strong>Cashier</strong>. Search products manually or scan their barcode. Add them to your cart.</div></div>
+                  <div class="step"><div class="step-num">4</div><div><strong>Process Payment & Receipt</strong> — Choose <strong>Cash</strong> or <strong>QRIS</strong>. After checkout, a printable receipt (bon) is generated automatically.</div></div>
+                  <div class="step"><div class="step-num">5</div><div><strong>Monitor Analytics</strong> — Your Dashboard and Charts page show live revenue, profit, best-sellers, and AI-powered recommendations.</div></div>
                 </div>
               </div>
             </div>
 
-            <div class="faq-item" data-search="dashboard main page stats card overview">
+            <div class="faq-item" data-search="dashboard main page stats cards ai revenue profit transactions">
               <div class="faq-question" onclick="toggleFaq(this)">
                 <div class="faq-q-left">
                   <div class="faq-q-icon"><i class="fas fa-chart-pie"></i></div>
-                  <div class="faq-q-text">What is displayed on the Dashboard page?</div>
+                  <div class="faq-q-text">What is displayed on the Dashboard?</div>
                 </div>
                 <i class="fas fa-chevron-down faq-chevron"></i>
               </div>
               <div class="faq-answer">
                 <div class="faq-answer-inner">
-                  The Dashboard displays a real-time inventory summary:
+                  The Dashboard shows a real-time business overview:
                   <ul>
-                    <li><strong>Total Products</strong> — number of distinct product types registered</li>
-                    <li><strong>Inventory Value</strong> — total value of stock (price × quantity)</li>
-                    <li><strong>Low Stock Items</strong> — products with running low stock</li>
-                    <li><strong>Total Stock Units</strong> — sum of all individual items in stock</li>
-                    <li><strong>Stock by Category</strong> — bar chart grouping products by category</li>
-                    <li><strong>Recently Added</strong> — last 5 products added to the system</li>
-                    <li><strong>Low Stock Alerts</strong> — quick list of products needing restock</li>
+                    <li><strong>Total Products, Inventory Value, Low Stock</strong> — top stat cards</li>
+                    <li><strong>Revenue Today / This Week</strong> — with trend indicators vs. yesterday/last week</li>
+                    <li><strong>Est. Profit Today / This Month</strong> — calculated from buy/sell price difference</li>
+                    <li><strong>Total Transactions This Month</strong></li>
+                    <li><strong>Stock by Category</strong> — bar chart</li>
+                    <li><strong>Recently Added Products</strong> — last 5 items</li>
+                    <li><strong>Low Stock Alerts</strong> — products needing restock</li>
+                    <li><strong>🧠 CocaCoy AI Insights</strong> — smart business recommendations powered by Gemini AI</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            <div class="faq-item" data-search="dark light mode theme toggle switch color scheme">
+            <div class="faq-item" data-search="dark light mode theme toggle switch">
               <div class="faq-question" onclick="toggleFaq(this)">
                 <div class="faq-q-left">
                   <div class="faq-q-icon"><i class="fas fa-moon"></i></div>
-                  <div class="faq-q-text">How to toggle dark/light mode?</div>
+                  <div class="faq-q-text">How do I toggle dark/light mode?</div>
                 </div>
                 <i class="fas fa-chevron-down faq-chevron"></i>
               </div>
               <div class="faq-answer">
                 <div class="faq-answer-inner">
-                  Click the <strong>🌙 / ☀️</strong> icon in the top right corner of any page to toggle between dark and
-                  light modes. Your preference is automatically saved in your browser. You can also configure this by
-                  going to <strong>Settings → Appearance → Dark / Light Mode</strong>.
+                  Click the <strong>🌙 / ☀️</strong> icon in the top-right corner on any page. Your preference is automatically saved in your browser.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Cashier & POS -->
+          <div class="faq-section" id="section-cashier">
+            <div class="faq-section-title"><i class="fas fa-cash-register"></i> Cashier & POS</div>
+
+            <div class="faq-item" data-search="cashier pos sell transaction cart product scan barcode qris cash payment">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-q-left">
+                  <div class="faq-q-icon"><i class="fas fa-cart-shopping"></i></div>
+                  <div class="faq-q-text">How do I process a sale transaction?</div>
+                </div>
+                <i class="fas fa-chevron-down faq-chevron"></i>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  <div class="step"><div class="step-num">1</div><div>Open the <strong>Cashier</strong> page from the sidebar.</div></div>
+                  <div class="step"><div class="step-num">2</div><div>Search for products manually OR click <strong>Scan Barcode</strong> to scan using your device's camera.</div></div>
+                  <div class="step"><div class="step-num">3</div><div>Click a product to add it to the cart. Adjust quantity as needed.</div></div>
+                  <div class="step"><div class="step-num">4</div><div>Open the cart panel, choose <strong>Cash</strong> or <strong>QRIS</strong>, then click <strong>Process Transaction</strong>.</div></div>
+                  <div class="step"><div class="step-num">5</div><div>Stock is automatically deducted. A <strong>printable receipt (bon)</strong> will appear immediately.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-item" data-search="barcode scanner scan camera qr product cashier">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-q-left">
+                  <div class="faq-q-icon"><i class="fas fa-barcode"></i></div>
+                  <div class="faq-q-text">How does barcode scanning work?</div>
+                </div>
+                <i class="fas fa-chevron-down faq-chevron"></i>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  Every product in CocaCoy has an <strong>auto-generated barcode</strong>. On the Cashier page, click the <strong>Scan Barcode</strong> button. Allow camera access when prompted, then point your camera at the product barcode. The system will instantly find and add the product to your cart — no manual typing needed.
+                  <br/><br/>💡 This works on both desktop (with a webcam) and mobile (using the rear camera).
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-item" data-search="qris payment method payment qr code digital cashless">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-q-left">
+                  <div class="faq-q-icon"><i class="fas fa-qrcode"></i></div>
+                  <div class="faq-q-text">What is QRIS simulation?</div>
+                </div>
+                <i class="fas fa-chevron-down faq-chevron"></i>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  When selecting <strong>QRIS</strong> as the payment method, a simulated QR code is displayed. In a real store scenario, customers would scan this QR using their banking/e-wallet app. In CocaCoy, this is a <strong>simulation mode</strong> — you confirm the payment manually by clicking <strong>Confirm Payment</strong>. The transaction is then processed exactly like a cash payment.
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-item" data-search="receipt bon print struk kasir invoice transaction">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-q-left">
+                  <div class="faq-q-icon"><i class="fas fa-receipt"></i></div>
+                  <div class="faq-q-text">Can I print receipts after checkout?</div>
+                </div>
+                <i class="fas fa-chevron-down faq-chevron"></i>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  <strong>Yes!</strong> After every successful transaction, a <strong>Transaction Receipt</strong> modal automatically appears. The receipt includes:
+                  <ul>
+                    <li>Your store name (from your profile)</li>
+                    <li>Transaction date, time, and unique ID (e.g., <code>CCY-TRX-20260510-XXXX</code>)</li>
+                    <li>Itemized list of products, quantities, and subtotals</li>
+                    <li>Payment method and total amount</li>
+                  </ul>
+                  Click <strong>Print Receipt</strong> to open the browser print dialog. The receipt is optimized for <strong>thermal printers (80mm width)</strong> and prints in clean white/black — no dark mode UI.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: AI Insights -->
+          <div class="faq-section" id="section-ai">
+            <div class="faq-section-title"><i class="fas fa-brain"></i> AI Business Insights</div>
+
+            <div class="faq-item" data-search="ai insight gemini artificial intelligence smart recommendations business">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-q-left">
+                  <div class="faq-q-icon"><i class="fas fa-robot"></i></div>
+                  <div class="faq-q-text">What is CocaCoy AI Insights?</div>
+                </div>
+                <i class="fas fa-chevron-down faq-chevron"></i>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  The <strong>🧠 CocaCoy AI Insights</strong> card on the Dashboard is an AI-powered business assistant. It automatically analyzes your inventory and sales data and generates <strong>practical, actionable recommendations</strong> such as:
+                  <ul>
+                    <li>"Indomie sales are increasing. Consider restocking soon."</li>
+                    <li>"Some products have high stock but no sales in 7 days."</li>
+                    <li>"3 products are critically low on stock."</li>
+                  </ul>
+                  This feature is powered by <strong>Google Gemini AI</strong>. It works as a background business intelligence tool — not a chatbot.
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-item" data-search="ai refresh cache update insights how often 20 minutes">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-q-left">
+                  <div class="faq-q-icon"><i class="fas fa-rotate-right"></i></div>
+                  <div class="faq-q-text">How often do AI Insights update?</div>
+                </div>
+                <i class="fas fa-chevron-down faq-chevron"></i>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  AI Insights are generated automatically when you load the Dashboard, and the result is <strong>saved (cached) for 20 minutes</strong> to avoid excessive API usage. This means:
+                  <ul>
+                    <li>Opening/refreshing the page within 20 minutes reuses the last insights</li>
+                    <li>After 20 minutes, fresh insights are generated from your latest data</li>
+                  </ul>
+                  You can always get fresh insights immediately by clicking the <strong>Refresh</strong> button on the AI card, which bypasses the cache.
                 </div>
               </div>
             </div>
@@ -798,6 +907,7 @@
           <!-- Section: Products -->
           <div class="faq-section" id="section-products">
             <div class="faq-section-title"><i class="fas fa-boxes-stacked"></i> Product Management</div>
+
 
             <div class="faq-item" data-search="add new product create name price stock">
               <div class="faq-question" onclick="toggleFaq(this)">
@@ -1136,19 +1246,19 @@
               </div>
               <div class="version-row">
                 <span class="version-key">Version</span>
-                <span class="version-val">1.0.0</span>
+                <span class="version-val">2.0.0</span>
               </div>
               <div class="version-row">
                 <span class="version-key">Platform</span>
                 <span class="version-val">Web App (Firebase)</span>
               </div>
               <div class="version-row">
-                <span class="version-key">Created by</span>
-                <span class="version-val">CocaCoy Team</span>
+                <span class="version-key">AI Engine</span>
+                <span class="version-val">Google Gemini</span>
               </div>
               <div class="version-row">
                 <span class="version-key">Last updated</span>
-                <span class="version-val" id="lastUpdateDate">Apr 2026</span>
+                <span class="version-val" id="lastUpdateDate">May 2026</span>
               </div>
             </div>
           </div>
@@ -1158,28 +1268,43 @@
             <div class="help-info-header"><i class="fas fa-code-branch"></i> Changelog</div>
             <div class="help-info-body">
               <div class="changelog-item">
-                <div class="changelog-ver">v1.0.0</div>
+                <div class="changelog-ver" style="background:rgba(200,149,108,.14);color:var(--brand-1);">v2.0.0</div>
+                <div class="changelog-info">
+                  <div class="changelog-title">🧠 AI Business Insights</div>
+                  <div class="changelog-desc">Gemini AI integration — automatic inventory & sales analysis, smart UMKM recommendations.</div>
+                  <div class="changelog-date">May 2026</div>
+                </div>
+              </div>
+              <div class="changelog-item">
+                <div class="changelog-ver" style="background:rgba(91,156,246,.12);color:var(--blue);">v1.5.0</div>
+                <div class="changelog-info">
+                  <div class="changelog-title">🧾 Receipt / Bon System</div>
+                  <div class="changelog-desc">Printable thermal receipt after every checkout with unique transaction ID.</div>
+                  <div class="changelog-date">May 2026</div>
+                </div>
+              </div>
+              <div class="changelog-item">
+                <div class="changelog-ver" style="background:rgba(34,201,151,.12);color:var(--green);">v1.4.0</div>
+                <div class="changelog-info">
+                  <div class="changelog-title">📱 Barcode Scanner & QRIS</div>
+                  <div class="changelog-desc">Camera-based barcode scanning in cashier. QRIS simulation payment method added.</div>
+                  <div class="changelog-date">May 2026</div>
+                </div>
+              </div>
+              <div class="changelog-item">
+                <div class="changelog-ver" style="background:rgba(160,113,79,.12);color:var(--brand-2);">v1.3.0</div>
+                <div class="changelog-info">
+                  <div class="changelog-title">💰 Full POS Cashier</div>
+                  <div class="changelog-desc">Cart system, transaction processing, stock auto-deduction, profit tracking.</div>
+                  <div class="changelog-date">May 2026</div>
+                </div>
+              </div>
+              <div class="changelog-item">
+                <div class="changelog-ver" style="background:rgba(245,166,35,.1);color:var(--yellow);">v1.0.0</div>
                 <div class="changelog-info">
                   <div class="changelog-title">🚀 Initial Release</div>
-                  <div class="changelog-desc">Dashboard, product management, transaction history, low stock alerts,
-                    dark/light mode, Firebase Firestore integration.</div>
+                  <div class="changelog-desc">Dashboard, product management, history, low stock alerts, dark mode, Firebase.</div>
                   <div class="changelog-date">April 2026</div>
-                </div>
-              </div>
-              <div class="changelog-item">
-                <div class="changelog-ver" style="background:rgba(91,156,246,.12);color:var(--blue);">Soon</div>
-                <div class="changelog-info">
-                  <div class="changelog-title">📤 Data Export</div>
-                  <div class="changelog-desc">Export products & history to CSV/Excel/PDF formats.</div>
-                  <div class="changelog-date">Coming soon</div>
-                </div>
-              </div>
-              <div class="changelog-item">
-                <div class="changelog-ver" style="background:rgba(34,201,151,.12);color:var(--green);">Soon</div>
-                <div class="changelog-info">
-                  <div class="changelog-title">👥 Multi-User</div>
-                  <div class="changelog-desc">Team management with Admin, Staff, and Viewer roles.</div>
-                  <div class="changelog-date">Coming soon</div>
                 </div>
               </div>
             </div>
