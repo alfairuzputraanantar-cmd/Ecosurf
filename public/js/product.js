@@ -123,7 +123,7 @@ window.removeCol = removeCol;
 /* ================================================================
    COLUMN VISIBILITY MODAL
 ================================================================ */
-window._renderColToggles = () => {
+function _renderColToggles() {
   const el = document.getElementById('colToggleList');
   if (!el) return;
   el.innerHTML = allPossibleCols().map(c => `
@@ -134,9 +134,9 @@ window._renderColToggles = () => {
         <span class="slider"></span>
       </label>
     </div>`).join('');
-};
+}
 
-window.applyColVisibility = () => {
+function applyColVisibility() {
   const newHidden = [];
   allPossibleCols().forEach(c => {
     const chk = document.getElementById(`vis-${c}`);
@@ -148,7 +148,7 @@ window.applyColVisibility = () => {
   renderTableBody();
   window.closeCustomizeModal();
   showToast('Column visibility updated!', 'success');
-};
+}
 
 /* ================================================================
    OPEN ADD PRODUCT MODAL
@@ -705,66 +705,64 @@ window.onerror = function(msg, url, line, col, error) {
 /* ================================================================
    RESTOCK LOGIC
 ================================================================ */
-window.openRestockModal = function(id, data) {
-  document.getElementById('restockProductId').value = id;
-  document.getElementById('restockProductName').value = data.Name || '-';
-  document.getElementById('restockCurrentStock').value = data.Stock || 0;
-  document.getElementById('restockQuantity').value = '';
-  document.getElementById('restockNote').value = '';
-  document.getElementById('restockModalOverlay').classList.add('open');
-};
-
-window.closeRestockModal = function() {
-  document.getElementById('restockModalOverlay').classList.remove('open');
-};
-
-window.processRestock = async function() {
-  const id = document.getElementById('restockProductId').value;
-  const name = document.getElementById('restockProductName').value;
-  const current = parseInt(document.getElementById('restockCurrentStock').value) || 0;
-  const add = parseInt(document.getElementById('restockQuantity').value);
-  const note = document.getElementById('restockNote').value.trim();
-
-  if (!add || add <= 0) {
-    return window.showToast('Please enter a valid quantity.', 'error');
+function openRestockModal(id, data) {
+  const modal = document.getElementById('restockModal');
+  if (!modal) return;
+  
+  const title = document.getElementById('restockTitle');
+  if (title) title.textContent = `Restock: ${data.Name}`;
+  
+  const qtyInp = document.getElementById('restockQty');
+  if (qtyInp) { qtyInp.value = ''; qtyInp.focus(); }
+  
+  const confirmBtn = document.getElementById('restockConfirmBtn');
+  if (confirmBtn) {
+    confirmBtn.onclick = () => processRestock(id, data.Name);
   }
+  
+  modal.classList.add('open');
+}
 
-  const btn = document.getElementById('confirmRestockBtn');
-  const original = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+function closeRestockModal() {
+  document.getElementById('restockModal')?.classList.remove('open');
+}
 
+async function processRestock(id, name) {
+  const qtyInp = document.getElementById('restockQty');
+  if (!qtyInp) return;
+  
+  const add = parseInt(qtyInp.value);
+  if (isNaN(add) || add <= 0) {
+    return showToast('Please enter a valid quantity.', 'error');
+  }
+  
+  const btn = document.getElementById('restockConfirmBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Processing...'; }
+  
   try {
-    // 1. Update Stock
-    const pRef = userDoc(_uid, 'products', id);
-    await updateDoc(pRef, {
-      Stock: increment(add)
-    });
-
-    // 2. Add History
-    const hCol = userCol(_uid, 'history');
-    await addDoc(hCol, {
-      action: 'Restock',
+    const docRef = userDoc(_uid, 'products', id);
+    await updateDoc(docRef, { Stock: increment(add) });
+    
+    // Log history
+    const now = new Date();
+    await addDoc(userCol(_uid, 'history'), {
       productName: name,
-      category: 'Restock', // Using Restock as a category for visual grouping
-      details: `Restocked ${add} units. Stock increased from ${current} to ${current + add}.`,
-      quantity: add,
-      prevStock: current,
-      newStock: current + add,
-      note: note || '-',
-      timestamp: new Date().toLocaleString('id-ID')
+      action:      'Restock',
+      details:     `Added ${add} units`,
+      timestamp:   now.toLocaleString('en-GB'),
+      createdAt:   now.toISOString(),
+      category:    'Inventory'
     });
-
-    window.showToast(`Restocked ${add} items for ${name}!`, 'success');
+    
+    showToast(`Restocked ${add} items for ${name}!`, 'success');
     window.closeRestockModal();
-  } catch (e) {
-    console.error(e);
-    window.showToast('Failed to restock. Please try again.', 'error');
+  } catch (err) {
+    console.error(err);
+    showToast('Failed to restock. Please try again.', 'error');
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = original;
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Restock Now'; }
   }
-};
+}
 
 /* ================================================================
    BARCODE GENERATION & RENDERING
@@ -792,7 +790,7 @@ function generateUniqueBarcode() {
   return newBarcode;
 }
 
-window.renderBarcodePreview = (svgId, value) => {
+function renderBarcodePreview(svgId, value) {
   try {
     JsBarcode(`#${svgId}`, value, {
       format: "CODE128",
@@ -805,7 +803,7 @@ window.renderBarcodePreview = (svgId, value) => {
   } catch (e) {
     console.error("JsBarcode render error:", e);
   }
-};
+}
 
 function regenerateBarcode(mode) {
   const newBarcode = generateUniqueBarcode();
