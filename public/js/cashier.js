@@ -485,7 +485,7 @@ window.showReceipt = (txId, items, totalRevenue, totalItems, paymentMethod, date
   // Set Store Name
   try {
     const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-    document.getElementById('rcptStoreName').textContent = p.businessName || 'CocaCoy ERP Store';
+    document.getElementById('rcptStoreName').textContent = p.storeName || 'CocaCoy Store';
   } catch(e) {}
   
   // Header Details
