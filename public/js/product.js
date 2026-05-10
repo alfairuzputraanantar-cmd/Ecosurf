@@ -19,6 +19,13 @@ let _currentScanMode = 'add'; // 'add' | 'edit'
 try { extra      = JSON.parse(localStorage.getItem('cocacoy_extra_cols') || '[]'); } catch(e) { extra = []; }
 try { hiddenCols = JSON.parse(localStorage.getItem('cocacoy_hidden_cols') || '[]'); } catch(e) { hiddenCols = []; }
 
+// ── GLOBAL TRY-CATCH FOR DEBUGGING ──
+try {
+  console.log("Product Module Loading...");
+} catch(e) {
+  alert("Fatal Script Error: " + e.message);
+}
+
 const allPossibleCols = () => [...CORE, ...extra];
 const visibleCols     = () => allPossibleCols().filter(c => !hiddenCols.includes(c));
 const saveExtra       = () => localStorage.setItem('cocacoy_extra_cols', JSON.stringify(extra));
@@ -31,6 +38,30 @@ const headEl  = () => document.getElementById('productHead');
 const bodyEl  = () => document.getElementById('productTable');
 const chipsEl = () => document.getElementById('activeColumnsList');
 const emptyEl = () => document.getElementById('emptyProducts');
+
+// ── HOIST FUNCTIONS TO WINDOW IMMEDIATELY ──
+window.addColumn = addColumn;
+window.saveProduct = saveProduct;
+window.saveEdit = saveEdit;
+window.openAddModal = openAddModal;
+window.filterTable = filterTable;
+window.performProductLookup = performProductLookup;
+window.onProductScanSuccess = onProductScanSuccess;
+window.setBarcodeType = setBarcodeType;
+window.regenerateBarcode = regenerateBarcode;
+window.openProductBarcodeScanner = openProductBarcodeScanner;
+window.closeProductBarcodeScanner = closeProductBarcodeScanner;
+window.applyManualBarcode = applyManualBarcode;
+window.renderBarcodePreview = renderBarcodePreview;
+window.printBarcode = printBarcode;
+window.closeEditModal = closeEditModal;
+window.confirmDelete = confirmDelete;
+window.openRestockModal = openRestockModal;
+window.closeRestockModal = closeRestockModal;
+window.processRestock = processRestock;
+window.openDetailModal = openDetailModal;
+window._renderColToggles = _renderColToggles;
+window.applyColVisibility = applyColVisibility;
 
 /* ================================================================
    RENDER TABLE HEADER
@@ -79,15 +110,15 @@ function addColumn() {
   showToast(`Column "${name}" added!`, 'success');
 }
 
-window.addColumn = addColumn;
-window.removeCol = (name) => {
+function removeCol(name) {
   extra = extra.filter(c => c !== name);
   saveExtra();
   renderHeader();
   renderChips();
   renderTableBody();
   showToast(`Column "${name}" removed.`, 'info');
-};
+}
+window.removeCol = removeCol;
 
 /* ================================================================
    COLUMN VISIBILITY MODAL
@@ -122,7 +153,7 @@ window.applyColVisibility = () => {
 /* ================================================================
    OPEN ADD PRODUCT MODAL
 ================================================================ */
-window.openAddModal = () => {
+function openAddModal() {
   const dyn = document.getElementById('dynamicInputs');
   if (dyn) {
     dyn.innerHTML = extra.length === 0 ? '' : `
@@ -157,12 +188,12 @@ window.openAddModal = () => {
   modalEl.classList.add('open');
   const modalInner = modalEl.querySelector('.modal');
   if (modalInner) modalInner.scrollTop = 0;
-};
+}
 
 /* ================================================================
    SAVE NEW PRODUCT
 ================================================================ */
-window.saveProduct = async () => {
+async function saveProduct() {
   if (!_uid) { showToast('Not authenticated.', 'error'); return; }
 
   const v     = id => (document.getElementById(id)?.value || '').trim();
@@ -243,17 +274,17 @@ window.saveProduct = async () => {
   }
 
   if (btn) { btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Product'; btn.disabled = false; }
-};
+}
 
 /* ================================================================
    SEARCH
 ================================================================ */
-window.filterTable = () => {
+function filterTable() {
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
   document.querySelectorAll('#productTable tr').forEach(row => {
     row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
   });
-};
+}
 
 /* ================================================================
    RENDER TABLE BODY
@@ -337,7 +368,7 @@ function renderTableBody() {
 /* ================================================================
    PRODUCT DETAIL MODAL
 ================================================================ */
-window.openDetailModal = (id, data) => {
+function openDetailModal(id, data) {
   const title = document.getElementById('detail-title');
   const body  = document.getElementById('detail-body');
   if (!title || !body) return;
@@ -460,7 +491,7 @@ function startTable(uid) {
 ================================================================ */
 let _editDocId = null;
 
-window.openEditModal = (id, data) => {
+function openEditModal(id, data) {
   _editDocId = id;
   const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val ?? ''; };
   set('edit-name',      data.Name);
@@ -503,20 +534,22 @@ window.openEditModal = (id, data) => {
     const type = data.barcodeType || 'internal';
     window.setBarcodeType('edit', type);
     if (data.barcode) {
-      document.getElementById('edit-barcode').value = data.barcode;
+      const el = document.getElementById('edit-barcode');
+      if (el) el.value = data.barcode;
       window.renderBarcodePreview('edit-barcode-svg', data.barcode);
     } else {
       window.regenerateBarcode('edit');
     }
   }, 100);
 
-  const modalEl = document.getElementById('editModal');
-  modalEl.classList.add('open');
-  const modalInner = modalEl.querySelector('.modal');
-  if (modalInner) modalInner.scrollTop = 0;
-};
+  if (modalEl) {
+    modalEl.classList.add('open');
+    const modalInner = modalEl.querySelector('.modal');
+    if (modalInner) modalInner.scrollTop = 0;
+  }
+}
 
-window.saveEdit = async () => {
+async function saveEdit() {
   if (!_editDocId || !_uid) return;
 
   const v     = id => (document.getElementById(id)?.value || '').trim();
@@ -591,17 +624,17 @@ window.saveEdit = async () => {
   }
 
   if (btn) { btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes'; btn.disabled = false; }
-};
+}
 
-window.closeEditModal = () => {
+function closeEditModal() {
   document.getElementById('editModal')?.classList.remove('open');
   _editDocId = null;
-};
+}
 
 /* ================================================================
    DELETE
 ================================================================ */
-window.confirmDelete = (id, name, category) => {
+function confirmDelete(id, name, category) {
   const modal = document.getElementById('deleteModal');
   if (modal) modal.classList.add('open');
 
@@ -632,7 +665,7 @@ window.confirmDelete = (id, name, category) => {
     }
     window.closeDeleteModal();
   };
-};
+}
 
 
 /* ================================================================
@@ -774,7 +807,7 @@ window.renderBarcodePreview = (svgId, value) => {
   }
 };
 
-window.regenerateBarcode = (mode) => {
+function regenerateBarcode(mode) {
   const newBarcode = generateUniqueBarcode();
   if (mode === 'add') {
     const input = document.getElementById('core-barcode');
@@ -785,9 +818,9 @@ window.regenerateBarcode = (mode) => {
     if (input) input.value = newBarcode;
     window.renderBarcodePreview('edit-barcode-svg', newBarcode);
   }
-};
+}
 
-window.printBarcode = (data) => {
+function printBarcode(data) {
   if (!data.barcode) {
     showToast("This product doesn't have a barcode yet.", "error");
     return;
@@ -846,12 +879,12 @@ window.printBarcode = (data) => {
     </html>
   `);
   printWindow.document.close();
-};
+}
 
 /* ================================================================
    BARCODE TYPE SELECTOR
 ================================================================ */
-window.setBarcodeType = (mode, type) => {
+function setBarcodeType(mode, type) {
   const prefix = mode === 'add' ? 'core' : 'edit';
 
   // Update hidden type input
@@ -882,12 +915,12 @@ window.setBarcodeType = (mode, type) => {
       if (svgEl) svgEl.innerHTML = '';
     }
   }
-};
+}
 
 /* ================================================================
    PRODUCT BARCODE SCANNER
 ================================================================ */
-window.openProductBarcodeScanner = (mode) => {
+function openProductBarcodeScanner(mode) {
   _currentScanMode = mode;
   const modal = document.getElementById('productScannerModal');
   if (modal) modal.classList.add('open');
@@ -921,17 +954,17 @@ window.openProductBarcodeScanner = (mode) => {
     console.error('Product scanner error:', err);
     if (statusEl) statusEl.textContent = 'Camera unavailable. Use manual entry below.';
   });
-};
+}
 
-window.closeProductBarcodeScanner = () => {
+function closeProductBarcodeScanner() {
   const modal = document.getElementById('productScannerModal');
   if (modal) modal.classList.remove('open');
   if (_productScanner && _productScanner.isScanning) {
     _productScanner.stop().catch(() => {});
   }
-};
+}
 
-window.onProductScanSuccess = (decodedText) => {
+function onProductScanSuccess(decodedText) {
   const mode = _currentScanMode;
   const prefix = mode === 'add' ? 'core' : 'edit';
 
@@ -969,9 +1002,9 @@ window.onProductScanSuccess = (decodedText) => {
   } else {
     showToast(`Barcode captured: ${decodedText}`, 'success');
   }
-};
+}
 
-window.performProductLookup = async (barcode, mode) => {
+async function performProductLookup(barcode, mode) {
   const prefix = mode === 'add' ? 'core' : 'edit';
   const aiStatus = document.getElementById(`${mode}-ai-status`);
   const saveBtn  = document.getElementById(mode === 'add' ? 'addBtn' : 'editSaveBtn');
@@ -1022,10 +1055,10 @@ window.performProductLookup = async (barcode, mode) => {
     if (aiStatus) aiStatus.style.display = 'none';
     if (saveBtn) saveBtn.disabled = false;
   }
-};
+}
 
-window.applyManualBarcode = () => {
+function applyManualBarcode() {
   const val = (document.getElementById('manualBarcodeInput')?.value || '').trim();
   if (!val) { showToast('Enter a barcode value first.', 'error'); return; }
   window.onProductScanSuccess(val);
-};
+}
