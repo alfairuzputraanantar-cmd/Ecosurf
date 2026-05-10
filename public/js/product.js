@@ -63,6 +63,10 @@ function addColumn() {
   if (allPossibleCols().map(c => c.toLowerCase()).includes(name.toLowerCase())) {
     showToast('Column already exists!', 'error'); return;
   }
+  if (extra.length >= 2) {
+    showToast('Maximum 2 custom columns allowed to keep the table readable.', 'warning');
+    return;
+  }
   extra.push(name);
   saveExtra();
   renderHeader();
