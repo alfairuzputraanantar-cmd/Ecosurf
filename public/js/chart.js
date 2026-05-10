@@ -8,9 +8,8 @@ import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-f
 
 const PALETTE = ['#c8956c', '#a0714f', '#7a9aaa', '#22c997', '#f5a623', '#5b9cf6', '#f75f5f', '#e8c9b0'];
 
-let _stockChart = null, _catChart = null, _histChart = null, _salesChart = null, _profitChart = null, _topProfitChart = null;
+let _stockChart = null, _catChart = null, _salesChart = null, _profitChart = null, _topProfitChart = null;
 let products = [];
-let history = [];
 let transactions = [];
 
 /* ── Start listeners only after auth is ready ── */
@@ -23,12 +22,7 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
     renderAll();
   });
 
-  // ✅ Listen to users/{uid}/history
-  onSnapshot(userCol(uid, 'history'), snap => {
-    history = [];
-    snap.forEach(d => history.push(d.data()));
-    renderAll();
-  });
+
 
   // ✅ Listen to users/{uid}/transactions
   onSnapshot(userCol(uid, 'transactions'), snap => {
@@ -45,7 +39,6 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
 function renderAll() {
   renderStockChart();
   renderCategoryChart();
-  renderHistoryChart();
   renderSalesChart();
   renderProfitChart();
   renderTopProfitChart();
@@ -185,70 +178,7 @@ function renderCategoryChart() {
         <span>${l}</span>
         <span style="margin-left:4px;color:var(--text);font-weight:600;">${data[i]}</span>
         <span style="margin-left:4px;color:var(--muted);font-size:10px;">(${Math.round(data[i] / total * 100)}%)</span>
-      </div>`).join('');
-  }
-}
-
-/* ================================================================
-   LINE CHART — products added per day (last 14 days)
-================================================================ */
-function renderHistoryChart() {
-  const canvas = document.getElementById('historyChart');
-  const empty = document.getElementById('emptyHistory');
-  if (!canvas) return;
-
-  const dayMap = {};
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    dayMap[d.toISOString().slice(0, 10)] = 0;
-  }
-
-  history.forEach(h => {
-    if (h.action !== 'Added') return;
-    let dateKey = null;
-    if (h.createdAt) {
-      dateKey = h.createdAt.slice(0, 10);
-    } else if (h.timestamp) {
-      const m = h.timestamp.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-      if (m) dateKey = `${m[3]}-${m[2]}-${m[1]}`;
-    }
-    if (dateKey && dayMap[dateKey] !== undefined) dayMap[dateKey]++;
-  });
-
-  const labels = Object.keys(dayMap).map(k => { const [y, m, d] = k.split('-'); return `${d}/${m}`; });
-  const data = Object.values(dayMap);
-
-  if (data.every(v => v === 0)) {
-    canvas.style.display = 'none';
-    if (empty) empty.style.display = 'flex';
-    return;
-  }
-  canvas.style.display = '';
-  if (empty) empty.style.display = 'none';
-
-  if (_histChart) _histChart.destroy();
-  _histChart = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Products Added',
-        data,
-        borderColor: '#c8956c',
-        backgroundColor: 'rgba(200,149,108,.12)',
-        fill: true, tension: 0.45,
-        pointBackgroundColor: '#c8956c',
-        pointBorderColor: '#13161f',
-        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.05)' } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true, ticks: { stepSize: 1 } }
+      </div>
       }
     }
   });
