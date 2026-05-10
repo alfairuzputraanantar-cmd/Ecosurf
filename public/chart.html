@@ -64,6 +64,11 @@
       max-height: 270px;
     }
 
+    .chart-card-body.tall canvas {
+      max-height: 400px;
+      height: 400px !important;
+    }
+
     .chart-legend {
       display: flex;
       flex-wrap: wrap;
@@ -217,7 +222,7 @@
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Top Products by Stock</div>
           </div>
-          <div class="chart-card-body">
+          <div class="chart-card-body tall">
             <div class="chart-wrapper">
               <canvas id="stockChart"></canvas>
             </div>
@@ -296,7 +301,7 @@
             <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--yellow);"></i> Top Profitable
               Products</div>
           </div>
-          <div class="chart-card-body">
+          <div class="chart-card-body tall">
             <div class="chart-wrapper">
               <canvas id="topProfitChart"></canvas>
             </div>

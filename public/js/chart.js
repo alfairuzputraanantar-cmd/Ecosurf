@@ -82,19 +82,48 @@ function renderStockChart() {
     data: {
       labels,
       datasets: [{
-        label: 'Stock',
+        label: 'Stock Quantity',
         data,
         backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length] + 'CC'),
         borderColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
-        borderWidth: 2, borderRadius: 8, borderSkipped: false
+        borderWidth: 1.5, 
+        borderRadius: 4, 
+        borderSkipped: false,
+        barPercentage: 0.7,
+        categoryPercentage: 0.8
       }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(19, 22, 31, 0.95)',
+          titleFont: { size: 13, weight: '700' },
+          bodyFont: { size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          displayColors: true,
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1
+        }
+      },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { maxRotation: 30 } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+        x: { 
+          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false }, 
+          ticks: { color: '#7a7265', font: { size: 10 } },
+          beginAtZero: true
+        },
+        y: { 
+          grid: { display: false }, 
+          ticks: { 
+            color: '#ccc', 
+            font: { size: 11 },
+            autoSkip: false
+          }
+        }
       }
     }
   });
