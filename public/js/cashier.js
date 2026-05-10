@@ -447,18 +447,24 @@ window.executeCheckoutTransaction = async (paymentMethod = 'Cash') => {
     await batch.commit();
 
     // Clear cart
+    const cartItemsData = [...items];
     _cart = {};
     updateCartUI();
     closeCartSheet();
     renderProducts();
 
-    // Success animation
+    // Success animation then Receipt
     const overlay = document.getElementById('successOverlay');
     const msg     = document.getElementById('successMsg');
     if (msg) msg.textContent = `Transaction Successful! Rp ${totalRevenue.toLocaleString('id-ID')}`;
     if (overlay) {
       overlay.classList.add('show');
-      setTimeout(() => overlay.classList.remove('show'), 2000);
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        showReceipt(txRef.id, cartItemsData, totalRevenue, totalItems, paymentMethod, now);
+      }, 1200);
+    } else {
+      showReceipt(txRef.id, cartItemsData, totalRevenue, totalItems, paymentMethod, now);
     }
 
   } catch (err) {
@@ -467,6 +473,56 @@ window.executeCheckoutTransaction = async (paymentMethod = 'Cash') => {
   }
 
   if (btn) { btn.innerHTML = '<i class="fas fa-check-circle"></i> Process Transaction'; btn.disabled = false; }
+};
+
+/* ================================================================
+   RECEIPT MODAL
+================================================================ */
+window.showReceipt = (txId, items, totalRevenue, totalItems, paymentMethod, dateObj) => {
+  const overlay = document.getElementById('receiptOverlay');
+  if (!overlay) return;
+  
+  // Set Store Name
+  try {
+    const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+    document.getElementById('rcptStoreName').textContent = p.businessName || 'CocaCoy ERP Store';
+  } catch(e) {}
+  
+  // Header Details
+  const dateStr = dateObj.toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const shortId = txId.substring(0, 8).toUpperCase();
+  const receiptNo = `CCY-TRX-${dateObj.getFullYear()}${(dateObj.getMonth()+1).toString().padStart(2,'0')}${dateObj.getDate().toString().padStart(2,'0')}-${shortId}`;
+  
+  setText('rcptDate', dateStr);
+  setText('rcptId', receiptNo);
+  
+  // Items
+  const itemsContainer = document.getElementById('rcptItems');
+  if (itemsContainer) {
+    itemsContainer.innerHTML = items.map(([id, item]) => `
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px; page-break-inside: avoid;">
+        <div style="flex: 1; padding-right: 10px;">
+          <div style="font-weight: 600;">${item.name}</div>
+          <div style="color: #555;">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</div>
+        </div>
+        <div style="font-weight: 600; text-align: right;">
+          Rp ${(item.qty * item.price).toLocaleString('id-ID')}
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  // Summary
+  setText('rcptTotalItems', totalItems);
+  setText('rcptMethod', paymentMethod);
+  setText('rcptTotal', 'Rp ' + totalRevenue.toLocaleString('id-ID'));
+  
+  overlay.classList.add('open');
+};
+
+window.closeReceipt = () => {
+  const overlay = document.getElementById('receiptOverlay');
+  if (overlay) overlay.classList.remove('open');
 };
 
 /* ================================================================
