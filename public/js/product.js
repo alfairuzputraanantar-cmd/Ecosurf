@@ -43,6 +43,7 @@ const emptyEl = () => document.getElementById('emptyProducts');
 window.addColumn = addColumn;
 window.saveProduct = saveProduct;
 window.saveEdit = saveEdit;
+window.openEditModal = openEditModal;
 window.openAddModal = openAddModal;
 window.filterTable = filterTable;
 window.performProductLookup = performProductLookup;
@@ -706,29 +707,34 @@ window.onerror = function(msg, url, line, col, error) {
    RESTOCK LOGIC
 ================================================================ */
 function openRestockModal(id, data) {
-  const modal = document.getElementById('restockModal');
+  const modal = document.getElementById('restockModalOverlay');
   if (!modal) return;
   
-  const title = document.getElementById('restockTitle');
-  if (title) title.textContent = `Restock: ${data.Name}`;
+  const title = document.getElementById('restockProductName');
+  if (title) title.value = data.Name || '-';
   
-  const qtyInp = document.getElementById('restockQty');
+  const stockEl = document.getElementById('restockCurrentStock');
+  if (stockEl) stockEl.value = data.Stock || 0;
+  
+  const idInp = document.getElementById('restockProductId');
+  if (idInp) idInp.value = id;
+
+  const qtyInp = document.getElementById('restockQuantity');
   if (qtyInp) { qtyInp.value = ''; qtyInp.focus(); }
-  
-  const confirmBtn = document.getElementById('restockConfirmBtn');
-  if (confirmBtn) {
-    confirmBtn.onclick = () => processRestock(id, data.Name);
-  }
   
   modal.classList.add('open');
 }
 
 function closeRestockModal() {
-  document.getElementById('restockModal')?.classList.remove('open');
+  document.getElementById('restockModalOverlay')?.classList.remove('open');
 }
 
-async function processRestock(id, name) {
-  const qtyInp = document.getElementById('restockQty');
+async function processRestock() {
+  const id = document.getElementById('restockProductId')?.value;
+  const name = document.getElementById('restockProductName')?.value;
+  if (!id) return;
+
+  const qtyInp = document.getElementById('restockQuantity');
   if (!qtyInp) return;
   
   const add = parseInt(qtyInp.value);
@@ -736,7 +742,7 @@ async function processRestock(id, name) {
     return showToast('Please enter a valid quantity.', 'error');
   }
   
-  const btn = document.getElementById('restockConfirmBtn');
+  const btn = document.getElementById('confirmRestockBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Processing...'; }
   
   try {
@@ -760,7 +766,7 @@ async function processRestock(id, name) {
     console.error(err);
     showToast('Failed to restock. Please try again.', 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = 'Restock Now'; }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Confirm Restock'; }
   }
 }
 
