@@ -505,12 +505,8 @@ function renderTopProfitChart() {
       scales: {
         x: {
           grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
-          beginAtZero: true,
-          ticks: {
-            color: '#7a7265',
-            font: { size: 10 },
-            callback: (val) => 'Rp ' + val.toLocaleString('id-ID')
-          }
+          ticks: { color: '#7a7265', font: { size: 10 } },
+          beginAtZero: true
         },
         y: {
           grid: { display: false },
