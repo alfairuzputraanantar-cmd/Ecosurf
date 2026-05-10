@@ -241,6 +241,37 @@
         </div>
       </div>
 
+      <!-- AI INSIGHTS CARD -->
+      <div class="card ai-insights-card" style="margin-top:18px;" id="aiInsightsCard">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="ai-brain-icon">🧠</span> CocaCoy AI Insights
+            <span class="ai-badge">Powered by Gemini</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="aiRefreshBtn" onclick="refreshAIInsights()" title="Refresh insights">
+            <i class="fas fa-rotate-right"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body" id="aiInsightsBody">
+          <!-- Loading skeleton -->
+          <div id="aiLoadingState">
+            <div class="ai-skeleton"></div>
+            <div class="ai-skeleton" style="width:85%;"></div>
+            <div class="ai-skeleton" style="width:90%;"></div>
+            <div class="ai-skeleton" style="width:75%;"></div>
+          </div>
+          <div id="aiInsightsList" style="display:none;"></div>
+          <div id="aiErrorState" style="display:none; text-align:center; padding:16px 0; color:var(--muted); font-size:13px;">
+            <i class="fas fa-triangle-exclamation" style="font-size:24px; color:var(--yellow); display:block; margin-bottom:8px;"></i>
+            Could not load AI insights. <a href="#" onclick="refreshAIInsights()" style="color:var(--brand-1);">Try again</a>
+          </div>
+        </div>
+        <div class="ai-insights-footer">
+          <i class="fas fa-clock" style="font-size:10px;"></i>
+          <span id="aiLastUpdated">Generating insights...</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -252,6 +283,7 @@
   <script type="module" src="./js/dashboard.js"></script>
   <script type="module" src="./js/notifications.js"></script>
   <script type="module" src="./js/export.js"></script>
+  <script type="module" src="./js/ai-insights-runner.js"></script>
   <script>
     function checkMobile() {
       document.getElementById('menuToggle').style.display = window.innerWidth <= 768 ? 'grid' : 'none';

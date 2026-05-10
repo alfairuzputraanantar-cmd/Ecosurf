@@ -2039,3 +2039,102 @@ input::-webkit-credentials-auto-fill-button {
 }
 .cart-checkout-btn:hover:not(:disabled) { opacity: .88; }
 .cart-checkout-btn:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
+
+/* ================================================================
+   AI INSIGHTS CARD
+================================================================ */
+.ai-insights-card {
+  border-color: rgba(200,149,108,.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-insights-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--brand-grd);
+}
+
+.ai-brain-icon {
+  font-size: 16px;
+  filter: drop-shadow(0 0 6px rgba(200,149,108,.5));
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--brand-1);
+  background: rgba(200,149,108,.12);
+  border: 1px solid rgba(200,149,108,.25);
+  border-radius: 20px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  font-family: var(--font);
+  letter-spacing: 0.3px;
+}
+
+/* ── Skeleton loading ── */
+.ai-skeleton {
+  height: 14px;
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  width: 100%;
+  animation: aiSkeletonPulse 1.5s ease infinite;
+}
+
+@keyframes aiSkeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Insight items ── */
+.ai-insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  animation: aiFadeIn .4s ease both;
+}
+
+.ai-insight-item:last-child {
+  border-bottom: none;
+}
+
+@keyframes aiFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ai-insight-bullet {
+  color: var(--brand-1);
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ai-insight-text {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+/* ── Footer ── */
+.ai-insights-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface2);
+}
