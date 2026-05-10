@@ -95,7 +95,8 @@ function renderStockChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
+      aspectRatio: 1.8, // Horizontal bar needs more width
       indexAxis: 'y',
       plugins: { 
         legend: { display: false },
@@ -172,6 +173,8 @@ function renderCategoryChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1.5, // slightly wider but keeps shape
       cutout: '65%',
       plugins: { legend: { display: false } }
     }
@@ -245,6 +248,8 @@ function renderHistoryChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.2,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -345,6 +350,8 @@ function renderSalesChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.2,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -419,6 +426,8 @@ function renderProfitChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.2,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -480,6 +489,8 @@ function renderTopProfitChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1.8,
       indexAxis: 'y', // horizontal bar
       plugins: { legend: { display: false } },
       scales: {
