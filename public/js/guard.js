@@ -8,8 +8,18 @@ import { seedDemoDataIfNeeded } from "./demo.js";
    Also exposes window.__uid so all other modules can use the UID
    without needing to re-import auth.
 ================================================================ */
+/* ── Clear Session Utility ── */
+function clearLocalSession() {
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('cocacoy_')) {
+      localStorage.removeItem(key);
+    }
+  });
+}
+
 onAuthStateChanged(auth, (user) => {
   if (!user) {
+    clearLocalSession();
     window.location.href = "login";
     return;
   }
@@ -87,6 +97,7 @@ onAuthStateChanged(auth, (user) => {
         document.body.prepend(banner);
       }
       document.getElementById("exitDemoBtn").onclick = async () => {
+        clearLocalSession();
         await signOut(auth);
         window.location.href = "login";
       };
@@ -98,8 +109,10 @@ onAuthStateChanged(auth, (user) => {
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
   logoutBtn.onclick = async () => {
+    clearLocalSession();
     await signOut(auth);
     window.location.href = "login";
   };
 }
+
 

@@ -1262,6 +1262,10 @@
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       try {
         const { signOut } = await import('./js/firebase.js');
+        // Clear personal data
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('cocacoy_')) localStorage.removeItem(key);
+        });
         await signOut();
       } catch (e) { }
       window.location.href = 'login.html';
