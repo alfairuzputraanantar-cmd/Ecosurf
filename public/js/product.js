@@ -2,6 +2,7 @@ import { db, userCol, userDoc } from './firebase.js';
 import {
   addDoc, onSnapshot, deleteDoc, updateDoc, increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { lookupProductByBarcode } from './barcode-lookup.js';
 
 /* ================================================================
    COLUMNS
@@ -145,6 +146,12 @@ window.openAddModal = () => {
   // ✅ Reset barcode type to internal + auto-generate
   window.setBarcodeType('add', 'internal');
   setTimeout(() => window.regenerateBarcode('add'), 100);
+
+  // ✅ Reset AI lookup UI
+  const imgPrev = document.getElementById('add-product-img-preview');
+  if (imgPrev) imgPrev.style.display = 'none';
+  const aiStatus = document.getElementById('add-ai-status');
+  if (aiStatus) aiStatus.style.display = 'none';
 
   const modalEl = document.getElementById('addModal');
   modalEl.classList.add('open');
@@ -478,6 +485,15 @@ window.openEditModal = (id, data) => {
       </div>`;
   }
   
+  const modalEl = document.getElementById('editModal');
+  if (modalEl) modalEl.classList.add('open');
+
+  // ✅ Reset AI lookup UI
+  const imgPrev = document.getElementById('edit-product-img-preview');
+  if (imgPrev) imgPrev.style.display = 'none';
+  const aiStatus = document.getElementById('edit-ai-status');
+  if (aiStatus) aiStatus.style.display = 'none';
+
   // ✅ Handle Barcode for Edit Modal — set type from saved data
   setTimeout(() => {
     const type = data.barcodeType || 'internal';
@@ -922,7 +938,67 @@ window.onProductScanSuccess = (decodedText) => {
 
   // Close scanner after short delay
   setTimeout(() => window.closeProductBarcodeScanner(), 900);
-  showToast(`Barcode captured: ${decodedText}`, 'success');
+  
+  // ✅ TRIGGER SMART LOOKUP if manufacturer type
+  const type = (document.getElementById(`${prefix}-barcodeType`)?.value) || 'internal';
+  if (type === 'manufacturer') {
+    window.performProductLookup(decodedText, mode);
+  } else {
+    showToast(`Barcode captured: ${decodedText}`, 'success');
+  }
+};
+
+window.performProductLookup = async (barcode, mode) => {
+  const prefix = mode === 'add' ? 'core' : 'edit';
+  const aiStatus = document.getElementById(`${mode}-ai-status`);
+  const saveBtn  = document.getElementById(mode === 'add' ? 'addBtn' : 'editSaveBtn');
+
+  if (aiStatus) aiStatus.style.display = 'flex';
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    const data = await lookupProductByBarcode(barcode);
+    
+    if (aiStatus) aiStatus.style.display = 'none';
+    if (saveBtn) saveBtn.disabled = false;
+
+    if (data) {
+      // Auto-fill fields if empty
+      const nameInput = document.getElementById(`${prefix}-name`);
+      if (nameInput && !nameInput.value.trim()) {
+        nameInput.value = data.name;
+        // Trigger visual feedback
+        nameInput.style.border = '1.5px solid var(--green)';
+        setTimeout(() => nameInput.style.border = '', 2000);
+      }
+
+      const catInput = document.getElementById(`${prefix}-category`);
+      if (catInput && (!catInput.value || catInput.value === 'Others')) {
+        catInput.value = data.category;
+      }
+
+      // Show image preview if available
+      if (data.image) {
+        const imgPrev = document.getElementById(`${mode}-product-img-preview`);
+        const imgEl   = document.getElementById(`${mode}-detected-img`);
+        const brandEl = document.getElementById(`${mode}-detected-brand`);
+        
+        if (imgPrev && imgEl) {
+          imgEl.src = data.image;
+          if (brandEl) brandEl.textContent = data.brand || 'No brand info';
+          imgPrev.style.display = 'flex';
+        }
+      }
+
+      showToast(`AI: Product recognized!`, 'success');
+    } else {
+      showToast(`No online product data found.`, 'info');
+    }
+  } catch (err) {
+    console.error('Lookup failed', err);
+    if (aiStatus) aiStatus.style.display = 'none';
+    if (saveBtn) saveBtn.disabled = false;
+  }
 };
 
 window.applyManualBarcode = () => {

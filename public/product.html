@@ -288,7 +288,22 @@
           <button class="btn btn-primary" id="add-scan-btn" style="display:none;" onclick="window.openProductBarcodeScanner('add')" title="Scan Barcode"><i class="fas fa-camera"></i></button>
         </div>
         <!-- SVG Preview -->
-        <svg id="add-barcode-svg" style="max-height: 80px; background: white; border-radius: 6px; width:100%;"></svg>
+        <!-- AI Detection Status -->
+        <div id="add-ai-status" style="display:none; font-size:11px; color:var(--brand-1); font-weight:700; align-items:center; gap:8px; margin-top:8px; background:rgba(200,149,108,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--brand-1);">
+          <i class="fas fa-robot"></i> AI Detecting Product...
+          <span class="spinner" style="width:12px; height:12px; border-width:2px; margin-left:auto;"></span>
+        </div>
+
+        <!-- Product Image Preview -->
+        <div id="add-product-img-preview" style="display:none; margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px; align-items:center; gap:12px; animation:fadeIn 0.3s ease;">
+          <img id="add-detected-img" src="" style="width:50px; height:50px; object-fit:contain; border-radius:6px; background:white;" />
+          <div style="flex:1;">
+            <div style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">Auto-Detected Image</div>
+            <div id="add-detected-brand" style="font-size:12px; font-weight:600; color:var(--text); opacity:0.8;"></div>
+          </div>
+          <button class="btn btn-ghost" onclick="document.getElementById('add-product-img-preview').style.display='none'" style="width:28px; height:28px; padding:0;"><i class="fas fa-times"></i></button>
+        </div>
+
         <input type="hidden" id="core-barcodeType" value="internal" />
       </div>
       
@@ -424,7 +439,22 @@
           <button class="btn btn-primary" id="edit-scan-btn" style="display:none;" onclick="window.openProductBarcodeScanner('edit')" title="Scan Barcode"><i class="fas fa-camera"></i></button>
         </div>
         <!-- SVG Preview -->
-        <svg id="edit-barcode-svg" style="max-height: 80px; background: white; border-radius: 6px; width:100%;"></svg>
+        <!-- AI Detection Status -->
+        <div id="edit-ai-status" style="display:none; font-size:11px; color:var(--brand-1); font-weight:700; align-items:center; gap:8px; margin-top:8px; background:rgba(200,149,108,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--brand-1);">
+          <i class="fas fa-robot"></i> AI Detecting Product...
+          <span class="spinner" style="width:12px; height:12px; border-width:2px; margin-left:auto;"></span>
+        </div>
+
+        <!-- Product Image Preview -->
+        <div id="edit-product-img-preview" style="display:none; margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px; align-items:center; gap:12px; animation:fadeIn 0.3s ease;">
+          <img id="edit-detected-img" src="" style="width:50px; height:50px; object-fit:contain; border-radius:6px; background:white;" />
+          <div style="flex:1;">
+            <div style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">Auto-Detected Image</div>
+            <div id="edit-detected-brand" style="font-size:12px; font-weight:600; color:var(--text); opacity:0.8;"></div>
+          </div>
+          <button class="btn btn-ghost" onclick="document.getElementById('edit-product-img-preview').style.display='none'" style="width:28px; height:28px; padding:0;"><i class="fas fa-times"></i></button>
+        </div>
+
         <input type="hidden" id="edit-barcodeType" value="internal" />
       </div>
       <div class="form-row">
