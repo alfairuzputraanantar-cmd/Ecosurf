@@ -174,10 +174,15 @@ window.saveProduct = async () => {
   try {
     const now = new Date();
     const product = {
-      Name: name, Stock: stock, Price: sellPrice,
-      BuyPrice: buyPrice, SellPrice: sellPrice,
-      Category: cat, Unit: unit, Notes: notes,
-      lowStockThreshold: thresh,
+      Name: name, 
+      Stock: Number(stock), 
+      Price: Number(sellPrice),
+      BuyPrice: Number(buyPrice), 
+      SellPrice: Number(sellPrice),
+      Category: cat, 
+      Unit: unit, 
+      Notes: notes,
+      lowStockThreshold: Number(thresh),
       barcode: barcode,
       createdAt: now.toISOString()
     };
@@ -490,10 +495,15 @@ window.saveEdit = async () => {
   try {
     const now = new Date();
     const updateData = {
-      Name: name, Stock: stock, Price: sellPrice,
-      BuyPrice: buyPrice, SellPrice: sellPrice,
-      Category: cat, Unit: unit, Notes: notes,
-      lowStockThreshold: thresh,
+      Name: name, 
+      Stock: Number(stock), 
+      Price: Number(sellPrice),
+      BuyPrice: Number(buyPrice), 
+      SellPrice: Number(sellPrice),
+      Category: cat, 
+      Unit: unit, 
+      Notes: notes,
+      lowStockThreshold: Number(thresh),
       barcode: barcode,
       updatedAt: now.toISOString()
     };

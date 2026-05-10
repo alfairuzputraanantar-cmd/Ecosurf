@@ -393,7 +393,8 @@ window.executeCheckoutTransaction = async (paymentMethod = 'Cash') => {
     // 1. Decrease each product's stock
     for (const [id, item] of items) {
       const prodRef = doc(db, 'users', _uid, 'products', id);
-      batch.update(prodRef, { Stock: String((parseInt(_products.find(p=>p.id===id)?.Stock)||0) - item.qty) });
+      const currentStock = parseInt(_products.find(p => p.id === id)?.Stock) || 0;
+      batch.update(prodRef, { Stock: currentStock - item.qty });
     }
 
     // 2. Add transaction document

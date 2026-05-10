@@ -24,3 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(backdrop);
   }
 });
+
+// Fix for type="number" inputs: prevent mouse wheel from changing values accidentally
+document.addEventListener("wheel", function(e) {
+  if (document.activeElement.type === "number") {
+    e.preventDefault();
+  }
+}, { passive: false });
+
