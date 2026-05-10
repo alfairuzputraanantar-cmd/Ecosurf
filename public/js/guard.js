@@ -59,15 +59,16 @@ onAuthStateChanged(auth, (user) => {
           };
 
           // ✅ UI Update: Only update if changed or elements are empty to prevent flash
-          if (nameEl) nameEl.textContent = p.ownerName;
-          if (roleEl) roleEl.textContent = p.role;
+          if (nameEl) nameEl.textContent = p.storeName || "CocaCoy Store";
+          if (roleEl) roleEl.textContent = p.ownerName;
           if (avatarEl) {
             if (p.photoURL) {
               const imgHtml = `<img src="${p.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>`;
               if (avatarEl.innerHTML !== imgHtml) avatarEl.innerHTML = imgHtml;
               localStorage.setItem('cocacoy_store_logo', p.photoURL);
             } else {
-              const letter = p.ownerName.charAt(0).toUpperCase();
+              const displayTitle = p.storeName || p.ownerName || "C";
+              const letter = displayTitle.charAt(0).toUpperCase();
               if (avatarEl.textContent !== letter) avatarEl.textContent = letter;
             }
           }
