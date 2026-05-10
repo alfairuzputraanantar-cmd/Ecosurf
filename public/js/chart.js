@@ -441,7 +441,14 @@ function renderTopProfitChart() {
   if (!canvas) return;
 
   const profMap = {};
+  const last7Days = new Date();
+  last7Days.setDate(last7Days.getDate() - 7);
+  const last7DaysStr = last7Days.toISOString().slice(0, 10);
+
   transactions.forEach(t => {
+    const dateKey = (t.createdAt || '').slice(0, 10);
+    if (!dateKey || dateKey < last7DaysStr) return;
+
     (t.items || []).forEach(item => {
       const prod = products.find(p => p.id === item.productId);
       const buyPrice = parseInt(prod?.BuyPrice) || parseInt(item.buyPrice) || 0;
