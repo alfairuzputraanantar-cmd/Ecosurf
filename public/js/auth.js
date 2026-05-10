@@ -1,5 +1,5 @@
-import { auth } from "./firebase.js";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { auth, userDoc, setDoc } from "./firebase.js";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword
@@ -57,19 +57,44 @@ if (demoBtn) {
   };
 }
 
+
 /* ── REGISTER ── */
 const registerBtn = document.getElementById("registerBtn");
 if (registerBtn) {
   registerBtn.onclick = async () => {
-    const email    = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    if (!email || !password) { showToast("Please fill in all fields.", "error"); return; }
-    if (password.length < 6) { showToast("Password must be at least 6 characters.", "error"); return; }
+    const email       = document.getElementById("email").value.trim();
+    const password    = document.getElementById("password").value.trim();
+    const ownerName   = document.getElementById("name").value.trim();
+    const companyName = document.getElementById("companyName").value.trim();
+
+    if (!email || !password || !ownerName || !companyName) { 
+      showToast("Please fill in all fields.", "error"); 
+      return; 
+    }
+    if (password.length < 6) { 
+      showToast("Password must be at least 6 characters.", "error"); 
+      return; 
+    }
 
     registerBtn.innerHTML = '<span class="spinner"></span> Creating...';
     registerBtn.disabled  = true;
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // 1. Create Auth User
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // 2. Set Display Name in Auth
+      await updateProfile(user, { displayName: ownerName });
+
+      // 3. Create Firestore Profile Document
+      await setDoc(userDoc(user.uid), {
+        ownerName: ownerName,
+        storeName: companyName,
+        role: "UMKM Admin",
+        storeCategory: "food",
+        updatedAt: new Date().toISOString()
+      });
+
       window.location.href = "/";
     } catch (err) {
       showToast(err.code === "auth/email-already-in-use" ? "Email already registered." : err.message, "error");
@@ -78,6 +103,7 @@ if (registerBtn) {
     }
   };
 }
+
 
 // Password update utilities
 export async function reauthenticateUser(currentPassword) {
