@@ -19,6 +19,84 @@
       try { window._initialProfile = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}'); } catch(e) {}
     })();
   </script>
+  <style>
+    /* ── Barcode Type Selector ── */
+    .barcode-type-tabs {
+      display: flex; gap: 4px;
+      background: var(--surface); border-radius: 8px; padding: 4px;
+    }
+    .barcode-type-btn {
+      flex: 1; padding: 7px 8px;
+      border-radius: 6px; font-size: 12px; font-weight: 600;
+      border: none; background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .barcode-type-btn.active {
+      background: var(--brand-grd); color: #fff;
+    }
+    .barcode-type-btn:hover:not(.active) { background: var(--border); color: var(--text); }
+
+    /* ── Product Scanner Modal ── */
+    .product-scanner-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.75);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .product-scanner-overlay:not(.open) { display: none; }
+    .product-scanner-box {
+      width: 90%; max-width: 420px;
+      background: var(--surface); border-radius: 18px;
+      overflow: hidden; border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .product-scanner-header {
+      padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+    }
+    .product-scanner-view {
+      position: relative; background: #000;
+      min-height: 240px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #product-reader { width: 100%; }
+    .scan-line {
+      position: absolute; left: 10%; right: 10%; height: 2px;
+      background: var(--brand-1);
+      box-shadow: 0 0 8px var(--brand-1), 0 0 16px var(--brand-1);
+      animation: scanAnim 1.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .scan-corners::before, .scan-corners::after {
+      content: ''; position: absolute;
+      width: 40px; height: 40px;
+      border-color: var(--brand-1); border-style: solid;
+      opacity: .8;
+    }
+    .scan-corners::before { top: 16px; left: 16px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    .scan-corners::after  { bottom: 16px; right: 16px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+    @keyframes scanAnim {
+      0%, 100% { top: 20%; }
+      50% { top: 78%; }
+    }
+    .product-scanner-footer { padding: 14px; border-top: 1px solid var(--border); }
+    .product-scanner-status {
+      text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 10px;
+    }
+    .product-scanner-manual {
+      display: flex; gap: 8px;
+    }
+    .scan-success-badge {
+      position: absolute; inset: 0;
+      background: rgba(34,201,151,.15);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      animation: fadeIn .2s ease;
+    }
+    .scan-success-badge i { font-size: 52px; color: var(--green); }
+    .scan-success-badge span { font-size: 14px; font-weight: 700; color: var(--green); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
 </head>
 
 <body>
@@ -192,13 +270,26 @@
       </div>
       
       <!-- BARCODE SECTION -->
-      <div class="form-group" style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-        <label class="form-label" style="align-self: flex-start; margin-bottom: 0;">Product Barcode</label>
-        <svg id="add-barcode-svg" style="max-height: 80px; background: white; border-radius: 6px;"></svg>
-        <div style="display: flex; gap: 8px; width: 100%;">
-          <input class="form-control" id="core-barcode" readonly style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
-          <button class="btn btn-ghost" onclick="window.regenerateBarcode('add')" title="Regenerate Barcode"><i class="fas fa-rotate"></i></button>
+      <div class="form-group" style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+        <label class="form-label" style="margin-bottom: 0;"><i class="fas fa-barcode" style="color:var(--brand-1);"></i> Product Barcode</label>
+        <!-- Type Tabs -->
+        <div class="barcode-type-tabs">
+          <button class="barcode-type-btn active" id="add-btn-internal" onclick="window.setBarcodeType('add','internal')">
+            <i class="fas fa-cog"></i> CocaCoy Internal
+          </button>
+          <button class="barcode-type-btn" id="add-btn-manufacturer" onclick="window.setBarcodeType('add','manufacturer')">
+            <i class="fas fa-camera"></i> Scan Real Barcode
+          </button>
         </div>
+        <!-- Barcode value input + action buttons -->
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <input class="form-control" id="core-barcode" readonly placeholder="Barcode value..." style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
+          <button class="btn btn-ghost" id="add-regenerate-btn" onclick="window.regenerateBarcode('add')" title="Regenerate"><i class="fas fa-rotate"></i></button>
+          <button class="btn btn-primary" id="add-scan-btn" style="display:none;" onclick="window.openProductBarcodeScanner('add')" title="Scan Barcode"><i class="fas fa-camera"></i></button>
+        </div>
+        <!-- SVG Preview -->
+        <svg id="add-barcode-svg" style="max-height: 80px; background: white; border-radius: 6px; width:100%;"></svg>
+        <input type="hidden" id="core-barcodeType" value="internal" />
       </div>
       
       <div class="form-row">
@@ -315,13 +406,26 @@
       </div>
       
       <!-- BARCODE SECTION -->
-      <div class="form-group" style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-        <label class="form-label" style="align-self: flex-start; margin-bottom: 0;">Product Barcode</label>
-        <svg id="edit-barcode-svg" style="max-height: 80px; background: white; border-radius: 6px;"></svg>
-        <div style="display: flex; gap: 8px; width: 100%;">
-          <input class="form-control" id="edit-barcode" readonly style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
-          <button class="btn btn-ghost" onclick="window.regenerateBarcode('edit')" title="Regenerate Barcode"><i class="fas fa-rotate"></i></button>
+      <div class="form-group" style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+        <label class="form-label" style="margin-bottom: 0;"><i class="fas fa-barcode" style="color:var(--brand-1);"></i> Product Barcode</label>
+        <!-- Type Tabs -->
+        <div class="barcode-type-tabs">
+          <button class="barcode-type-btn active" id="edit-btn-internal" onclick="window.setBarcodeType('edit','internal')">
+            <i class="fas fa-cog"></i> CocaCoy Internal
+          </button>
+          <button class="barcode-type-btn" id="edit-btn-manufacturer" onclick="window.setBarcodeType('edit','manufacturer')">
+            <i class="fas fa-camera"></i> Scan Real Barcode
+          </button>
         </div>
+        <!-- Barcode value input + action buttons -->
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <input class="form-control" id="edit-barcode" readonly placeholder="Barcode value..." style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
+          <button class="btn btn-ghost" id="edit-regenerate-btn" onclick="window.regenerateBarcode('edit')" title="Regenerate"><i class="fas fa-rotate"></i></button>
+          <button class="btn btn-primary" id="edit-scan-btn" style="display:none;" onclick="window.openProductBarcodeScanner('edit')" title="Scan Barcode"><i class="fas fa-camera"></i></button>
+        </div>
+        <!-- SVG Preview -->
+        <svg id="edit-barcode-svg" style="max-height: 80px; background: white; border-radius: 6px; width:100%;"></svg>
+        <input type="hidden" id="edit-barcodeType" value="internal" />
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -421,6 +525,38 @@
   </button>
 
   <!-- =========================================================
+       MODAL: PRODUCT BARCODE SCANNER
+  ========================================================= -->
+  <div class="product-scanner-overlay" id="productScannerModal">
+    <div class="product-scanner-box">
+      <div class="product-scanner-header">
+        <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-barcode" style="color:var(--brand-1);"></i> Scan Product Barcode
+        </div>
+        <button style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;" onclick="window.closeProductBarcodeScanner()">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div class="product-scanner-view">
+        <div id="product-reader"></div>
+        <div class="scan-line"></div>
+        <div class="scan-corners"></div>
+        <div id="scanSuccessBadge" style="display:none;" class="scan-success-badge">
+          <i class="fas fa-circle-check"></i>
+          <span id="scanSuccessText">Barcode Detected!</span>
+        </div>
+      </div>
+      <div class="product-scanner-footer">
+        <div class="product-scanner-status" id="productScanStatus">Initializing camera...</div>
+        <div class="product-scanner-manual">
+          <input class="form-control" id="manualBarcodeInput" placeholder="Or type barcode manually..." style="font-family:monospace;" />
+          <button class="btn btn-primary" onclick="window.applyManualBarcode()" title="Apply"><i class="fas fa-check"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
        MODAL: PRODUCT DETAIL
   ========================================================= -->
   <div class="modal-overlay" id="detailModal">
@@ -437,6 +573,7 @@
 
   <div id="toast-container"></div>
 
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script type="module" src="./js/guard.js"></script>
   <script src="./js/ui.js"></script>

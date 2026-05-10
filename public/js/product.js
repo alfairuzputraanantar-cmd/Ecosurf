@@ -12,6 +12,8 @@ let extra      = [];
 let hiddenCols = [];
 let productsCache = [];
 let _uid = null; // Set when userReady fires
+let _productScanner = null;  // html5-qrcode instance for product registration
+let _currentScanMode = 'add'; // 'add' | 'edit'
 
 try { extra      = JSON.parse(localStorage.getItem('cocacoy_extra_cols') || '[]'); } catch(e) { extra = []; }
 try { hiddenCols = JSON.parse(localStorage.getItem('cocacoy_hidden_cols') || '[]'); } catch(e) { hiddenCols = []; }
@@ -140,7 +142,8 @@ window.openAddModal = () => {
   const threshEl = document.getElementById('core-threshold');
   if (threshEl) threshEl.value = globalThreshold;
 
-  // ✅ Auto-generate Barcode
+  // ✅ Reset barcode type to internal + auto-generate
+  window.setBarcodeType('add', 'internal');
   setTimeout(() => window.regenerateBarcode('add'), 100);
 
   const modalEl = document.getElementById('addModal');
@@ -172,11 +175,21 @@ window.saveProduct = async () => {
   if (isNaN(Number(buyPrice)) || Number(buyPrice) < 0) { showToast('Buy Price must be a non-negative number!', 'error'); return; }
   if (isNaN(Number(sellPrice)) || Number(sellPrice) < 0) { showToast('Sell Price must be a non-negative number!', 'error'); return; }
 
+  // ✅ Duplicate barcode protection
+  if (barcode) {
+    const dup = productsCache.find(p => p.data.barcode && p.data.barcode === barcode);
+    if (dup) {
+      showToast(`Barcode already assigned to "${dup.data.Name}"`, 'error');
+      return;
+    }
+  }
+
   const btn = document.getElementById('addBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Saving...'; btn.disabled = true; }
 
   try {
     const now = new Date();
+    const barcodeType = (document.getElementById('core-barcodeType')?.value) || 'internal';
     const product = {
       Name: name, 
       Stock: Number(stock), 
@@ -188,6 +201,7 @@ window.saveProduct = async () => {
       Notes: notes,
       lowStockThreshold: Number(thresh),
       barcode: barcode,
+      barcodeType: barcodeType,
       createdAt: now.toISOString()
     };
     extra.forEach(c => {
@@ -266,10 +280,17 @@ function renderTableBody() {
       const td = document.createElement('td');
       td.setAttribute('data-label', col);
       if (col === 'Name') {
-        const barcodeHtml = data.barcode ? 
-          `<div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:4px;font-family:monospace;">
-             <i class="fas fa-barcode"></i> ${data.barcode}
-           </div>` : '';
+        const barcodeType = data.barcodeType || 'internal';
+        const isMfr = barcodeType === 'manufacturer';
+        const badgeStyle = isMfr
+          ? 'background:rgba(91,156,246,.15);color:var(--blue);'
+          : 'background:rgba(122,114,101,.12);color:var(--muted);';
+        const badgeLabel = isMfr ? 'Manufacturer' : 'Internal';
+        const barcodeHtml = data.barcode
+          ? `<div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+               <span style="font-family:monospace;"><i class="fas fa-barcode" style="font-size:10px;"></i> ${data.barcode}</span>
+               <span style="padding:1px 7px;border-radius:12px;font-size:10px;font-weight:700;${badgeStyle}">${badgeLabel}</span>
+             </div>` : '';
         td.innerHTML = `
           <div style="font-weight:600;">${data.Name}</div>
           ${barcodeHtml}
@@ -457,13 +478,15 @@ window.openEditModal = (id, data) => {
       </div>`;
   }
   
-  // ✅ Handle Barcode for Edit Modal
+  // ✅ Handle Barcode for Edit Modal — set type from saved data
   setTimeout(() => {
+    const type = data.barcodeType || 'internal';
+    window.setBarcodeType('edit', type);
     if (data.barcode) {
       document.getElementById('edit-barcode').value = data.barcode;
       window.renderBarcodePreview('edit-barcode-svg', data.barcode);
     } else {
-      window.regenerateBarcode('edit'); // Generate new if legacy product
+      window.regenerateBarcode('edit');
     }
   }, 100);
 
@@ -493,11 +516,21 @@ window.saveEdit = async () => {
   if (isNaN(Number(buyPrice)) || Number(buyPrice) < 0) { showToast('Buy Price must be a valid number!', 'error'); return; }
   if (isNaN(Number(sellPrice)) || Number(sellPrice) < 0) { showToast('Sell Price must be a valid number!', 'error'); return; }
 
+  // ✅ Duplicate barcode protection (exclude current product)
+  if (barcode) {
+    const dup = productsCache.find(p => p.data.barcode && p.data.barcode === barcode && p.id !== _editDocId);
+    if (dup) {
+      showToast(`Barcode already assigned to "${dup.data.Name}"`, 'error');
+      return;
+    }
+  }
+
   const btn = document.getElementById('editSaveBtn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Saving...'; btn.disabled = true; }
 
   try {
     const now = new Date();
+    const barcodeType = (document.getElementById('edit-barcodeType')?.value) || 'internal';
     const updateData = {
       Name: name, 
       Stock: Number(stock), 
@@ -509,6 +542,7 @@ window.saveEdit = async () => {
       Notes: notes,
       lowStockThreshold: Number(thresh),
       barcode: barcode,
+      barcodeType: barcodeType,
       updatedAt: now.toISOString()
     };
     extra.forEach(col => {
@@ -773,4 +807,126 @@ window.printBarcode = (data) => {
     </html>
   `);
   printWindow.document.close();
+};
+
+/* ================================================================
+   BARCODE TYPE SELECTOR
+================================================================ */
+window.setBarcodeType = (mode, type) => {
+  const prefix = mode === 'add' ? 'core' : 'edit';
+
+  // Update hidden type input
+  const typeInput = document.getElementById(`${prefix}-barcodeType`);
+  if (typeInput) typeInput.value = type;
+
+  // Toggle tab buttons
+  const internalBtn = document.getElementById(`${mode}-btn-internal`);
+  const manufacturerBtn = document.getElementById(`${mode}-btn-manufacturer`);
+  if (internalBtn) internalBtn.classList.toggle('active', type === 'internal');
+  if (manufacturerBtn) manufacturerBtn.classList.toggle('active', type === 'manufacturer');
+
+  // Toggle action buttons
+  const regenBtn = document.getElementById(`${mode}-regenerate-btn`);
+  const scanBtn  = document.getElementById(`${mode}-scan-btn`);
+  if (regenBtn) regenBtn.style.display = type === 'internal'     ? '' : 'none';
+  if (scanBtn)  scanBtn.style.display  = type === 'manufacturer' ? '' : 'none';
+
+  // If switching to internal: generate a new CCY barcode
+  if (type === 'internal') {
+    window.regenerateBarcode(mode);
+  } else {
+    // Switching to manufacturer: clear CCY barcode from field, keep any existing real barcode
+    const barcodeInput = document.getElementById(`${prefix}-barcode`);
+    if (barcodeInput && barcodeInput.value.startsWith('CCY-')) {
+      barcodeInput.value = '';
+      const svgEl = document.getElementById(`${mode}-barcode-svg`);
+      if (svgEl) svgEl.innerHTML = '';
+    }
+  }
+};
+
+/* ================================================================
+   PRODUCT BARCODE SCANNER
+================================================================ */
+window.openProductBarcodeScanner = (mode) => {
+  _currentScanMode = mode;
+  const modal = document.getElementById('productScannerModal');
+  if (modal) modal.classList.add('open');
+
+  const statusEl = document.getElementById('productScanStatus');
+  const successBadge = document.getElementById('scanSuccessBadge');
+  if (statusEl) statusEl.textContent = 'Requesting camera access...';
+  if (successBadge) successBadge.style.display = 'none';
+
+  const manualInput = document.getElementById('manualBarcodeInput');
+  if (manualInput) manualInput.value = '';
+
+  if (typeof Html5Qrcode === 'undefined') {
+    if (statusEl) statusEl.textContent = 'Scanner library not loaded.';
+    return;
+  }
+
+  if (!_productScanner) {
+    _productScanner = new Html5Qrcode('product-reader');
+  }
+
+  const config = { fps: 10, qrbox: { width: 250, height: 120 }, aspectRatio: 1.5 };
+  _productScanner.start(
+    { facingMode: 'environment' },
+    config,
+    (decodedText) => window.onProductScanSuccess(decodedText),
+    () => {} // silent failure
+  )
+  .then(() => { if (statusEl) statusEl.textContent = 'Align barcode within the frame'; })
+  .catch((err) => {
+    console.error('Product scanner error:', err);
+    if (statusEl) statusEl.textContent = 'Camera unavailable. Use manual entry below.';
+  });
+};
+
+window.closeProductBarcodeScanner = () => {
+  const modal = document.getElementById('productScannerModal');
+  if (modal) modal.classList.remove('open');
+  if (_productScanner && _productScanner.isScanning) {
+    _productScanner.stop().catch(() => {});
+  }
+};
+
+window.onProductScanSuccess = (decodedText) => {
+  const mode = _currentScanMode;
+  const prefix = mode === 'add' ? 'core' : 'edit';
+
+  // Duplicate check
+  const dup = productsCache.find(p => {
+    const idToExclude = mode === 'edit' ? _editDocId : null;
+    return p.data.barcode && p.data.barcode === decodedText && p.id !== idToExclude;
+  });
+  if (dup) {
+    const statusEl = document.getElementById('productScanStatus');
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--red);font-weight:700;"><i class="fas fa-triangle-exclamation"></i> Already used by "${dup.data.Name}"</span>`;
+    showToast(`Barcode assigned to "${dup.data.Name}"`, 'error');
+    return;
+  }
+
+  // Success feedback
+  const successBadge = document.getElementById('scanSuccessBadge');
+  const successText  = document.getElementById('scanSuccessText');
+  if (successBadge) { successBadge.style.display = 'flex'; }
+  if (successText)  successText.textContent = decodedText;
+  if (navigator.vibrate) navigator.vibrate([100]);
+
+  // Write to input + render SVG
+  const barcodeInput = document.getElementById(`${prefix}-barcode`);
+  if (barcodeInput) barcodeInput.value = decodedText;
+  window.renderBarcodePreview(`${mode}-barcode-svg`, decodedText);
+
+  // Close scanner after short delay
+  setTimeout(() => window.closeProductBarcodeScanner(), 900);
+  showToast(`Barcode captured: ${decodedText}`, 'success');
+};
+
+window.applyManualBarcode = () => {
+  const val = (document.getElementById('manualBarcodeInput')?.value || '').trim();
+  if (!val) { showToast('Enter a barcode value first.', 'error'); return; }
+  window.onProductScanSuccess(val);
 };
