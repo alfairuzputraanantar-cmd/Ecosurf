@@ -86,8 +86,8 @@ function renderStockChart() {
         data,
         backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length] + 'CC'),
         borderColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
-        borderWidth: 1.5, 
-        borderRadius: 4, 
+        borderWidth: 1.5,
+        borderRadius: 4,
         borderSkipped: false,
         barPercentage: 0.7,
         categoryPercentage: 0.8
@@ -95,10 +95,9 @@ function renderStockChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 1.8, // Horizontal bar needs more width
+      maintainAspectRatio: false,
       indexAxis: 'y',
-      plugins: { 
+      plugins: {
         legend: { display: false },
         tooltip: {
           backgroundColor: 'rgba(19, 22, 31, 0.95)',
@@ -112,15 +111,15 @@ function renderStockChart() {
         }
       },
       scales: {
-        x: { 
-          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false }, 
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
           ticks: { color: '#7a7265', font: { size: 10 } },
           beginAtZero: true
         },
-        y: { 
-          grid: { display: false }, 
-          ticks: { 
-            color: '#ccc', 
+        y: {
+          grid: { display: false },
+          ticks: {
+            color: '#ccc',
             font: { size: 11 },
             autoSkip: false
           }
@@ -173,8 +172,6 @@ function renderCategoryChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 1, // Perfect circle
       cutout: '65%',
       plugins: { legend: { display: false } }
     }
@@ -248,8 +245,6 @@ function renderHistoryChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2.2,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -350,8 +345,6 @@ function renderSalesChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2.2,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -426,8 +419,6 @@ function renderProfitChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2.2,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -489,8 +480,6 @@ function renderTopProfitChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 1.8,
       indexAxis: 'y', // horizontal bar
       plugins: { legend: { display: false } },
       scales: {
