@@ -444,10 +444,14 @@ window.openDetailModal = (id, data) => {
 ================================================================ */
 function startTable(uid) {
   // ✅ Listen to users/{uid}/products
+  console.log("Starting product listener for:", uid);
   onSnapshot(userCol(uid, 'products'), snap => {
     productsCache = [];
     snap.forEach(d => productsCache.push({ id: d.id, data: d.data() }));
     renderTableBody();
+  }, err => {
+    console.error("Firestore Listener Error:", err);
+    window.showToast("Connection error. Please refresh.", "error");
   });
 }
 
@@ -634,18 +638,37 @@ window.confirmDelete = (id, name, category) => {
 /* ================================================================
    BOOT — wait for userReady event from guard.js
 ================================================================ */
-document.addEventListener('userReady', ({ detail: { uid } }) => {
+function init(uid) {
+  if (!uid || _uid === uid) return;
   _uid = uid;
   renderHeader();
   renderChips();
   startTable(uid);
 
   const addColBtn = document.getElementById('addColumnBtn');
-  if (addColBtn) addColBtn.onclick = addColumn;
+  if (addColBtn) addColBtn.onclick = window.addColumn;
 
   const inp = document.getElementById('newColumnName');
-  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addColumn(); });
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') window.addColumn(); });
+}
+
+// 1. Listen for the event
+document.addEventListener('userReady', ({ detail: { uid } }) => {
+  console.log("userReady event received:", uid);
+  init(uid);
 });
+
+// 2. Check if already set (for fast module loading)
+if (window.__uid) {
+  console.log("__uid already exists:", window.__uid);
+  init(window.__uid);
+}
+
+// 3. Global error catch for debugging
+window.onerror = function(msg, url, line, col, error) {
+  console.error("Global Error:", msg, "at", url, line, col);
+  // Optional: show user-friendly error
+};
 /* ================================================================
    RESTOCK LOGIC
 ================================================================ */
