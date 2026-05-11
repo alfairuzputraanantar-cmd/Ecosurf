@@ -221,7 +221,7 @@
 
       <!-- CHARTS ROW 1 -->
       <div class="chart-grid grid-auto">
-        <div class="chart-card">
+        <div class="chart-card animate-fade-up stagger-1">
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Top Products by Stock</div>
           </div>
@@ -235,7 +235,7 @@
           </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card animate-fade-up stagger-2">
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-chart-pie"></i> Category Distribution</div>
           </div>
@@ -253,7 +253,7 @@
 
       <!-- CHARTS ROW 2: Line charts -->
       <div class="chart-grid grid-auto">
-        <div class="chart-card">
+        <div class="chart-card animate-fade-up stagger-3">
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-clock-rotate-left"></i> Products Added – Last 14 Days</div>
           </div>
@@ -267,7 +267,7 @@
           </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card animate-fade-up stagger-4">
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-money-bill-trend-up"></i> Daily Revenue – Last 7 Days</div>
           </div>
@@ -284,7 +284,7 @@
 
       <!-- CHARTS ROW 3: Profit and Top Profitable -->
       <div class="chart-grid grid-auto">
-        <div class="chart-card">
+        <div class="chart-card animate-fade-up stagger-1">
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-coins" style="color:var(--brand-1);"></i> Daily Profit – Last
               7 Days</div>
@@ -299,7 +299,7 @@
           </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card animate-fade-up stagger-2">
           <div class="chart-card-header">
             <div class="chart-card-title"><i class="fas fa-crown" style="color:var(--yellow);"></i> Top Profitable
               Products – Last 7 Days</div>
@@ -316,7 +316,7 @@
       </div>
 
       <!-- LOW STOCK TABLE -->
-      <div class="card">
+      <div class="card animate-fade-up stagger-3">
         <div class="card-header">
           <div class="card-title">
             <i class="fas fa-triangle-exclamation" style="color:var(--yellow);"></i> Low Stock Products
@@ -378,7 +378,12 @@
       el.className = 'toast ' + type;
       el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      
+      // Auto dismiss with exit animation
+      setTimeout(() => {
+        el.classList.add('exit');
+        el.addEventListener('animationend', () => el.remove());
+      }, 3500);
     };
 
     /* ── Theme toggle ── */

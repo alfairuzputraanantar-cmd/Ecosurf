@@ -182,10 +182,10 @@
     </div>
 
     <div class="content">
-      <div class="profile-card">
+      <div class="profile-card animate-fade-up stagger-1">
         <div class="profile-header">
-          <div class="profile-avatar-large" id="profileAvatarLarge">U</div>
-          <div class="profile-title-area">
+          <div class="profile-avatar-large animate-scale-in stagger-2" id="profileAvatarLarge">U</div>
+          <div class="profile-title-area animate-fade-in stagger-3">
             <h2 id="profileDisplayName">Owner Name</h2>
             <p id="profileDisplayRole">UMKM Admin</p>
             <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="document.getElementById('avatarInput').click()">
@@ -264,7 +264,7 @@
             <span class="saved-badge" id="profileSaved"><i class="fas fa-circle-check"></i> Changes saved</span>
           </div>
 
-          <div class="account-info-box">
+          <div class="account-info-box animate-fade-up stagger-2">
             <div class="info-item">
               <label>Account Email</label>
               <span id="profileEmail">loading...</span>
@@ -480,13 +480,18 @@
       });
     })();
 
-    window.showToast = function(msg, type='info') {
-      const ic = { success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info' };
+    window.showToast = function (msg, type = 'info') {
+      const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
       const el = document.createElement('div');
       el.className = 'toast ' + type;
-      el.innerHTML = `<i class="fas ${ic[type]||ic.info}"></i> ${msg}`;
+      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      
+      // Auto dismiss with exit animation
+      setTimeout(() => {
+        el.classList.add('exit');
+        el.addEventListener('animationend', () => el.remove());
+      }, 3500);
     };
 
     window.addEventListener('beforeunload', (e) => {

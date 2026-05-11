@@ -658,8 +658,8 @@
     <div class="content">
 
       <!-- ── Hero ── -->
-      <div class="help-hero">
-        <div>
+      <div class="help-hero animate-fade-in">
+        <div class="animate-fade-up stagger-1">
           <div class="help-hero-title">Welcome to CocaCoy ERP</div>
           <div class="help-hero-sub">CocaCoy helps UMKM, warungs, and small businesses manage stock, sales, cashier operations, and analytics — all in real-time powered by Firebase & AI.</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;">
@@ -671,11 +671,11 @@
             <span style="background:rgba(34,201,151,.12);border:1px solid rgba(34,201,151,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--green);">📊 Analytics & Reports</span>
           </div>
         </div>
-        <div class="help-hero-icon"><i class="fas fa-circle-question"></i></div>
+        <div class="help-hero-icon animate-scale-in stagger-2"><i class="fas fa-circle-question"></i></div>
       </div>
 
       <!-- ── Search ── -->
-      <div class="help-search-wrap">
+      <div class="help-search-wrap animate-fade-up stagger-2">
         <div class="help-search">
           <i class="fas fa-magnifying-glass"></i>
           <input type="text" id="helpSearchInput" placeholder="Search for guides, features, or questions..." oninput="searchHelp(this.value)" />
@@ -684,7 +684,7 @@
       </div>
 
       <!-- ── Quick Links ── -->
-      <div class="quick-links grid-auto" id="quickLinks">
+      <div class="quick-links grid-auto animate-fade-up stagger-3" id="quickLinks">
         <div class="quick-link-card" onclick="scrollToFaq('getting-started')">
           <div class="quick-link-icon si-copper"><i class="fas fa-rocket"></i></div>
           <div class="quick-link-label">Quick Start</div>
@@ -1384,9 +1384,14 @@
       const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
       const el = document.createElement('div');
       el.className = 'toast ' + type;
-      el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`;
+      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      
+      // Auto dismiss with exit animation
+      setTimeout(() => {
+        el.classList.add('exit');
+        el.addEventListener('animationend', () => el.remove());
+      }, 3500);
     };
 
     /* ── Theme toggle ── */

@@ -201,7 +201,7 @@
     <div class="content">
 
       <!-- ADD CUSTOM COLUMN CARD -->
-      <div class="card" style="margin-bottom:18px;">
+      <div class="card animate-fade-up stagger-1" style="margin-bottom:18px;">
         <div class="card-header">
           <div class="card-title"><i class="fas fa-sliders"></i> Add Custom Column</div>
         </div>
@@ -221,7 +221,7 @@
       </div>
 
       <!-- PRODUCT TABLE CARD -->
-      <div class="card">
+      <div class="card animate-fade-up stagger-2">
         <div class="table-toolbar">
           <div class="search-box">
             <i class="fas fa-magnifying-glass"></i>
@@ -646,7 +646,12 @@
       el.className = 'toast ' + type;
       el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      
+      // Auto dismiss with exit animation
+      setTimeout(() => {
+        el.classList.add('exit');
+        el.addEventListener('animationend', () => el.remove());
+      }, 3500);
     };
 
     /* ── Theme toggle ── */

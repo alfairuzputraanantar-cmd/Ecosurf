@@ -13,6 +13,14 @@ let products = [];
 let history = [];
 let transactions = [];
 
+/* ── Global Chart Config ── */
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.animation = {
+    duration: 800,
+    easing: 'easeOutQuart'
+  };
+}
+
 /* ── Start listeners only after auth is ready ── */
 document.addEventListener('userReady', ({ detail: { uid } }) => {
 
@@ -50,6 +58,12 @@ function renderAll() {
   renderProfitChart();
   renderTopProfitChart();
   renderLowStockTable();
+  
+  // Highlight updates
+  document.querySelectorAll('.chart-card, .stat-card').forEach(el => {
+    el.classList.add('pulse-highlight');
+    el.addEventListener('animationend', () => el.classList.remove('pulse-highlight'), { once: true });
+  });
 }
 
 
