@@ -300,7 +300,11 @@
       el.className = 'toast ' + type;
       el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      const dismiss = () => {
+        el.classList.add('toast-out');
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+      };
+      setTimeout(dismiss, 3200);
     };
 
     /* ── Theme toggle ── */
@@ -323,6 +327,29 @@
         applyTheme(current === 'dark' ? 'light' : 'dark');
       });
     })();
+  </script>
+
+  <script>
+    /* ── Page Entrance Animations ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const els = document.querySelectorAll('.stat-card, .card');
+      els.forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(10px)';
+        el.style.transition = `opacity .3s cubic-bezier(.4,0,.2,1) ${i * 50}ms, transform .3s cubic-bezier(.4,0,.2,1) ${i * 50}ms`;
+      });
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.05 });
+      els.forEach(el => io.observe(el));
+    });
   </script>
 </body>
 

@@ -37,6 +37,13 @@
   --font: 'Plus Jakarta Sans', sans-serif;
   --font-hd: 'Space Grotesk', sans-serif;
 
+  /* ── Motion system ── */
+  --ease-out:      cubic-bezier(.4,0,.2,1);
+  --ease-spring:   cubic-bezier(.34,1.56,.64,1);
+  --transition-fast:   .15s cubic-bezier(.4,0,.2,1);
+  --transition-normal: .25s cubic-bezier(.4,0,.2,1);
+  --transition-slow:   .4s  cubic-bezier(.4,0,.2,1);
+
   /* ── Chart grid / tooltip (dark) ── */
   --chart-grid: rgba(255, 255, 255, 0.05);
   --chart-tick: #7a7265;
@@ -124,7 +131,7 @@ a {
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: transform .3s ease, background .25s, border-color .25s;
+  transition: transform var(--transition-slow), background var(--transition-normal), border-color var(--transition-normal);
 }
 
 .sidebar-logo {
@@ -196,9 +203,10 @@ a {
   color: var(--muted);
   font-size: 14px;
   font-weight: 500;
-  transition: all .2s;
+  transition: background var(--transition-fast), color var(--transition-fast);
   margin-bottom: 2px;
   cursor: pointer;
+  position: relative;
 }
 
 .nav-link i {
@@ -206,11 +214,33 @@ a {
   text-align: center;
   font-size: 14px;
   flex-shrink: 0;
+  transition: transform var(--transition-fast);
 }
 
 .nav-link:hover {
   background: var(--surface2);
   color: var(--text);
+}
+
+.nav-link:hover i {
+  transform: translateX(2px);
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  background: var(--brand-1);
+  border-radius: 0 3px 3px 0;
+  animation: slideIndicator var(--transition-fast) ease both;
+}
+
+@keyframes slideIndicator {
+  from { opacity: 0; transform: scaleY(0); }
+  to   { opacity: 1; transform: scaleY(1); }
 }
 
 .nav-link.active {
@@ -496,12 +526,21 @@ a {
   display: flex;
   align-items: center;
   gap: 14px;
-  transition: transform .2s, box-shadow .2s, background .25s;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal), background var(--transition-normal);
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+  border-color: rgba(200, 149, 108, .28);
+}
+
+.stat-icon {
+  transition: transform var(--transition-normal);
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1);
 }
 
 .stat-icon {
@@ -512,6 +551,7 @@ a {
   place-items: center;
   font-size: 20px;
   flex-shrink: 0;
+  will-change: transform;
 }
 
 .si-copper {
@@ -571,8 +611,28 @@ a {
   font-size: 13px;
   font-weight: 600;
   font-family: var(--font);
-  transition: all .2s;
+  transition: all var(--transition-fast);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background var(--transition-fast);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.btn:hover::after {
+  background: rgba(255,255,255,.05);
 }
 
 .btn-primary {
@@ -653,7 +713,7 @@ a {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: background .25s, border-color .25s;
+  transition: background var(--transition-normal), border-color var(--transition-normal);
 }
 
 .card-body {
@@ -750,7 +810,7 @@ thead th {
 
 tbody tr {
   border-top: 1px solid var(--border);
-  transition: background .15s;
+  transition: background var(--transition-fast);
 }
 
 tbody tr:hover {
@@ -945,17 +1005,16 @@ input::-webkit-credentials-auto-fill-button {
   max-width: 520px;
   padding: 32px 30px;
   box-shadow: 0 28px 70px rgba(0, 0, 0, .55);
-  animation: modalIn .25s ease;
+  animation: modalIn .3s var(--ease-out) both;
 }
 
 @keyframes modalIn {
   from {
-    transform: translateY(18px);
+    transform: translateY(10px) scale(0.97);
     opacity: 0;
   }
-
   to {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 }
@@ -1114,11 +1173,13 @@ input::-webkit-credentials-auto-fill-button {
   display: flex;
   align-items: center;
   gap: 14px;
-  transition: background .15s;
+  transition: background var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
 }
 
 .history-item:hover {
   background: var(--surface2);
+  transform: translateY(-1px);
+  border-color: rgba(200, 149, 108, .22);
 }
 
 .history-icon {
@@ -1178,9 +1239,10 @@ input::-webkit-credentials-auto-fill-button {
 ================================================================ */
 #toast-container {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
-  z-index: 999;
+  bottom: auto;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1191,28 +1253,31 @@ input::-webkit-credentials-auto-fill-button {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 12px 18px;
+  padding: 13px 20px;
   font-size: 13px;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, .4);
-  animation: toastIn .3s ease;
-  max-width: 300px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, .45);
+  animation: toastIn .3s var(--ease-out) both;
+  max-width: 320px;
   pointer-events: all;
+  will-change: transform, opacity;
+}
+
+.toast.toast-out {
+  animation: toastOut .25s var(--ease-out) both;
 }
 
 @keyframes toastIn {
-  from {
-    transform: translateX(30px);
-    opacity: 0;
-  }
+  from { transform: translateY(-12px) scale(0.95); opacity: 0; }
+  to   { transform: translateY(0)     scale(1);    opacity: 1; }
+}
 
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+@keyframes toastOut {
+  from { transform: translateY(0)    scale(1);    opacity: 1; }
+  to   { transform: translateY(-8px) scale(0.95); opacity: 0; }
 }
 
 .toast.success i {
@@ -1860,12 +1925,17 @@ input::-webkit-credentials-auto-fill-button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
-  transition: all 0.2s ease;
+  transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .timeline-item:hover {
   border-color: rgba(200, 149, 108, 0.4);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+
+.timeline-item.new-entry {
+  animation: fadeInUp .35s var(--ease-out) both;
 }
 
 .timeline-icon {
@@ -2045,7 +2115,8 @@ input::-webkit-credentials-auto-fill-button {
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
-  transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--transition-slow);
+  will-change: transform;
 }
 
 .cart-sheet.open {
@@ -2256,38 +2327,68 @@ input::-webkit-credentials-auto-fill-button {
    ANIMATIONS & MOTION UTILITIES
 ================================================================ */
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
+/* ── Skeleton Loaders ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+  border-radius: 8px;
+}
 
-  to {
-    opacity: 1;
-  }
+.skeleton-text  { height: 13px; margin-bottom: 10px; }
+.skeleton-title { height: 20px; margin-bottom: 14px; width: 60%; }
+.skeleton-card  { height: 78px; border-radius: var(--radius); }
+.skeleton-row   { height: 46px; border-radius: 0; border-bottom: 1px solid var(--border); }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Pulse highlight (realtime update) ── */
+@keyframes statPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(200,149,108,.35); }
+  50%  { box-shadow: 0 0 0 8px rgba(200,149,108,0);   }
+  100% { box-shadow: 0 0 0 0   rgba(200,149,108,0);   }
+}
+.stat-pulse {
+  animation: statPulse .7s var(--ease-out);
+}
+
+/* ── Cart badge bounce ── */
+@keyframes badgeBounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); }
+  70%  { transform: scale(.9); }
+  100% { transform: scale(1); }
+}
+.badge-bounce {
+  animation: badgeBounce .35s var(--ease-spring);
+}
+
+/* ── Product card add feedback ── */
+.product-card.adding {
+  animation: cardAdding .3s var(--ease-out);
+}
+@keyframes cardAdding {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideInLeft {
@@ -2342,17 +2443,7 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
-@keyframes toastIn {
-  from {
-    transform: translateX(30px) scale(0.9);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateX(0) scale(1);
-    opacity: 1;
-  }
-}
+/* toastIn/Out now defined in the toast block above */
 
 @keyframes badge-pop {
   0% {
@@ -2412,39 +2503,7 @@ input::-webkit-credentials-auto-fill-button {
   animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* ── Toast refinements ── */
-#toast-container {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  pointer-events: none;
-}
-
-.toast {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, .4);
-  animation: toastIn 0.4s var(--ease-out) both;
-  max-width: 340px;
-  pointer-events: all;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.toast.exit {
-  animation: toastIn 0.3s var(--ease-in-out) reverse forwards;
-}
+/* Toast styles now unified in the primary toast block above */
 
 @keyframes pulseHighlight {
   0% {

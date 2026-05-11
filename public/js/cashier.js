@@ -2,6 +2,7 @@ import { db, userCol, userDoc } from './firebase.js';
 import {
   onSnapshot, addDoc, writeBatch, doc, increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { bounceBadge } from './motion.js';
 
 /* ================================================================
    CASHIER — Real-time POS for CocaCoy ERP
@@ -188,8 +189,15 @@ window.addToCart = (productId) => {
   const card = document.getElementById(`card-${productId}`);
   if (card) {
     card.classList.add('in-cart');
+    // Card press feedback
+    card.classList.add('adding');
+    setTimeout(() => card.classList.remove('adding'), 300);
     const badge = document.getElementById(`badge-${productId}`);
-    if (badge) { badge.textContent = _cart[productId].qty; badge.style.display = 'flex'; }
+    if (badge) {
+      badge.textContent = _cart[productId].qty;
+      badge.style.display = 'flex';
+      bounceBadge(badge);
+    }
   }
 };
 

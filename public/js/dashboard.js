@@ -1,5 +1,6 @@
 import { db, userCol } from './firebase.js';
 import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { pulseHighlight } from './motion.js';
 
 /* ================================================================
    DASHBOARD — live data from Firebase, scoped per authenticated user.
@@ -87,6 +88,11 @@ document.addEventListener('userReady', ({ detail: { uid } }) => {
     setTrend('todaySalesTrend', revToday, revYest);
     setTrend('weekSalesTrend', revWeek, revLastWeek);
     setTrend('todayProfitTrend', profToday, profYest);
+
+    // Pulse analytics cards on realtime update
+    pulseHighlight('todaySales');
+    pulseHighlight('weekSales');
+    pulseHighlight('todayProfit');
   });
 });
 

@@ -97,6 +97,11 @@ function renderStockChart() {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: 'y',
+      animation: {
+        duration: 700,
+        easing: 'easeInOutQuart',
+        delay: (ctx) => ctx.dataIndex * 35
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -173,6 +178,12 @@ function renderCategoryChart() {
     options: {
       responsive: true,
       cutout: '65%',
+      animation: {
+        duration: 800,
+        easing: 'easeInOutQuart',
+        animateRotate: true,
+        animateScale: true
+      },
       plugins: { legend: { display: false } }
     }
   });
@@ -245,6 +256,7 @@ function renderHistoryChart() {
     },
     options: {
       responsive: true,
+      animation: { duration: 700, easing: 'easeInOutQuart' },
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -345,6 +357,7 @@ function renderSalesChart() {
     },
     options: {
       responsive: true,
+      animation: { duration: 700, easing: 'easeInOutQuart' },
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -419,6 +432,7 @@ function renderProfitChart() {
     },
     options: {
       responsive: true,
+      animation: { duration: 700, easing: 'easeInOutQuart' },
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -493,6 +507,11 @@ function renderTopProfitChart() {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: 'y',
+      animation: {
+        duration: 700,
+        easing: 'easeInOutQuart',
+        delay: (ctx) => ctx.dataIndex * 35
+      },
       plugins: {
         legend: { display: false },
         tooltip: {

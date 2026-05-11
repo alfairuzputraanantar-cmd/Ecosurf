@@ -1248,7 +1248,8 @@
       el.className = 'toast ' + type;
       el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      const dismiss = () => { el.classList.add('toast-out'); el.addEventListener('animationend', () => el.remove(), { once: true }); };
+      setTimeout(dismiss, 3200);
     };
 
     /* ── Theme toggle ── */

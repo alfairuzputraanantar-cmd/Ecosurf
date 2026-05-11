@@ -1096,8 +1096,18 @@
       el.className = 'toast ' + type;
       el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`;
       document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => el.remove(), 3500);
+      const dismiss = () => { el.classList.add('toast-out'); el.addEventListener('animationend', () => el.remove(), { once: true }); };
+      setTimeout(dismiss, 3200);
     };
+  </script>
+
+  <script>
+    /* ── Cashier cart-sheet slide transition upgrade ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      /* Upgrade cart-bar visibility transition */
+      const cartBar = document.getElementById('cartBar');
+      if (cartBar) cartBar.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+    });
   </script>
 
 </body>
