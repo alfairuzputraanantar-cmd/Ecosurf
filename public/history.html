@@ -178,14 +178,14 @@
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
         <!-- Time Scope -->
         <div class="scroll-tabs" id="timeFilters">
-          <button class="hist-time-tab btn btn-sm active" data-time="today" onclick="switchTimeScope('today')"
-            style="background:var(--brand-grd);color:#fff;border:1px solid transparent;">Today</button>
+          <button class="hist-time-tab btn btn-sm" data-time="today" onclick="switchTimeScope('today')"
+            style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">Today</button>
           <button class="hist-time-tab btn btn-sm" data-time="7days" onclick="switchTimeScope('7days')"
             style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">7 Days</button>
           <button class="hist-time-tab btn btn-sm" data-time="30days" onclick="switchTimeScope('30days')"
             style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">30 Days</button>
-          <button class="hist-time-tab btn btn-sm" data-time="all" onclick="switchTimeScope('all')"
-            style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);">All Time</button>
+          <button class="hist-time-tab btn btn-sm active" data-time="all" onclick="switchTimeScope('all')"
+            style="background:var(--brand-grd);color:#fff;border:1px solid transparent;">All Time</button>
         </div>
 
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -237,20 +237,14 @@
   <script type="module" src="./js/notifications.js"></script>
   <script type="module" src="./js/export.js"></script>
   <script>
-    window.renderHistoryCards = function (rows) {
-      const list = document.getElementById('historyList');
-      if (!rows || rows.length === 0) { list.innerHTML = '<div class="empty-state"><i class="fas fa-clock-rotate-left"></i><p>No transaction history yet.</p></div>'; return; }
-      const em = { Food: '🍱', Beverages: '🥤', Electronics: '💡', Clothing: '👕', Cosmetics: '💄', Others: '📦' };
-      list.innerHTML = rows.map(r => `<div class="history-item" data-search="${(r.product || r.name || '').toLowerCase()}"><div class="history-icon">${em[r.category] || '📦'}</div><div class="history-info"><div class="history-name">${r.product || r.name || '-'}</div><div class="history-meta">${r.details || ''}</div></div><div class="history-date">${r.date || ''}</div></div>`).join('');
-    };
-    window.filterHistory = function () { const q = document.getElementById('historySearch').value.toLowerCase(); document.querySelectorAll('.history-item').forEach(el => { el.style.display = el.dataset.search.includes(q) ? '' : 'none'; }); };
-    /* Mobile sidebar toggle visibility managed by CSS now, but keeping function for safety if needed */
+    /* ── Mobile Sidebar ── */
     function checkMobile() {
       const toggle = document.getElementById('menuToggle');
       if (toggle) toggle.style.display = window.innerWidth <= 768 ? 'grid' : 'none';
     }
     checkMobile();
     window.addEventListener('resize', checkMobile);
+    
     window.showToast = function (msg, type = 'info') { const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' }; const el = document.createElement('div'); el.className = `toast ${type}`; el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`; document.getElementById('toast-container').appendChild(el); const dismiss = () => { el.classList.add('toast-out'); el.addEventListener('animationend', () => el.remove(), { once: true }); }; setTimeout(dismiss, 3200); };
 
     /* ── Theme toggle ── */
@@ -275,22 +269,11 @@
     })();
   </script>
 
-  <script>
+  <script type="module">
+    import { animateEntrance } from "./js/motion.js";
     /* ── Page Entrance Animations ── */
     document.addEventListener('DOMContentLoaded', () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const els = document.querySelectorAll('.stat-card, .timeline-item, .history-item');
-      els.forEach((el, i) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(10px)';
-        el.style.transition = `opacity .3s cubic-bezier(.4,0,.2,1) ${i * 40}ms, transform .3s cubic-bezier(.4,0,.2,1) ${i * 40}ms`;
-      });
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; io.unobserve(e.target); }
-        });
-      }, { threshold: 0.05 });
-      els.forEach(el => io.observe(el));
+      animateEntrance('.stat-card, .search-box, .scroll-tabs');
     });
   </script>
 </body>

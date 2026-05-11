@@ -1,5 +1,6 @@
 import { userCol } from "./firebase.js";
 import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { animateEntrance } from "./motion.js";
 
 /* ================================================================
    HISTORY — realtime, scoped per authenticated user.
@@ -13,7 +14,7 @@ const CAT_EMOJI = {
 
 let allRows = [];
 let activeTab = 'all'; // 'all' | 'Added' | 'Edited' | 'Deleted' | 'Sold' | 'Restock'
-let activeTimeScope = 'today'; // 'today' | '7days' | '30days' | 'all'
+let activeTimeScope = 'all'; // 'today' | '7days' | '30days' | 'all'
 
 /* ── Start listener only after auth is ready ── */
 document.addEventListener('userReady', ({ detail: { uid } }) => {
@@ -271,6 +272,9 @@ function renderHistory() {
   });
 
   listEl.innerHTML = html;
+  
+  // Trigger entrance animation for new items
+  animateEntrance('.timeline-item, .history-item', 25);
 }
 
 /* ── Tab switching ── */
