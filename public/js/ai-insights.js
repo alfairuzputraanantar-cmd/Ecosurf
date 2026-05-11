@@ -25,7 +25,7 @@ const CACHE_DURATION = 20 * 60 * 1000; // 20 minutes in ms
 export async function generateInsights(analytics) {
   // 1. Check cache first
   const cached = getCache(analytics);
-  if (cached) return cached;
+  if (cached) return cached; // { insights, timestamp }
 
   // 2. Validate API key
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
@@ -61,12 +61,13 @@ export async function generateInsights(analytics) {
     const insights = parseInsights(rawText);
 
     // 5. Cache the successful response
-    setCache(insights, analytics);
-    return insights;
+    const timestamp = Date.now();
+    setCache(insights, analytics, timestamp);
+    return { insights, timestamp };
 
   } catch (err) {
     console.error('[CocaCoy AI] Network error:', err);
-    return generateFallbackInsights(analytics);
+    return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
   }
 }
 
@@ -202,6 +203,10 @@ function generateFallbackInsights(analytics) {
     : ['Add products and complete transactions to receive AI-powered insights.'];
 }
 
+export function getFallbackWithTimestamp(analytics) {
+  return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
+}
+
 
 // ── CACHE HELPERS ────────────────────────────────────────────────
 
@@ -209,21 +214,22 @@ function getCache(analytics) {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const { insights, expiry, productCount, txCount } = JSON.parse(raw);
+    const { insights, timestamp, expiry, productCount, txCount } = JSON.parse(raw);
     const now = Date.now();
     if (now > expiry) return null;
     // Invalidate cache if data significantly changed
     if (productCount !== analytics.totalProducts || txCount !== analytics.txCountToday) return null;
-    return insights;
+    return { insights, timestamp };
   } catch {
     return null;
   }
 }
 
-function setCache(insights, analytics) {
+function setCache(insights, analytics, timestamp) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       insights,
+      timestamp,
       expiry: Date.now() + CACHE_DURATION,
       productCount: analytics.totalProducts,
       txCount: analytics.txCountToday

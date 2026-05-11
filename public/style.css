@@ -2180,6 +2180,22 @@ input::-webkit-credentials-auto-fill-button {
   letter-spacing: 0.3px;
 }
 
+.ai-insights-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.ai-insights-footer i {
+  color: var(--brand-1);
+  opacity: 0.7;
+}
+
 /* ── Skeleton loading ── */
 .skeleton {
   background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
