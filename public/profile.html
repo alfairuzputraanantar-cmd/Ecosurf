@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,12 +13,12 @@
       if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
       const s = localStorage.getItem('cocacoy_sidebar_labels');
       if (s === 'false') document.documentElement.classList.add('sidebar-min');
-      
+
       // ✅ Instantly load profile from localStorage to prevent flash
       try {
         const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
         window._initialProfile = p; // Store for form pre-fill
-      } catch(e) {}
+      } catch (e) { }
     })();
   </script>
   <style>
@@ -28,6 +29,7 @@
       overflow: hidden;
       margin-bottom: 24px;
     }
+
     .profile-header {
       padding: 30px;
       background: linear-gradient(135deg, rgba(200, 149, 108, .1), rgba(160, 113, 79, .05));
@@ -36,6 +38,7 @@
       align-items: center;
       gap: 24px;
     }
+
     .profile-avatar-large {
       width: 100px;
       height: 100px;
@@ -50,32 +53,47 @@
       flex-shrink: 0;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
     }
+
     .profile-avatar-large img {
-      width: 100%; height: 100%; object-fit: cover;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
+
     .profile-title-area h2 {
       font-family: var(--font-hd);
       font-size: 24px;
       margin-bottom: 4px;
     }
+
     .profile-title-area p {
       color: var(--muted);
       font-size: 14px;
     }
+
     .profile-body {
       padding: 30px;
     }
+
     .profile-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 20px;
     }
+
     @media (max-width: 768px) {
-      .profile-grid { grid-template-columns: 1fr; }
-      .profile-header { flex-direction: column; text-align: center; }
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+      }
     }
+
     .account-info-box {
       background: var(--surface2);
       border-radius: 12px;
@@ -85,6 +103,7 @@
       flex-wrap: wrap;
       gap: 30px;
     }
+
     .info-item label {
       display: block;
       font-size: 11px;
@@ -94,10 +113,12 @@
       margin-bottom: 5px;
       font-weight: 700;
     }
+
     .info-item span {
       font-weight: 600;
       font-size: 14px;
     }
+
     .saved-badge {
       display: inline-flex;
       align-items: center;
@@ -112,9 +133,13 @@
       opacity: 0;
       transition: opacity .3s;
     }
-    .saved-badge.show { opacity: 1; }
+
+    .saved-badge.show {
+      opacity: 1;
+    }
   </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
@@ -148,7 +173,7 @@
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> <span>Sign Out</span></button>
     </div>
     <script>
-      (function() {
+      (function () {
         try {
           const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           const logo = localStorage.getItem('cocacoy_store_logo');
@@ -162,7 +187,7 @@
               av.textContent = displayTitle.charAt(0).toUpperCase();
             }
           }
-        } catch(e) {}
+        } catch (e) { }
       })();
     </script>
   </aside>
@@ -182,19 +207,22 @@
     </div>
 
     <div class="content">
-      <div class="profile-card animate-fade-up stagger-1">
+      <div class="profile-card">
         <div class="profile-header">
-          <div class="profile-avatar-large animate-scale-in stagger-2" id="profileAvatarLarge">U</div>
-          <div class="profile-title-area animate-fade-in stagger-3">
+          <div class="profile-avatar-large" id="profileAvatarLarge">U</div>
+          <div class="profile-title-area">
             <h2 id="profileDisplayName">Owner Name</h2>
             <p id="profileDisplayRole">UMKM Admin</p>
-            <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="document.getElementById('avatarInput').click()">
+            <button class="btn btn-ghost btn-sm" style="margin-top:12px;"
+              onclick="document.getElementById('avatarInput').click()">
               <i class="fas fa-camera"></i> Change
             </button>
-            <button class="btn btn-warn btn-sm" id="removePhotoBtn" style="margin-top:12px; margin-left:4px; display:none;" onclick="removePhoto()">
+            <button class="btn btn-warn btn-sm" id="removePhotoBtn"
+              style="margin-top:12px; margin-left:4px; display:none;" onclick="removePhoto()">
               <i class="fas fa-trash"></i> Remove
             </button>
-            <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(event)" />
+            <input type="file" id="avatarInput" accept="image/*" style="display:none;"
+              onchange="previewAvatar(event)" />
           </div>
         </div>
         <div class="profile-body">
@@ -229,42 +257,42 @@
             <div class="form-group" style="grid-column: 1 / -1;">
               <label class="form-label">Business Description</label>
               <textarea class="form-control" id="storeDesc" rows="3" placeholder="A short bio..."></textarea>
+            </div>
           </div>
-        </div>
 
-        <script>
-          (function() {
-            try {
-              const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
-              const logo = localStorage.getItem('cocacoy_store_logo');
-              if (p.ownerName) {
-                document.getElementById('profileDisplayName').textContent = p.ownerName;
-                document.getElementById('profileDisplayRole').textContent = p.role || "UMKM Admin";
-                const pa = document.getElementById('profileAvatarLarge');
-                if (logo) pa.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
-                else pa.textContent = p.ownerName.charAt(0).toUpperCase();
-                
-                // Pre-fill form
-                document.getElementById('storeName').value = p.storeName || "";
-                document.getElementById('ownerName').value = p.ownerName || "";
-                document.getElementById('userRole').value = p.role || "";
-                document.getElementById('storeDesc').value = p.storeDesc || "";
-                document.getElementById('storePhone').value = p.storePhone || "";
-                document.getElementById('storeCategory').value = p.storeCategory || "food";
-                if (logo) document.getElementById('removePhotoBtn').style.display = 'inline-flex';
-              }
-            } catch(e) {}
-          })();
-        </script>
+          <script>
+            (function () {
+              try {
+                const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
+                const logo = localStorage.getItem('cocacoy_store_logo');
+                if (p.ownerName) {
+                  document.getElementById('profileDisplayName').textContent = p.ownerName;
+                  document.getElementById('profileDisplayRole').textContent = p.role || "UMKM Admin";
+                  const pa = document.getElementById('profileAvatarLarge');
+                  if (logo) pa.innerHTML = `<img src="${logo}" alt="Avatar"/>`;
+                  else pa.textContent = p.ownerName.charAt(0).toUpperCase();
 
-        <div style="display:flex;align-items:center;gap:12px;margin-top:20px;">
+                  // Pre-fill form
+                  document.getElementById('storeName').value = p.storeName || "";
+                  document.getElementById('ownerName').value = p.ownerName || "";
+                  document.getElementById('userRole').value = p.role || "";
+                  document.getElementById('storeDesc').value = p.storeDesc || "";
+                  document.getElementById('storePhone').value = p.storePhone || "";
+                  document.getElementById('storeCategory').value = p.storeCategory || "food";
+                  if (logo) document.getElementById('removePhotoBtn').style.display = 'inline-flex';
+                }
+              } catch (e) { }
+            })();
+          </script>
+
+          <div style="display:flex;align-items:center;gap:12px;margin-top:20px;">
             <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfile()">
               <i class="fas fa-check-circle"></i> Update Profile
             </button>
             <span class="saved-badge" id="profileSaved"><i class="fas fa-circle-check"></i> Changes saved</span>
           </div>
 
-          <div class="account-info-box animate-fade-up stagger-2">
+          <div class="account-info-box">
             <div class="info-item">
               <label>Account Email</label>
               <span id="profileEmail">loading...</span>
@@ -286,7 +314,7 @@
     import { auth, userDoc, storage, ref, uploadBytes, getDownloadURL } from './js/firebase.js';
     import { setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     // We'll store image directly in Firestore to bypass Storage network issues
-    
+
     let hasUnsavedChanges = false;
     let pendingLogoData = null;
 
@@ -297,13 +325,13 @@
 
         if (p.storeName) document.getElementById('storeName').value = p.storeName;
         if (p.ownerName) document.getElementById('ownerName').value = p.ownerName;
-        if (p.role)      document.getElementById('userRole').value = p.role;
+        if (p.role) document.getElementById('userRole').value = p.role;
         if (p.storeDesc) document.getElementById('storeDesc').value = p.storeDesc;
         if (p.storePhone) document.getElementById('storePhone').value = p.storePhone;
         if (p.storeCategory) document.getElementById('storeCategory').value = p.storeCategory;
-        
+
         if (p.ownerName) document.getElementById('profileDisplayName').textContent = p.ownerName;
-        if (p.role)      document.getElementById('profileDisplayRole').textContent = p.role;
+        if (p.role) document.getElementById('profileDisplayRole').textContent = p.role;
 
         // Sync Avatar (Profile Page)
         const profileAv = document.getElementById('profileAvatarLarge');
@@ -326,13 +354,13 @@
             sideAv.innerHTML = p.ownerName.charAt(0).toUpperCase();
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
-    window.previewAvatar = function(e) {
+    window.previewAvatar = function (e) {
       const file = e.target.files[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
       reader.onload = ev => {
         const img = new Image();
@@ -347,7 +375,7 @@
           canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
+
           pendingLogoData = canvas.toDataURL('image/jpeg', 0.7); // Compress to JPEG
           document.getElementById('profileAvatarLarge').innerHTML = `<img src="${pendingLogoData}" alt="Preview"/>`;
           document.getElementById('removePhotoBtn').style.display = 'inline-flex';
@@ -359,18 +387,18 @@
       reader.readAsDataURL(file);
     };
 
-    window.saveProfile = async function() {
+    window.saveProfile = async function () {
       if (location.protocol === 'http:' && location.hostname !== 'localhost' && !location.hostname.startsWith('127.')) {
         showToast('Storage requires HTTPS on most devices.', 'warning');
       }
 
       const btn = document.getElementById('saveProfileBtn');
       const originalBtnHtml = btn.innerHTML;
-      
+
       const data = {
         storeName: document.getElementById('storeName').value.trim(),
         ownerName: document.getElementById('ownerName').value.trim(),
-        role:      document.getElementById('userRole').value.trim(),
+        role: document.getElementById('userRole').value.trim(),
         storeDesc: document.getElementById('storeDesc').value.trim(),
         storePhone: document.getElementById('storePhone').value.trim(),
         storeCategory: document.getElementById('storeCategory').value,
@@ -380,15 +408,15 @@
       const currentP = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
       const newP = { ...data, photoURL: currentP.photoURL || "" };
       localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
-      loadProfile(); 
-      
+      loadProfile();
+
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Saving...';
 
       try {
         if (auth.currentUser) {
           const updateData = { ...data, updatedAt: new Date().toISOString() };
-          
+
           // Use direct Base64 storage in Firestore to bypass Storage ERR_FAILED
           if (hasUnsavedChanges && pendingLogoData) {
             updateData.photoURL = pendingLogoData;
@@ -396,12 +424,12 @@
             newP.photoURL = pendingLogoData;
             pendingLogoData = null;
           }
-          
+
           await setDoc(userDoc(auth.currentUser.uid), updateData, { merge: true });
-          
+
           localStorage.setItem('cocacoy_profile', JSON.stringify(newP));
           hasUnsavedChanges = false;
-          
+
           showToast('Profile updated!', 'success');
           const badge = document.getElementById('profileSaved');
           if (badge) {
@@ -422,17 +450,17 @@
       }
     };
 
-    window.removePhoto = async function() {
+    window.removePhoto = async function () {
       if (!confirm('Remove profile photo?')) return;
       const btn = document.getElementById('removePhotoBtn');
       btn.disabled = true;
-      
+
       // 1. INSTANT UI UPDATE
       localStorage.removeItem('cocacoy_store_logo');
       const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
       p.photoURL = "";
       localStorage.setItem('cocacoy_profile', JSON.stringify(p));
-      loadProfile(); 
+      loadProfile();
 
       try {
         if (auth.currentUser) {
@@ -440,15 +468,15 @@
           localStorage.removeItem('cocacoy_store_logo');
           pendingLogoData = null;
           hasUnsavedChanges = false;
-          
+
           const p = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           p.photoURL = "";
           localStorage.setItem('cocacoy_profile', JSON.stringify(p));
-          
+
           loadProfile();
           showToast('Photo removed', 'success');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('Cloud sync failed.', 'warning');
       } finally {
         btn.disabled = false;
@@ -458,9 +486,9 @@
     document.addEventListener('userReady', loadProfile);
     // Listen for Firestore sync from guard.js
     document.addEventListener('profileUpdated', loadProfile);
-    
+
     // Theme toggle logic
-    (function() {
+    (function () {
       const btn = document.getElementById('themeToggleBtn');
       const icon = document.getElementById('themeIcon');
       function applyTheme(theme) {
@@ -484,14 +512,9 @@
       const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
       const el = document.createElement('div');
       el.className = 'toast ' + type;
-      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
+      el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`;
       document.getElementById('toast-container').appendChild(el);
-      
-      // Auto dismiss with exit animation
-      setTimeout(() => {
-        el.classList.add('exit');
-        el.addEventListener('animationend', () => el.remove());
-      }, 3500);
+      setTimeout(() => el.remove(), 3500);
     };
 
     window.addEventListener('beforeunload', (e) => {
@@ -522,4 +545,5 @@
     }
   </script>
 </body>
+
 </html>

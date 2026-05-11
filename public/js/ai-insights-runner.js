@@ -5,20 +5,11 @@
 ================================================================ */
 import { db, userCol } from './firebase.js';
 import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { generateInsights, buildAnalyticsSummary, getFallbackWithTimestamp } from './ai-insights.js';
+import { generateInsights, buildAnalyticsSummary } from './ai-insights.js';
 
 let _products = [];
 let _transactions = [];
 let _insightsTriggered = false;
-
-// ── NEW: Handle API key absence or failures gracefully ──
-function getInitialInsights(analytics) {
-  try {
-    return generateInsights(analytics);
-  } catch (e) {
-    return getFallbackWithTimestamp(analytics);
-  }
-}
 
 document.addEventListener('userReady', ({ detail: { uid } }) => {
   // Listen to products
@@ -56,8 +47,8 @@ async function runInsights() {
 
   try {
     const analytics = buildAnalyticsSummary(_products, _transactions);
-    const { insights, timestamp } = await generateInsights(analytics);
-    renderInsights(insights, timestamp);
+    const insights = await generateInsights(analytics);
+    renderInsights(insights);
   } catch (err) {
     console.error('[AI Runner] Failed to generate insights:', err);
     showErrorState();
@@ -93,7 +84,7 @@ function showErrorState() {
   setText('aiLastUpdated', 'Failed to load insights.');
 }
 
-function renderInsights(insights, timestamp) {
+function renderInsights(insights) {
   const listEl = document.getElementById('aiInsightsList');
   if (!listEl) return;
 
@@ -108,9 +99,8 @@ function renderInsights(insights, timestamp) {
   setDisplay('aiInsightsList', 'block');
   setDisplay('aiErrorState', 'none');
 
-  const date = timestamp ? new Date(timestamp) : new Date();
-  const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  setText('aiLastUpdated', `Last updated: ${timeStr}`);
+  const now = new Date();
+  setText('aiLastUpdated', `Last updated: ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`);
 }
 
 function setDisplay(id, val) {

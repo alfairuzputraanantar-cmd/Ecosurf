@@ -9,7 +9,7 @@
 // Replace with your actual Gemini API Key from https://aistudio.google.com/
 const GEMINI_API_KEY = 'AIzaSyBDAkiI4KWntrV1qeGmAWzIh72AOEI-33g';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-const CACHE_KEY      = 'cocacoy_ai_insights_cache';
+const CACHE_KEY = 'cocacoy_ai_insights_cache';
 const CACHE_DURATION = 20 * 60 * 1000; // 20 minutes in ms
 
 // ── MAIN EXPORT ─────────────────────────────────────────────────
@@ -25,12 +25,12 @@ const CACHE_DURATION = 20 * 60 * 1000; // 20 minutes in ms
 export async function generateInsights(analytics) {
   // 1. Check cache first
   const cached = getCache(analytics);
-  if (cached) return cached; // { insights, timestamp }
+  if (cached) return cached;
 
   // 2. Validate API key
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
     console.warn('[CocaCoy AI] Gemini API key not configured. Returning demo insights.');
-    return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
+    return generateFallbackInsights(analytics);
   }
 
   // 3. Build the prompt
@@ -53,7 +53,7 @@ export async function generateInsights(analytics) {
     if (!response.ok) {
       const err = await response.json();
       console.error('[CocaCoy AI] API Error:', err);
-      return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
+      return generateFallbackInsights(analytics);
     }
 
     const data = await response.json();
@@ -61,13 +61,12 @@ export async function generateInsights(analytics) {
     const insights = parseInsights(rawText);
 
     // 5. Cache the successful response
-    const timestamp = Date.now();
-    setCache(insights, analytics, timestamp);
-    return { insights, timestamp };
+    setCache(insights, analytics);
+    return insights;
 
   } catch (err) {
     console.error('[CocaCoy AI] Network error:', err);
-    return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
+    return generateFallbackInsights(analytics);
   }
 }
 
@@ -85,7 +84,7 @@ export async function generateInsights(analytics) {
 export function buildAnalyticsSummary(products, transactions) {
   const now = new Date();
   const todayStr = now.toLocaleDateString('en-CA');
-  const weekAgo  = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
 
   // ── Products ──
   const lowStock = products
@@ -142,9 +141,9 @@ export function buildAnalyticsSummary(products, transactions) {
 function buildPrompt(analytics) {
   const { totalProducts, outOfStock, lowStock, revenueToday, txCountToday, topSelling, slowMoving } = analytics;
 
-  const lowStockStr   = lowStock.length   ? lowStock.map(p => `${p.name} (${p.stock} left)`).join(', ') : 'none';
+  const lowStockStr = lowStock.length ? lowStock.map(p => `${p.name} (${p.stock} left)`).join(', ') : 'none';
   const topSellingStr = topSelling.length ? topSelling.map(p => `${p.name} (${p.qty} sold)`).join(', ') : 'no sales yet';
-  const slowStr       = slowMoving.length ? slowMoving.map(p => `${p.name} (${p.stock} in stock)`).join(', ') : 'none';
+  const slowStr = slowMoving.length ? slowMoving.map(p => `${p.name} (${p.stock} in stock)`).join(', ') : 'none';
 
   return `You are a smart business assistant for a small Indonesian UMKM store using CocaCoy ERP.
 Analyze the following daily business data and respond with exactly 3–4 short, actionable bullet points in English.
@@ -203,10 +202,6 @@ function generateFallbackInsights(analytics) {
     : ['Add products and complete transactions to receive AI-powered insights.'];
 }
 
-export function getFallbackWithTimestamp(analytics) {
-  return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
-}
-
 
 // ── CACHE HELPERS ────────────────────────────────────────────────
 
@@ -214,22 +209,21 @@ function getCache(analytics) {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const { insights, timestamp, expiry, productCount, txCount } = JSON.parse(raw);
+    const { insights, expiry, productCount, txCount } = JSON.parse(raw);
     const now = Date.now();
     if (now > expiry) return null;
     // Invalidate cache if data significantly changed
     if (productCount !== analytics.totalProducts || txCount !== analytics.txCountToday) return null;
-    return { insights, timestamp };
+    return insights;
   } catch {
     return null;
   }
 }
 
-function setCache(insights, analytics, timestamp) {
+function setCache(insights, analytics) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       insights,
-      timestamp,
       expiry: Date.now() + CACHE_DURATION,
       productCount: analytics.totalProducts,
       txCount: analytics.txCountToday

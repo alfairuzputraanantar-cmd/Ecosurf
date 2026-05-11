@@ -28,6 +28,7 @@
       .settings-layout {
         grid-template-columns: 1fr;
       }
+
       .settings-nav {
         position: static;
         margin-bottom: 20px;
@@ -407,7 +408,8 @@
     </div>
     <div class="sidebar-footer">
       <a href="profile" class="user-pill">
-        <div class="user-avatar" id="sidebarAvatar">U</div>        <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">U</div>
+        <div class="user-info">
           <div class="user-name" id="sidebarName"></div>
           <div class="user-role" id="sidebarRole"></div>
         </div>
@@ -415,7 +417,7 @@
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> <span>Sign Out</span></button>
     </div>
     <script>
-      (function() {
+      (function () {
         try {
           const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           const logo = localStorage.getItem('cocacoy_store_logo');
@@ -429,7 +431,7 @@
               av.textContent = displayTitle.charAt(0).toUpperCase();
             }
           }
-        } catch(e) {}
+        } catch (e) { }
       })();
     </script>
 
@@ -473,7 +475,7 @@
       <div class="settings-layout">
 
         <!-- ── Left Nav ── -->
-        <nav class="settings-nav animate-fade-in">
+        <nav class="settings-nav">
           <div class="settings-nav-item active" data-panel="appearance" onclick="switchPanel('appearance')">
             <i class="fas fa-palette"></i> Appearance
           </div>
@@ -542,7 +544,8 @@
                   </div>
                   <div class="setting-control">
                     <label class="switch">
-                      <input type="checkbox" id="showSidebarLabels" checked onchange="toggleSidebarLabels(this.checked)" />
+                      <input type="checkbox" id="showSidebarLabels" checked
+                        onchange="toggleSidebarLabels(this.checked)" />
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -772,7 +775,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- PAYMENT -->
           <div class="settings-panel" id="panel-payment">
             <div class="settings-section">
@@ -787,20 +790,27 @@
                 <div class="form-group">
                   <label class="form-label">QR Image Upload</label>
                   <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRFileSelect(this)" />
+                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;"
+                      onchange="handleQRFileSelect(this)" />
                     <button class="btn btn-ghost" onclick="document.getElementById('qrFileInput').click()">
                       <i class="fas fa-upload"></i> Choose QR Image
                     </button>
-                    <div id="qrFileName" style="font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">No file chosen</div>
+                    <div id="qrFileName"
+                      style="font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">
+                      No file chosen</div>
                   </div>
                   <div class="setting-desc" style="margin-top:6px;">Upload your QRIS/GoPay QR image (JPG/PNG).</div>
                 </div>
-                
+
                 <div class="form-group" style="margin-top:16px;">
                   <label class="form-label">QR Preview</label>
-                  <div style="background: white; padding: 10px; border-radius: 12px; border: 1px solid var(--border); display: inline-block; width: 200px; height: 200px; display: grid; place-items: center; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
-                    <img id="qrImagePreview" src="" alt="QR Preview" style="max-width: 100%; max-height: 100%; display: none;" />
-                    <span id="qrImageEmpty" style="color: #aaa; font-size: 13px; text-align: center;"><i class="fas fa-image" style="font-size:24px; margin-bottom:8px; display:block;"></i>No Image</span>
+                  <div
+                    style="background: white; padding: 10px; border-radius: 12px; border: 1px solid var(--border); display: inline-block; width: 200px; height: 200px; display: grid; place-items: center; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
+                    <img id="qrImagePreview" src="" alt="QR Preview"
+                      style="max-width: 100%; max-height: 100%; display: none;" />
+                    <span id="qrImageEmpty" style="color: #aaa; font-size: 13px; text-align: center;"><i
+                        class="fas fa-image" style="font-size:24px; margin-bottom:8px; display:block;"></i>No
+                      Image</span>
                   </div>
                 </div>
 
@@ -808,7 +818,8 @@
                   <button class="btn btn-primary" onclick="savePaymentSettings()">
                     <i class="fas fa-floppy-disk"></i> Save Configuration
                   </button>
-                  <span class="saved-badge" id="paySaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i> Saved</span>
+                  <span class="saved-badge" id="paySaved" style="margin-left:12px;"><i class="fas fa-circle-check"></i>
+                    Saved</span>
                 </div>
               </div>
             </div>
@@ -883,7 +894,7 @@
       };
       localStorage.setItem('cocacoy_currency', data.currency);
       localStorage.setItem('cocacoy_sidebar_labels', data.sidebarLabels);
-      
+
       try {
         const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
         if (auth.currentUser) {
@@ -959,9 +970,9 @@
     function handleQRFileSelect(input) {
       const file = input.files[0];
       if (!file) return;
-      
+
       document.getElementById('qrFileName').textContent = file.name;
-      
+
       // Local preview & compression
       const reader = new FileReader();
       reader.onload = (ev) => {
@@ -977,9 +988,9 @@
           canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
+
           pendingQRData = canvas.toDataURL('image/jpeg', 0.8);
-          
+
           const previewImg = document.getElementById('qrImagePreview');
           const empty = document.getElementById('qrImageEmpty');
           previewImg.src = pendingQRData;
@@ -993,12 +1004,12 @@
 
     async function savePaymentSettings() {
       const btn = document.querySelector('button[onclick="savePaymentSettings()"]');
-      
+
       if (!pendingQRData) {
         const currentQR = localStorage.getItem('cocacoy_payment_qr');
         if (!currentQR) {
-            showToast('Please select a QR image first!', 'warning');
-            return;
+          showToast('Please select a QR image first!', 'warning');
+          return;
         }
         showToast('Settings saved (no changes)!', 'info');
         flashSaved('paySaved');
@@ -1011,16 +1022,16 @@
         const { auth, userDoc, updateDoc } = await import('./js/firebase.js');
         if (auth.currentUser) {
           const uid = auth.currentUser.uid;
-          
+
           // Save Base64 directly to Firestore to bypass Storage ERR_FAILED
           await updateDoc(userDoc(uid), { paymentQR: pendingQRData });
           localStorage.setItem('cocacoy_payment_qr', pendingQRData);
-          
+
           pendingQRData = null; // Clear pending state
           showToast('QR Code saved and synced!', 'success');
         }
-      } catch (e) { 
-        console.error(e); 
+      } catch (e) {
+        console.error(e);
         showToast('Save failed: ' + e.message, 'error');
       } finally {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Configuration'; }
@@ -1033,7 +1044,7 @@
       const url = localStorage.getItem('cocacoy_payment_qr');
       const img = document.getElementById('qrImagePreview');
       const empty = document.getElementById('qrImageEmpty');
-      
+
       if (url) {
         img.src = url;
         img.style.display = 'block';
@@ -1046,33 +1057,33 @@
 
     /* ── Security ── */
     function changePassword() {
-        const curr = document.getElementById('currentPass').value;
-        const nw = document.getElementById('newPass').value;
-        const conf = document.getElementById('confirmPass').value;
-        if (!curr || !nw || !conf) { showToast('All password fields are required', 'error'); return; }
-        if (nw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
-        if (nw !== conf) { showToast('Password confirmation does not match', 'error'); return; }
-        const btn = document.querySelector('button[onclick="changePassword()"]');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Updating...'; }
-        (async () => {
-            try {
-                await reauthenticateUser(curr);
-                await changeUserPassword(nw);
-                flashSaved('passSaved');
-                showToast('Password updated successfully!', 'success');
-                document.getElementById('currentPass').value = '';
-                document.getElementById('newPass').value = '';
-                document.getElementById('confirmPass').value = '';
-            } catch (err) {
-                let msg = err.message;
-                if (err.code === 'auth/wrong-password') { msg = 'Current password is incorrect.'; }
-                else if (err.code === 'auth/weak-password') { msg = 'New password is too weak.'; }
-                else if (err.code === 'auth/requires-recent-login') { msg = 'Please sign out and sign in again before changing password.'; }
-                showToast(msg, 'error');
-            } finally {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Change Password'; }
-            }
-        })();
+      const curr = document.getElementById('currentPass').value;
+      const nw = document.getElementById('newPass').value;
+      const conf = document.getElementById('confirmPass').value;
+      if (!curr || !nw || !conf) { showToast('All password fields are required', 'error'); return; }
+      if (nw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
+      if (nw !== conf) { showToast('Password confirmation does not match', 'error'); return; }
+      const btn = document.querySelector('button[onclick="changePassword()"]');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Updating...'; }
+      (async () => {
+        try {
+          await reauthenticateUser(curr);
+          await changeUserPassword(nw);
+          flashSaved('passSaved');
+          showToast('Password updated successfully!', 'success');
+          document.getElementById('currentPass').value = '';
+          document.getElementById('newPass').value = '';
+          document.getElementById('confirmPass').value = '';
+        } catch (err) {
+          let msg = err.message;
+          if (err.code === 'auth/wrong-password') { msg = 'Current password is incorrect.'; }
+          else if (err.code === 'auth/weak-password') { msg = 'New password is too weak.'; }
+          else if (err.code === 'auth/requires-recent-login') { msg = 'Please sign out and sign in again before changing password.'; }
+          showToast(msg, 'error');
+        } finally {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Change Password'; }
+        }
+      })();
     }
 
 
@@ -1092,12 +1103,12 @@
         try {
           const { auth, userCol, getDocs, writeBatch, deleteDoc, db } = await import('./js/firebase.js');
           if (auth.currentUser) {
-             const q = userCol(auth.currentUser.uid, 'history');
-             const snap = await getDocs(q);
-             const batch = writeBatch(db);
-             snap.forEach(d => batch.delete(d.ref));
-             await batch.commit();
-             showToast('Cloud history cleared!', 'success');
+            const q = userCol(auth.currentUser.uid, 'history');
+            const snap = await getDocs(q);
+            const batch = writeBatch(db);
+            snap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            showToast('Cloud history cleared!', 'success');
           }
         } catch (e) { console.error(e); }
         showToast('History cleared successfully', 'success');
@@ -1136,7 +1147,7 @@
           const snap = await getDoc(userDoc(auth.currentUser.uid));
           if (snap.exists()) {
             const data = snap.data();
-            
+
             // Appearance
             if (data.appearance) {
               const app = data.appearance;
@@ -1235,14 +1246,9 @@
       const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
       const el = document.createElement('div');
       el.className = 'toast ' + type;
-      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
+      el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`;
       document.getElementById('toast-container').appendChild(el);
-      
-      // Auto dismiss with exit animation
-      setTimeout(() => {
-        el.classList.add('exit');
-        el.addEventListener('animationend', () => el.remove());
-      }, 3500);
+      setTimeout(() => el.remove(), 3500);
     };
 
     /* ── Theme toggle ── */

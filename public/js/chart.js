@@ -13,14 +13,6 @@ let products = [];
 let history = [];
 let transactions = [];
 
-/* ── Global Chart Config ── */
-if (typeof Chart !== 'undefined') {
-  Chart.defaults.animation = {
-    duration: 800,
-    easing: 'easeOutQuart'
-  };
-}
-
 /* ── Start listeners only after auth is ready ── */
 document.addEventListener('userReady', ({ detail: { uid } }) => {
 

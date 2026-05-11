@@ -14,88 +14,193 @@
       if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
       const s = localStorage.getItem('cocacoy_sidebar_labels');
       if (s === 'false') document.documentElement.classList.add('sidebar-min');
-      
+
       // ✅ Instantly load profile from localStorage
-      try { window._initialProfile = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}'); } catch(e) {}
+      try { window._initialProfile = JSON.parse(localStorage.getItem('cocacoy_profile') || '{}'); } catch (e) { }
     })();
   </script>
   <style>
     /* ── Barcode Type Selector ── */
     .barcode-type-tabs {
-      display: flex; gap: 4px;
-      background: var(--surface); border-radius: 8px; padding: 4px;
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 4px;
     }
+
     .barcode-type-btn {
-      flex: 1; padding: 7px 8px;
-      border-radius: 6px; font-size: 12px; font-weight: 600;
-      border: none; background: transparent; color: var(--muted);
-      cursor: pointer; transition: all .2s;
-      display: flex; align-items: center; justify-content: center; gap: 5px;
+      flex: 1;
+      padding: 7px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
     }
+
     .barcode-type-btn.active {
-      background: var(--brand-grd); color: #fff;
+      background: var(--brand-grd);
+      color: #fff;
     }
-    .barcode-type-btn:hover:not(.active) { background: var(--border); color: var(--text); }
+
+    .barcode-type-btn:hover:not(.active) {
+      background: var(--border);
+      color: var(--text);
+    }
 
     /* ── Product Scanner Modal ── */
     .product-scanner-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: rgba(0,0,0,.75);
-      display: flex; align-items: center; justify-content: center;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, .75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .product-scanner-overlay:not(.open) { display: none; }
+
+    .product-scanner-overlay:not(.open) {
+      display: none;
+    }
+
     .product-scanner-box {
-      width: 90%; max-width: 420px;
-      background: var(--surface); border-radius: 18px;
-      overflow: hidden; border: 1px solid var(--border);
-      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      width: 90%;
+      max-width: 420px;
+      background: var(--surface);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
     }
+
     .product-scanner-header {
       padding: 14px 18px;
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--surface2); border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
     }
+
     .product-scanner-view {
-      position: relative; background: #000;
-      min-height: 240px; display: flex; align-items: center; justify-content: center;
+      position: relative;
+      background: #000;
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
-    #product-reader { width: 100%; }
+
+    #product-reader {
+      width: 100%;
+    }
+
     .scan-line {
-      position: absolute; left: 10%; right: 10%; height: 2px;
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      height: 2px;
       background: var(--brand-1);
       box-shadow: 0 0 8px var(--brand-1), 0 0 16px var(--brand-1);
       animation: scanAnim 1.8s ease-in-out infinite;
       pointer-events: none;
     }
-    .scan-corners::before, .scan-corners::after {
-      content: ''; position: absolute;
-      width: 40px; height: 40px;
-      border-color: var(--brand-1); border-style: solid;
+
+    .scan-corners::before,
+    .scan-corners::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-color: var(--brand-1);
+      border-style: solid;
       opacity: .8;
     }
-    .scan-corners::before { top: 16px; left: 16px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
-    .scan-corners::after  { bottom: 16px; right: 16px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+    .scan-corners::before {
+      top: 16px;
+      left: 16px;
+      border-width: 3px 0 0 3px;
+      border-radius: 4px 0 0 0;
+    }
+
+    .scan-corners::after {
+      bottom: 16px;
+      right: 16px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 4px 0;
+    }
+
     @keyframes scanAnim {
-      0%, 100% { top: 20%; }
-      50% { top: 78%; }
+
+      0%,
+      100% {
+        top: 20%;
+      }
+
+      50% {
+        top: 78%;
+      }
     }
-    .product-scanner-footer { padding: 14px; border-top: 1px solid var(--border); }
+
+    .product-scanner-footer {
+      padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+
     .product-scanner-status {
-      text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 10px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
     }
+
     .product-scanner-manual {
-      display: flex; gap: 8px;
+      display: flex;
+      gap: 8px;
     }
+
     .scan-success-badge {
-      position: absolute; inset: 0;
-      background: rgba(34,201,151,.15);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      position: absolute;
+      inset: 0;
+      background: rgba(34, 201, 151, .15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       animation: fadeIn .2s ease;
     }
-    .scan-success-badge i { font-size: 52px; color: var(--green); }
-    .scan-success-badge span { font-size: 14px; font-weight: 700; color: var(--green); }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .scan-success-badge i {
+      font-size: 52px;
+      color: var(--green);
+    }
+
+    .scan-success-badge span {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 
@@ -134,7 +239,7 @@
       <button class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> <span>Sign Out</span></button>
     </div>
     <script>
-      (function() {
+      (function () {
         try {
           const p = window._initialProfile || JSON.parse(localStorage.getItem('cocacoy_profile') || '{}');
           const logo = localStorage.getItem('cocacoy_store_logo');
@@ -148,7 +253,7 @@
               av.textContent = displayTitle.charAt(0).toUpperCase();
             }
           }
-        } catch(e) {}
+        } catch (e) { }
       })();
     </script>
   </aside>
@@ -201,7 +306,7 @@
     <div class="content">
 
       <!-- ADD CUSTOM COLUMN CARD -->
-      <div class="card animate-fade-up stagger-1" style="margin-bottom:18px;">
+      <div class="card" style="margin-bottom:18px;">
         <div class="card-header">
           <div class="card-title"><i class="fas fa-sliders"></i> Add Custom Column</div>
         </div>
@@ -221,7 +326,7 @@
       </div>
 
       <!-- PRODUCT TABLE CARD -->
-      <div class="card animate-fade-up stagger-2">
+      <div class="card">
         <div class="table-toolbar">
           <div class="search-box">
             <i class="fas fa-magnifying-glass"></i>
@@ -268,45 +373,59 @@
           <input class="form-control" type="number" id="core-stock" placeholder="0" min="0" />
         </div>
       </div>
-      
+
       <!-- BARCODE SECTION -->
-      <div class="form-group" style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
-        <label class="form-label" style="margin-bottom: 0;"><i class="fas fa-barcode" style="color:var(--brand-1);"></i> Product Barcode</label>
+      <div class="form-group"
+        style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+        <label class="form-label" style="margin-bottom: 0;"><i class="fas fa-barcode" style="color:var(--brand-1);"></i>
+          Product Barcode</label>
         <!-- Type Tabs -->
         <div class="barcode-type-tabs">
-          <button class="barcode-type-btn active" id="add-btn-internal" onclick="window.setBarcodeType('add','internal')">
+          <button class="barcode-type-btn active" id="add-btn-internal"
+            onclick="window.setBarcodeType('add','internal')">
             <i class="fas fa-cog"></i> CocaCoy Internal
           </button>
-          <button class="barcode-type-btn" id="add-btn-manufacturer" onclick="window.setBarcodeType('add','manufacturer')">
+          <button class="barcode-type-btn" id="add-btn-manufacturer"
+            onclick="window.setBarcodeType('add','manufacturer')">
             <i class="fas fa-camera"></i> Scan Real Barcode
           </button>
         </div>
         <!-- Barcode value input + action buttons -->
         <div style="display: flex; gap: 8px; width: 100%;">
-          <input class="form-control" id="core-barcode" readonly placeholder="Barcode value..." style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
-          <button class="btn btn-ghost" id="add-regenerate-btn" onclick="window.regenerateBarcode('add')" title="Regenerate"><i class="fas fa-rotate"></i></button>
-          <button class="btn btn-primary" id="add-scan-btn" style="display:none;" onclick="window.openProductBarcodeScanner('add')" title="Scan Barcode"><i class="fas fa-camera"></i></button>
+          <input class="form-control" id="core-barcode" readonly placeholder="Barcode value..."
+            style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
+          <button class="btn btn-ghost" id="add-regenerate-btn" onclick="window.regenerateBarcode('add')"
+            title="Regenerate"><i class="fas fa-rotate"></i></button>
+          <button class="btn btn-primary" id="add-scan-btn" style="display:none;"
+            onclick="window.openProductBarcodeScanner('add')" title="Scan Barcode"><i
+              class="fas fa-camera"></i></button>
         </div>
         <!-- SVG Preview -->
         <!-- AI Detection Status -->
-        <div id="add-ai-status" style="display:none; font-size:11px; color:var(--brand-1); font-weight:700; align-items:center; gap:8px; margin-top:8px; background:rgba(200,149,108,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--brand-1);">
+        <div id="add-ai-status"
+          style="display:none; font-size:11px; color:var(--brand-1); font-weight:700; align-items:center; gap:8px; margin-top:8px; background:rgba(200,149,108,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--brand-1);">
           <i class="fas fa-robot"></i> AI Detecting Product...
           <span class="spinner" style="width:12px; height:12px; border-width:2px; margin-left:auto;"></span>
         </div>
 
         <!-- Product Image Preview -->
-        <div id="add-product-img-preview" style="display:none; margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px; align-items:center; gap:12px; animation:fadeIn 0.3s ease;">
-          <img id="add-detected-img" src="" style="width:50px; height:50px; object-fit:contain; border-radius:6px; background:white;" />
+        <div id="add-product-img-preview"
+          style="display:none; margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px; align-items:center; gap:12px; animation:fadeIn 0.3s ease;">
+          <img id="add-detected-img" src=""
+            style="width:50px; height:50px; object-fit:contain; border-radius:6px; background:white;" />
           <div style="flex:1;">
-            <div style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">Auto-Detected Image</div>
+            <div style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">Auto-Detected
+              Image</div>
             <div id="add-detected-brand" style="font-size:12px; font-weight:600; color:var(--text); opacity:0.8;"></div>
           </div>
-          <button class="btn btn-ghost" onclick="document.getElementById('add-product-img-preview').style.display='none'" style="width:28px; height:28px; padding:0;"><i class="fas fa-times"></i></button>
+          <button class="btn btn-ghost"
+            onclick="document.getElementById('add-product-img-preview').style.display='none'"
+            style="width:28px; height:28px; padding:0;"><i class="fas fa-times"></i></button>
         </div>
 
         <input type="hidden" id="core-barcodeType" value="internal" />
       </div>
-      
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Buy Price (Rp)</label>
@@ -349,7 +468,8 @@
       </div>
       <div class="form-group">
         <label class="form-label">Notes</label>
-        <textarea class="form-control" id="core-notes" placeholder="Optional notes..." rows="2" style="resize:none;"></textarea>
+        <textarea class="form-control" id="core-notes" placeholder="Optional notes..." rows="2"
+          style="resize:none;"></textarea>
       </div>
 
       <!-- Custom column fields injected here -->
@@ -419,40 +539,55 @@
           <input class="form-control" type="number" id="edit-stock" placeholder="0" min="0" />
         </div>
       </div>
-      
+
       <!-- BARCODE SECTION -->
-      <div class="form-group" style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
-        <label class="form-label" style="margin-bottom: 0;"><i class="fas fa-barcode" style="color:var(--brand-1);"></i> Product Barcode</label>
+      <div class="form-group"
+        style="background: var(--surface2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+        <label class="form-label" style="margin-bottom: 0;"><i class="fas fa-barcode" style="color:var(--brand-1);"></i>
+          Product Barcode</label>
         <!-- Type Tabs -->
         <div class="barcode-type-tabs">
-          <button class="barcode-type-btn active" id="edit-btn-internal" onclick="window.setBarcodeType('edit','internal')">
+          <button class="barcode-type-btn active" id="edit-btn-internal"
+            onclick="window.setBarcodeType('edit','internal')">
             <i class="fas fa-cog"></i> CocaCoy Internal
           </button>
-          <button class="barcode-type-btn" id="edit-btn-manufacturer" onclick="window.setBarcodeType('edit','manufacturer')">
+          <button class="barcode-type-btn" id="edit-btn-manufacturer"
+            onclick="window.setBarcodeType('edit','manufacturer')">
             <i class="fas fa-camera"></i> Scan Real Barcode
           </button>
         </div>
         <!-- Barcode value input + action buttons -->
         <div style="display: flex; gap: 8px; width: 100%;">
-          <input class="form-control" id="edit-barcode" readonly placeholder="Barcode value..." style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
-          <button class="btn btn-ghost" id="edit-regenerate-btn" onclick="window.regenerateBarcode('edit')" title="Regenerate"><i class="fas fa-rotate"></i></button>
-          <button class="btn btn-primary" id="edit-scan-btn" style="display:none;" onclick="window.openProductBarcodeScanner('edit')" title="Scan Barcode"><i class="fas fa-camera"></i></button>
+          <input class="form-control" id="edit-barcode" readonly placeholder="Barcode value..."
+            style="opacity: 0.7; flex: 1; text-align: center; font-family: monospace; font-size: 14px;" />
+          <button class="btn btn-ghost" id="edit-regenerate-btn" onclick="window.regenerateBarcode('edit')"
+            title="Regenerate"><i class="fas fa-rotate"></i></button>
+          <button class="btn btn-primary" id="edit-scan-btn" style="display:none;"
+            onclick="window.openProductBarcodeScanner('edit')" title="Scan Barcode"><i
+              class="fas fa-camera"></i></button>
         </div>
         <!-- SVG Preview -->
         <!-- AI Detection Status -->
-        <div id="edit-ai-status" style="display:none; font-size:11px; color:var(--brand-1); font-weight:700; align-items:center; gap:8px; margin-top:8px; background:rgba(200,149,108,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--brand-1);">
+        <div id="edit-ai-status"
+          style="display:none; font-size:11px; color:var(--brand-1); font-weight:700; align-items:center; gap:8px; margin-top:8px; background:rgba(200,149,108,0.1); padding:8px 12px; border-radius:8px; border:1px dashed var(--brand-1);">
           <i class="fas fa-robot"></i> AI Detecting Product...
           <span class="spinner" style="width:12px; height:12px; border-width:2px; margin-left:auto;"></span>
         </div>
 
         <!-- Product Image Preview -->
-        <div id="edit-product-img-preview" style="display:none; margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px; align-items:center; gap:12px; animation:fadeIn 0.3s ease;">
-          <img id="edit-detected-img" src="" style="width:50px; height:50px; object-fit:contain; border-radius:6px; background:white;" />
+        <div id="edit-product-img-preview"
+          style="display:none; margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px; align-items:center; gap:12px; animation:fadeIn 0.3s ease;">
+          <img id="edit-detected-img" src=""
+            style="width:50px; height:50px; object-fit:contain; border-radius:6px; background:white;" />
           <div style="flex:1;">
-            <div style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">Auto-Detected Image</div>
-            <div id="edit-detected-brand" style="font-size:12px; font-weight:600; color:var(--text); opacity:0.8;"></div>
+            <div style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">Auto-Detected
+              Image</div>
+            <div id="edit-detected-brand" style="font-size:12px; font-weight:600; color:var(--text); opacity:0.8;">
+            </div>
           </div>
-          <button class="btn btn-ghost" onclick="document.getElementById('edit-product-img-preview').style.display='none'" style="width:28px; height:28px; padding:0;"><i class="fas fa-times"></i></button>
+          <button class="btn btn-ghost"
+            onclick="document.getElementById('edit-product-img-preview').style.display='none'"
+            style="width:28px; height:28px; padding:0;"><i class="fas fa-times"></i></button>
         </div>
 
         <input type="hidden" id="edit-barcodeType" value="internal" />
@@ -563,7 +698,8 @@
         <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;">
           <i class="fas fa-barcode" style="color:var(--brand-1);"></i> Scan Product Barcode
         </div>
-        <button style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;" onclick="window.closeProductBarcodeScanner()">
+        <button style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;"
+          onclick="window.closeProductBarcodeScanner()">
           <i class="fas fa-xmark"></i>
         </button>
       </div>
@@ -579,8 +715,10 @@
       <div class="product-scanner-footer">
         <div class="product-scanner-status" id="productScanStatus">Initializing camera...</div>
         <div class="product-scanner-manual">
-          <input class="form-control" id="manualBarcodeInput" placeholder="Or type barcode manually..." style="font-family:monospace;" />
-          <button class="btn btn-primary" onclick="window.applyManualBarcode()" title="Apply"><i class="fas fa-check"></i></button>
+          <input class="form-control" id="manualBarcodeInput" placeholder="Or type barcode manually..."
+            style="font-family:monospace;" />
+          <button class="btn btn-primary" onclick="window.applyManualBarcode()" title="Apply"><i
+              class="fas fa-check"></i></button>
         </div>
       </div>
     </div>
@@ -590,7 +728,8 @@
        MODAL: PRODUCT DETAIL
   ========================================================= -->
   <div class="modal-overlay" id="detailModal">
-    <div class="modal" style="max-width:520px; max-height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+    <div class="modal"
+      style="max-width:520px; max-height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
       <div class="modal-header" style="padding: 24px 24px 0 24px; margin-bottom:0;">
         <div class="modal-title" id="detail-title">Product Details</div>
         <button class="modal-close" onclick="closeDetailModal()">✕</button>
@@ -646,12 +785,7 @@
       el.className = 'toast ' + type;
       el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      
-      // Auto dismiss with exit animation
-      setTimeout(() => {
-        el.classList.add('exit');
-        el.addEventListener('animationend', () => el.remove());
-      }, 3500);
+      setTimeout(() => el.remove(), 3500);
     };
 
     /* ── Theme toggle ── */

@@ -124,21 +124,21 @@
 
       <!-- STAT CARDS -->
       <div class="stats-grid grid-auto">
-        <div class="stat-card animate-fade-up stagger-1">
+        <div class="stat-card">
           <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
           <div>
             <div class="stat-val" id="totalProducts">–</div>
             <div class="stat-label">Total Products</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-2">
+        <div class="stat-card">
           <div class="stat-icon si-green"><i class="fas fa-money-bill-wave"></i></div>
           <div>
             <div class="stat-val" id="totalValue" style="font-size:16px;">–</div>
             <div class="stat-label">Inventory Value</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-3">
+        <div class="stat-card">
           <div class="stat-icon si-yellow"><i class="fas fa-triangle-exclamation"></i></div>
           <div>
             <div class="stat-val" id="lowStock">–</div>
@@ -149,7 +149,7 @@
 
       <!-- ANALYTICS GRID -->
       <div class="stats-grid grid-auto" style="margin-top:18px;">
-        <div class="stat-card animate-fade-up stagger-1" style="border-color:rgba(34,201,151,.3);">
+        <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
           <div class="stat-icon si-green"><i class="fas fa-money-bill-wave"></i></div>
           <div>
             <div class="stat-val" id="todaySales" style="font-size:16px;">Rp 0</div>
@@ -159,7 +159,7 @@
             </div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-2">
+        <div class="stat-card">
           <div class="stat-icon si-copper"><i class="fas fa-calendar-week"></i></div>
           <div>
             <div class="stat-val" id="weekSales" style="font-size:16px;">Rp 0</div>
@@ -169,7 +169,7 @@
             </div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-3" style="border-color:rgba(91,156,246,.3);">
+        <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
           <div class="stat-icon si-blue"><i class="fas fa-coins"></i></div>
           <div>
             <div class="stat-val" id="todayProfit" style="font-size:16px;">Rp 0</div>
@@ -179,14 +179,14 @@
             </div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-4">
+        <div class="stat-card">
           <div class="stat-icon si-blue"><i class="fas fa-wallet"></i></div>
           <div>
             <div class="stat-val" id="monthProfit" style="font-size:16px;">Rp 0</div>
             <div class="stat-label">Est. Profit This Month</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-5">
+        <div class="stat-card">
           <div class="stat-icon si-yellow"><i class="fas fa-receipt"></i></div>
           <div>
             <div class="stat-val" id="totalSalesCount" style="font-size:16px;">0</div>
@@ -197,7 +197,7 @@
 
       <!-- ROW 1: Mini bar chart + Recent products -->
       <div class="dash-grid">
-        <div class="card animate-fade-up stagger-1">
+        <div class="card">
           <div class="card-header">
             <div class="card-title"><i class="fas fa-chart-bar"></i> Stock by Category</div>
           </div>
@@ -213,7 +213,7 @@
           </div>
         </div>
 
-        <div class="card animate-fade-up stagger-2">
+        <div class="card">
           <div class="card-header">
             <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recently Added</div>
             <a href="product" class="btn btn-ghost btn-sm">View All</a>
@@ -228,7 +228,7 @@
       </div>
 
       <!-- ROW 2: Low stock alerts -->
-      <div class="card animate-fade-up stagger-3" style="margin-top:18px;">
+      <div class="card" style="margin-top:18px;">
         <div class="card-header">
           <div class="card-title">
             <i class="fas fa-triangle-exclamation" style="color:var(--yellow);"></i>
@@ -261,9 +261,12 @@
             <div class="ai-skeleton" style="width:75%;"></div>
           </div>
           <div id="aiInsightsList" style="display:none;"></div>
-          <div id="aiErrorState" style="display:none; text-align:center; padding:16px 0; color:var(--muted); font-size:13px;">
-            <i class="fas fa-triangle-exclamation" style="font-size:24px; color:var(--yellow); display:block; margin-bottom:8px;"></i>
-            Could not load AI insights. <a href="#" onclick="refreshAIInsights()" style="color:var(--brand-1);">Try again</a>
+          <div id="aiErrorState"
+            style="display:none; text-align:center; padding:16px 0; color:var(--muted); font-size:13px;">
+            <i class="fas fa-triangle-exclamation"
+              style="font-size:24px; color:var(--yellow); display:block; margin-bottom:8px;"></i>
+            Could not load AI insights. <a href="#" onclick="refreshAIInsights()" style="color:var(--brand-1);">Try
+              again</a>
           </div>
         </div>
         <div class="ai-insights-footer">
@@ -297,12 +300,7 @@
       el.className = 'toast ' + type;
       el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
       document.getElementById('toast-container').appendChild(el);
-      
-      // Auto dismiss with exit animation
-      setTimeout(() => {
-        el.classList.add('exit');
-        el.addEventListener('animationend', () => el.remove());
-      }, 3500);
+      setTimeout(() => el.remove(), 3500);
     };
 
     /* ── Theme toggle ── */

@@ -122,21 +122,21 @@
       <!-- Analytics Summary Row 1: Main Metrics -->
       <div class="stats-grid grid-auto"
         style="margin-bottom: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-        <div class="stat-card animate-fade-up stagger-1" style="border-color:rgba(34,201,151,.3);">
+        <div class="stat-card" style="border-color:rgba(34,201,151,.3);">
           <div class="stat-icon si-green"><i class="fas fa-receipt"></i></div>
           <div>
             <div class="stat-val" id="statSales">0</div>
             <div class="stat-label">Transactions</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-2" style="border-color:rgba(91,156,246,.3);">
+        <div class="stat-card" style="border-color:rgba(91,156,246,.3);">
           <div class="stat-icon si-blue"><i class="fas fa-truck"></i></div>
           <div>
             <div class="stat-val" id="statRestocks">0</div>
             <div class="stat-label">Restocks</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-3" style="border-color:rgba(160,113,79,.3);">
+        <div class="stat-card" style="border-color:rgba(160,113,79,.3);">
           <div class="stat-icon si-copper"><i class="fas fa-boxes-stacked"></i></div>
           <div>
             <div class="stat-val" id="statMovements">0</div>
@@ -148,7 +148,7 @@
       <!-- Analytics Summary Row 2: Management Metrics -->
       <div class="stats-grid grid-auto"
         style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
-        <div class="stat-card animate-fade-up stagger-1" style="border-color:rgba(52,152,219,.3);">
+        <div class="stat-card" style="border-color:rgba(52,152,219,.3);">
           <div class="stat-icon si-blue" style="background:rgba(52,152,219,.15);color:#3498db;"><i
               class="fas fa-plus-circle"></i></div>
           <div>
@@ -156,7 +156,7 @@
             <div class="stat-label">Added</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-2" style="border-color:rgba(241,196,15,.3);">
+        <div class="stat-card" style="border-color:rgba(241,196,15,.3);">
           <div class="stat-icon si-yellow" style="background:rgba(241,196,15,.15);color:#f1c40f;"><i
               class="fas fa-pen-to-square"></i></div>
           <div>
@@ -164,7 +164,7 @@
             <div class="stat-label">Edited</div>
           </div>
         </div>
-        <div class="stat-card animate-fade-up stagger-3" style="border-color:rgba(231,76,60,.3);">
+        <div class="stat-card" style="border-color:rgba(231,76,60,.3);">
           <div class="stat-icon si-red" style="background:rgba(231,76,60,.15);color:#e74c3c;"><i
               class="fas fa-trash-can"></i></div>
           <div>
@@ -175,7 +175,7 @@
       </div>
 
       <!-- Time & Action Filters -->
-      <div class="animate-fade-in stagger-2" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
         <!-- Time Scope -->
         <div class="scroll-tabs" id="timeFilters">
           <button class="hist-time-tab btn btn-sm active" data-time="today" onclick="switchTimeScope('today')"
@@ -219,7 +219,7 @@
         </div>
       </div>
 
-      <div class="timeline-container animate-fade-up stagger-3" id="historyList">
+      <div class="timeline-container" id="historyList">
         <div class="empty-state"><i class="fas fa-clock-rotate-left"></i>
           <p>No transaction history yet.</p>
         </div>
@@ -251,19 +251,7 @@
     }
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    window.showToast = function (msg, type = 'info') {
-      const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
-      const el = document.createElement('div');
-      el.className = 'toast ' + type;
-      el.innerHTML = '<i class="fas ' + (ic[type] || ic.info) + '"></i> ' + msg;
-      document.getElementById('toast-container').appendChild(el);
-      
-      // Auto dismiss with exit animation
-      setTimeout(() => {
-        el.classList.add('exit');
-        el.addEventListener('animationend', () => el.remove());
-      }, 3500);
-    };
+    window.showToast = function (msg, type = 'info') { const ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' }; const el = document.createElement('div'); el.className = `toast ${type}`; el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i> ${msg}`; document.getElementById('toast-container').appendChild(el); setTimeout(() => el.remove(), 3500); };
 
     /* ── Theme toggle ── */
     (function () {
