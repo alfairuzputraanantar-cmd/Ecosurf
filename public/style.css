@@ -1658,10 +1658,14 @@ input::-webkit-credentials-auto-fill-button {
 }
 
 /* ---- Chart wrapper ---- */
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .chart-wrapper canvas {
-  width: 100% !important;
-  height: auto !important;
-  max-height: 300px;
+  display: block;
+  max-width: 100%;
 }
 
 .scroll-tabs {

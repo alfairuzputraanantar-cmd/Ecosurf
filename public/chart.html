@@ -60,13 +60,18 @@
       padding: 20px;
     }
 
-    .chart-card-body canvas {
-      max-height: 270px;
+    .chart-wrapper {
+      position: relative;
+      height: 270px;
+      width: 100%;
+    }
+
+    .chart-card-body.tall .chart-wrapper {
+      height: 400px;
     }
 
     .chart-card-body.tall canvas {
-      max-height: 400px;
-      height: 400px !important;
+      height: 100% !important;
     }
 
     .chart-legend {

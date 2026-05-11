@@ -58,12 +58,6 @@ function renderAll() {
   renderProfitChart();
   renderTopProfitChart();
   renderLowStockTable();
-  
-  // Highlight updates
-  document.querySelectorAll('.chart-card, .stat-card').forEach(el => {
-    el.classList.add('pulse-highlight');
-    el.addEventListener('animationend', () => el.classList.remove('pulse-highlight'), { once: true });
-  });
 }
 
 
