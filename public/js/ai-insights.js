@@ -30,7 +30,7 @@ export async function generateInsights(analytics) {
   // 2. Validate API key
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
     console.warn('[CocaCoy AI] Gemini API key not configured. Returning demo insights.');
-    return generateFallbackInsights(analytics);
+    return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
   }
 
   // 3. Build the prompt
@@ -53,7 +53,7 @@ export async function generateInsights(analytics) {
     if (!response.ok) {
       const err = await response.json();
       console.error('[CocaCoy AI] API Error:', err);
-      return generateFallbackInsights(analytics);
+      return { insights: generateFallbackInsights(analytics), timestamp: Date.now() };
     }
 
     const data = await response.json();
